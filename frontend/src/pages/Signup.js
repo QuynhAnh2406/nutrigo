@@ -1,36 +1,43 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Apple, Leaf } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Apple, Leaf } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
-export default function Login() {
+export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, fullName })
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // Store user and token in localStorage
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/dashboard');
       } else {
-        setError(data.message || 'Email hoặc mật khẩu không chính xác.');
+        setError(data.message || 'Đăng ký không thành công. Vui lòng thử lại.');
       }
     } catch (err) {
       console.error(err);
@@ -43,52 +50,46 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] flex font-sans text-gray-800">
       
-      {/* Cột trái: Hình ảnh / Thông điệp truyền cảm hứng (Ẩn trên mobile, hiện trên màn hình lớn) */}
+      {/* Cột trái: Hình ảnh / Thông điệp truyền cảm hứng */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-[#EAF5DA] items-center justify-center p-12 overflow-hidden">
-        {/* Vòng tròn trang trí */}
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#B5E361] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#FFE4A0] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
 
         <div className="relative z-10 w-full max-w-lg">
-          {/* Mô phỏng một card giao diện giống trong dashboard */}
-          <div className="bg-[#B5E361] rounded-[2rem] p-8 shadow-lg text-gray-900 mb-8 transform -rotate-2 hover:rotate-0 transition-transform duration-300">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Daily Nutrition</h2>
-              <div className="bg-white/30 px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                 <Leaf className="w-4 h-4 mr-1" /> Fresh
-              </div>
-            </div>
-            <div className="bg-white/40 rounded-2xl p-6">
-              <p className="font-medium text-lg italic mb-2">
-                "Start your day with positive energy and healthy meals!"
-              </p>
-              <p className="text-sm font-medium mt-4">NUTRITION QUOTE OF THE DAY</p>
-            </div>
+          <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-10 shadow-2xl shadow-green-900/5 border border-white/50 mb-10">
+            <div className="w-16 h-16 bg-[#B5E361] rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-lg shadow-green-200">🥗</div>
+            <h2 className="text-3xl font-black text-gray-900 mb-4 leading-tight">Join 10,000+ members eating healthier every day.</h2>
+            <p className="text-gray-600 leading-relaxed">
+              Create your account to get personalized meal plans, track your macro-nutrients, and reach your fitness goals faster.
+            </p>
           </div>
 
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
-            Your health journey <br/> starts here.
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Log in to Nutrigo to track calories, plan meals, and connect with a healthy food community.
-          </p>
+          <div className="flex gap-4">
+             <div className="flex-1 bg-white/40 p-4 rounded-2xl border border-white/40">
+                <div className="text-2xl font-bold text-gray-900">2K+</div>
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Recipes</div>
+             </div>
+             <div className="flex-1 bg-white/40 p-4 rounded-2xl border border-white/40">
+                <div className="text-2xl font-bold text-gray-900">150+</div>
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Trainers</div>
+             </div>
+          </div>
         </div>
       </div>
 
-      {/* Cột phải: Form đăng nhập */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      {/* Cột phải: Form đăng ký */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 overflow-y-auto">
+        <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] my-8">
           
-          {/* Logo */}
-          <div className="flex items-center gap-2 mb-10">
+          <div className="flex items-center gap-2 mb-8">
             <div className="w-10 h-10 bg-[#B5E361] rounded-full rounded-tl-sm flex items-center justify-center shadow-sm">
                <Leaf className="w-6 h-6 text-gray-900" />
             </div>
             <span className="text-2xl font-bold tracking-tight text-gray-900">Nutrigo</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back! 👋</h2>
-          <p className="text-gray-500 mb-6">Please enter your details to access your dashboard.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Create an account ✨</h2>
+          <p className="text-gray-500 mb-8">Start your healthy journey with us today.</p>
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-medium">
@@ -96,7 +97,25 @@ export default function Login() {
             </div>
           )}
 
-          <form className="space-y-5" onSubmit={handleLogin}>
+          <form className="space-y-4" onSubmit={handleSignup}>
+            {/* Full Name Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#B5E361] focus:border-transparent transition-all"
+                  placeholder="John Doe"
+                  required
+                />
+              </div>
+            </div>
+
             {/* Email Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
@@ -140,49 +159,44 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Nhớ mật khẩu & Quên mật khẩu */}
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center">
+            {/* Confirm Password Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-[#B5E361] focus:ring-[#B5E361] border-gray-300 rounded cursor-pointer accent-[#B5E361]"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#B5E361] focus:border-transparent transition-all"
+                  placeholder="••••••••"
+                  required
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600 cursor-pointer">
-                  Remember me
-                </label>
-              </div>
-              <div className="text-sm">
-                <a href="#forgot" className="font-semibold text-gray-700 hover:text-[#8cbd3e] transition-colors">
-                  Forgot password?
-                </a>
               </div>
             </div>
 
-            {/* Nút Đăng nhập */}
             <button
               type="submit"
               disabled={isLoading}
               className={`w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-2xl shadow-sm text-base font-bold text-gray-900 bg-[#B5E361] hover:bg-[#a5d44b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#B5E361] transition-colors mt-6 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? 'Creating account...' : 'Create Account'}
               {!isLoading && <ArrowRight className="ml-2 h-5 w-5" />}
             </button>
           </form>
 
-          {/* Dấu gạch ngang phân cách */}
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium">Or continue with</span>
+                <span className="px-4 bg-white text-gray-500 font-medium">Or sign up with</span>
               </div>
             </div>
 
-            {/* Đăng nhập bằng Mạng xã hội */}
             <div className="mt-6 grid grid-cols-2 gap-4">
               <button className="flex justify-center items-center py-2.5 px-4 border border-gray-200 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                 <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
@@ -201,9 +215,9 @@ export default function Login() {
           </div>
 
           <p className="mt-8 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/signup" className="font-bold text-gray-900 hover:text-[#8cbd3e] transition-colors">
-              Sign up now
+            Already have an account?{' '}
+            <Link to="/login" className="font-bold text-gray-900 hover:text-[#8cbd3e] transition-colors">
+              Log in
             </Link>
           </p>
 

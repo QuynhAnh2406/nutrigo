@@ -35,29 +35,76 @@ function MainLayout() {
   });
 
   const [healthData, setHealthData] = useState({
-    dateOfBirth: '1995-10-15',
-    age: 28,
-    gender: 'Male',
-    height: 175, // cm
-    weight: 70, // kg
-    activityLevel: 'Moderate', // Sedentary, Light, Moderate, Active, Very Active
-    goal: 'Maintain weight',
-    dietaryPreference: 'None',
-    allergies: 'Peanuts',
-    cookingSkill: 'Beginner'
+    dateOfBirth: '',
+    gender: '',
+    height: '',
+    weight: '',
+    activityLevel: '',
+    goal: '',
+    dietaryPreference: '',
+    allergies: '',
+    cookingSkill: '',
+    phone: ''
   });
 
   const [metrics, setMetrics] = useState({
     bmi: 0,
     bmr: 0,
     tdee: 0,
-    bmiStatus: ''
+    targetCalories: 0,
+    bmiStatus: '',
+    age: 0
   });
 
   useEffect(() => {
+    const fetchHealthData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const res = await fetch('http://localhost:5000/api/profile/health', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          const row = data.data;
+          setHealthData({
+            dateOfBirth: row.date_of_birth ? String(row.date_of_birth).slice(0, 10) : '',
+            gender: row.gender || '',
+            height: row.height_cm || '',
+            weight: row.weight_kg || '',
+            activityLevel: row.activity_level || '',
+            goal: row.goal || '',
+            dietaryPreference: row.dietary_preference || '',
+            allergies: row.allergies || '',
+            cookingSkill: row.cooking_skill || 'Beginner',
+            phone: row.phone || ''
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch health data:', err);
+      }
+    };
+
+    fetchHealthData();
+  }, []);
+
+  useEffect(() => {
     const calculateMetrics = () => {
-      const { weight, height, age, gender, activityLevel } = healthData;
-      if (!weight || !height || !age) return;
+      const { weight, height, dateOfBirth, gender, activityLevel } = healthData;
+      if (!weight || !height || !dateOfBirth) return;
+
+      // Calculate age from dateOfBirth
+      const today = new Date();
+      const birthDate = new Date(dateOfBirth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      age = Math.max(0, age);
 
       // BMI
       const heightInMeters = height / 100;
@@ -84,7 +131,12 @@ function MainLayout() {
       };
       const tdee = Math.round(bmr * (activityMultipliers[activityLevel] || 1.2));
 
-      setMetrics({ bmi, bmr: Math.round(bmr), tdee, bmiStatus });
+      // Target Calories based on Goal
+      let targetCalories = tdee;
+      if (healthData.goal === 'Lose weight') targetCalories -= 500;
+      else if (healthData.goal === 'Gain weight') targetCalories += 500;
+
+      setMetrics({ bmi, bmr: Math.round(bmr), tdee, targetCalories, bmiStatus, age });
     };
 
     calculateMetrics();

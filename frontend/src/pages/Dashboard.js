@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { X, Heart, Bookmark } from 'lucide-react';
+import { X, Heart, Bookmark, ArrowRight, Sparkles } from 'lucide-react';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 
 function Dashboard() {
   const { metrics, healthData } = useOutletContext();
+  const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
 
   const [posts, setPosts] = useState([]);
@@ -222,39 +223,95 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* COMPLETE PROFILE CTA FOR NEW USERS */}
+      {(!healthData.weight || !healthData.height || !healthData.dateOfBirth) && (
+        <div className="mb-8 p-1 bg-gradient-to-r from-[#B5E361] via-[#8CB33D] to-[#4facfe] rounded-[2.5rem] shadow-xl shadow-green-100 animate-in slide-in-from-bottom-4 duration-700 mt-8">
+          <div className="bg-white/90 backdrop-blur-md rounded-[2.4rem] p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#B5E361] to-[#8CB33D] rounded-3xl flex items-center justify-center text-4xl shadow-lg shadow-green-200 shrink-0 animate-pulse">
+                <Sparkles className="text-white w-10 h-10" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-2xl font-black text-gray-900 mb-2">Complete Your Health Profile! ✨</h3>
+                <p className="text-gray-500 max-w-md leading-relaxed">
+                  To give you accurate calorie goals and personalized meal plans, we need a few details like your weight, height, and date of birth.
+                </p>
+              </div>
+            </div>
+            <button 
+              onClick={() => navigate('/profile?tab=Edit')}
+              className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-black flex items-center gap-3 hover:bg-gray-800 transition-all shadow-xl hover:scale-105 shrink-0"
+            >
+              Fill Information
+              <ArrowRight className="w-5 h-5 text-[#B5E361]" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="section-title" style={{ marginTop: '20px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Health Dashboard</h2>
       </div>
 
-      <div className="metrics-grid mb-8">
-        <div className="metric-card">
-          <div className="metric-icon bg-blue-100 text-blue-600">⚖️</div>
-          <div className="metric-info">
-            <span className="metric-label">BMI</span>
-            <span className="metric-value">{metrics.bmi}</span>
-            <span className={`metric-status ${metrics.bmiStatus.toLowerCase()}`}>{metrics.bmiStatus}</span>
+      <div className="flex flex-col lg:flex-row gap-6 mb-8">
+        {/* HERO CARD: DAILY TARGET */}
+        <div className="flex-1 bg-gradient-to-br from-[#B5E361] via-[#8CB33D] to-[#4facfe] rounded-[2.5rem] p-8 relative overflow-hidden shadow-xl shadow-green-200 group border-none">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+          
+          <div className="relative z-10 flex flex-col h-full justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">🎯</div>
+                <span className="text-white font-black uppercase tracking-[0.2em] text-xs">Daily Goal</span>
+              </div>
+              <h3 className="text-white text-6xl font-black mt-6 flex items-baseline gap-3">
+                {metrics.targetCalories || '--'}
+                <span className="text-xl text-white/50 font-bold uppercase tracking-widest">kcal</span>
+              </h3>
+              <p className="text-white/80 text-sm mt-3 flex items-center gap-2">
+                Target to <span className="text-white font-black px-3 py-1 bg-white/20 rounded-xl backdrop-blur-sm shadow-sm">{healthData.goal || 'Maintain weight'}</span>
+              </p>
+            </div>
+
+            <div className="mt-10">
+              <div className="flex justify-between items-end mb-3">
+                <span className="text-white/70 text-xs font-black uppercase tracking-wider">Daily Progress</span>
+                <span className="text-white text-xs font-black bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">0 / {metrics.targetCalories || '--'} kcal</span>
+              </div>
+              <div className="w-full h-4 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm border border-white/10 shadow-inner">
+                <div className="h-full bg-white rounded-full w-[2%] shadow-[0_0_20px_rgba(255,255,255,0.8)]"></div>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="metric-card">
-          <div className="metric-icon bg-orange-100 text-orange-600">🔥</div>
-          <div className="metric-info">
-            <span className="metric-label">BMR (Resting Cal)</span>
-            <span className="metric-value">{metrics.bmr} <small>kcal</small></span>
+
+        {/* SECONDARY METRICS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-1 gap-4 w-full lg:w-[280px]">
+          <div className="bg-white border border-gray-100 p-5 rounded-[2rem] shadow-sm flex items-center gap-4 hover:border-[#B5E361]/50 transition-all">
+            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-xl">⚡</div>
+            <div>
+              <span className="block text-[10px] text-gray-400 font-black uppercase tracking-wider">TDEE</span>
+              <strong className="text-xl text-gray-900">{metrics.tdee || '--'} <small className="text-[10px] opacity-40">kcal</small></strong>
+            </div>
           </div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-icon bg-green-100 text-green-600">⚡</div>
-          <div className="metric-info">
-            <span className="metric-label">TDEE (Daily Cal)</span>
-            <span className="metric-value">{metrics.tdee} <small>kcal</small></span>
-            <span className="metric-desc">To maintain current weight</span>
+          <div className="bg-white border border-gray-100 p-5 rounded-[2rem] shadow-sm flex items-center gap-4 hover:border-orange-200 transition-all">
+            <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center text-xl">🔥</div>
+            <div>
+              <span className="block text-[10px] text-gray-400 font-black uppercase tracking-wider">BMR</span>
+              <strong className="text-xl text-gray-900">{metrics.bmr || '--'} <small className="text-[10px] opacity-40">kcal</small></strong>
+            </div>
           </div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-icon bg-purple-100 text-purple-600">🎯</div>
-          <div className="metric-info">
-            <span className="metric-label">Current Goal</span>
-            <span className="metric-value text-xl mt-1">{healthData.goal}</span>
+          <div className="bg-white border border-gray-100 p-5 rounded-[2rem] shadow-sm flex items-center gap-4 hover:border-blue-200 transition-all">
+            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl">⚖️</div>
+            <div>
+              <span className="block text-[10px] text-gray-400 font-black uppercase tracking-wider">BMI</span>
+              <div className="flex items-center gap-2">
+                <strong className="text-xl text-gray-900">{metrics.bmi || '--'}</strong>
+                {metrics.bmiStatus && (
+                  <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${metrics.bmiStatus === 'Normal' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>{metrics.bmiStatus}</span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

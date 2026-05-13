@@ -14,7 +14,7 @@ exports.getMyHealth = async (req, res) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        date_of_birth,
+        TO_CHAR(date_of_birth, 'YYYY-MM-DD') as date_of_birth,
         gender,
         height_cm,
         weight_kg,
@@ -22,7 +22,8 @@ exports.getMyHealth = async (req, res) => {
         goal,
         dietary_preference,
         allergies,
-        cooking_skill
+        cooking_skill,
+        phone
       FROM user_health_data
       WHERE user_id = $1`,
       [userId]
@@ -38,6 +39,10 @@ exports.getMyHealth = async (req, res) => {
 
 exports.upsertMyHealth = async (req, res) => {
   const userId = getUserId(req);
+  console.log('--- UPSERT ATTEMPT ---');
+  console.log('User ID:', userId);
+  console.log('Request Body:', req.body);
+
   const {
     dateOfBirth,
     gender,
@@ -48,6 +53,7 @@ exports.upsertMyHealth = async (req, res) => {
     dietaryPreference,
     allergies,
     cookingSkill,
+    phone,
   } = req.body || {};
 
   try {
@@ -62,9 +68,10 @@ exports.upsertMyHealth = async (req, res) => {
         goal,
         dietary_preference,
         allergies,
-        cooking_skill
+        cooking_skill,
+        phone
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
       )
       ON CONFLICT (user_id) DO UPDATE SET
         date_of_birth = EXCLUDED.date_of_birth,
@@ -75,9 +82,10 @@ exports.upsertMyHealth = async (req, res) => {
         goal = EXCLUDED.goal,
         dietary_preference = EXCLUDED.dietary_preference,
         allergies = EXCLUDED.allergies,
-        cooking_skill = EXCLUDED.cooking_skill
+        cooking_skill = EXCLUDED.cooking_skill,
+        phone = EXCLUDED.phone
       RETURNING
-        date_of_birth,
+        TO_CHAR(date_of_birth, 'YYYY-MM-DD') as date_of_birth,
         gender,
         height_cm,
         weight_kg,
@@ -85,7 +93,8 @@ exports.upsertMyHealth = async (req, res) => {
         goal,
         dietary_preference,
         allergies,
-        cooking_skill`,
+        cooking_skill,
+        phone`,
       [
         userId,
         dateOfBirth || null,
@@ -97,8 +106,17 @@ exports.upsertMyHealth = async (req, res) => {
         dietaryPreference || null,
         allergies || null,
         cookingSkill || null,
+        phone || null,
       ]
     );
+
+    // Update email in users table
+    if (req.body.email) {
+      await db.query(
+        'UPDATE users SET email = $1 WHERE id = $2',
+        [req.body.email, userId]
+      );
+    }
 
     res.json({ success: true, data: rows[0] });
   } catch (error) {

@@ -13,6 +13,7 @@ import Community from './pages/Community';
 import CreatePost from './pages/CreatePost';
 import Favourites from './pages/Favourites';
 import Profile from './pages/Profile';
+import Signup from './pages/Signup';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
         {/* Protected Routes (Main Layout) */}
         <Route element={<MainLayout />}>

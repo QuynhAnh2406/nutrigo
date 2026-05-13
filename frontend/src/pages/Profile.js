@@ -20,7 +20,24 @@ function Profile() {
   }, [tabParam]);
 
   // Get User Profile & Health Data from MainLayout context
-  const { user, healthData, setHealthData, metrics } = useOutletContext();
+  const { user, setUser, healthData, setHealthData, metrics } = useOutletContext();
+  
+  // Local form state for editing to prevent immediate global state updates
+  const [formData, setFormData] = useState({
+    ...healthData,
+    email: user.email
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Re-sync local form if healthData or user changes (e.g. initial load)
+  useEffect(() => {
+    if (activeTab === 'Edit') {
+      setFormData({
+        ...healthData,
+        email: user.email
+      });
+    }
+  }, [activeTab, healthData, user.email]);
 
   const saveHealthToDb = async () => {
     const token = localStorage.getItem('token');
@@ -31,15 +48,17 @@ function Profile() {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       },
       body: JSON.stringify({
-        dateOfBirth: healthData.dateOfBirth,
-        gender: healthData.gender,
-        height: healthData.height,
-        weight: healthData.weight,
-        activityLevel: healthData.activityLevel,
-        goal: healthData.goal,
-        dietaryPreference: healthData.dietaryPreference,
-        allergies: healthData.allergies,
-        cookingSkill: healthData.cookingSkill
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender || 'Male',
+        height: formData.height,
+        weight: formData.weight,
+        activityLevel: formData.activityLevel || 'Sedentary',
+        goal: formData.goal || 'Maintain weight',
+        dietaryPreference: formData.dietaryPreference,
+        allergies: formData.allergies,
+        cookingSkill: formData.cookingSkill || 'Beginner',
+        phone: formData.phone,
+        email: formData.email
       })
     });
 
@@ -50,6 +69,12 @@ function Profile() {
 
     // Map DB -> frontend state shape
     const row = data.data || {};
+
+    // Update global user state with new email
+    if (formData.email !== user.email) {
+      setUser(prev => ({ ...prev, email: formData.email }));
+    }
+
     setHealthData((prev) => ({
       ...prev,
       dateOfBirth: row.date_of_birth ? String(row.date_of_birth).slice(0, 10) : prev.dateOfBirth,
@@ -60,23 +85,14 @@ function Profile() {
       goal: row.goal ?? prev.goal,
       dietaryPreference: row.dietary_preference ?? prev.dietaryPreference,
       allergies: row.allergies ?? prev.allergies,
-      cookingSkill: row.cooking_skill ?? prev.cookingSkill
+      cookingSkill: row.cooking_skill ?? prev.cookingSkill,
+      phone: row.phone ?? prev.phone
     }));
   };
 
-  const handleHealthChange = (e) => {
-    let newValues = { [e.target.name]: e.target.value };
-    if (e.target.name === 'dateOfBirth') {
-      const today = new Date();
-      const birthDate = new Date(e.target.value);
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      newValues.age = Math.max(0, age);
-    }
-    setHealthData({ ...healthData, ...newValues });
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const renderTabContent = () => {
@@ -84,24 +100,57 @@ function Profile() {
 
       case 'Personal':
         return (
-          <div className="profile-tab-content edit-profile animate-in">
-            <div className="bg-blue-50 border border-blue-100 p-6 rounded-2xl mb-8">
-              <h4 className="font-bold text-blue-900 mb-4">Health Metrics</h4>
-              <div className="flex gap-4">
-                <div className="bg-white px-4 py-3 rounded-xl shadow-sm flex-1">
-                  <span className="block text-xs text-gray-500 uppercase font-bold">BMI</span>
-                  <strong className="text-2xl text-blue-700 block mt-1">{metrics.bmi}</strong>
-                  <span className={`text-xs font-semibold ${metrics.bmiStatus === 'Normal' ? 'text-green-600' : 'text-orange-600'}`}>{metrics.bmiStatus}</span>
+          <div className="profile-tab-content personal-profile animate-in">
+            <div className="bg-gradient-to-br from-[#B5E361] via-[#8CB33D] to-[#4facfe] p-8 rounded-[2.5rem] mb-8 shadow-xl shadow-green-200 relative overflow-hidden group border-none">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-125"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/20 rounded-full -ml-24 -mb-24 blur-2xl"></div>
+              
+              <h4 className="font-black text-white mb-8 flex items-center gap-3 relative z-10">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">🥗</div>
+                <div>
+                  <span className="block text-xl tracking-tight">Energy & Nutrition Summary</span>
+                  <span className="block text-[10px] text-white/70 font-bold uppercase tracking-[0.2em] mt-1">Personalized Health Intelligence</span>
                 </div>
-                <div className="bg-white px-4 py-3 rounded-xl shadow-sm flex-1">
-                  <span className="block text-xs text-gray-500 uppercase font-bold">BMR</span>
-                  <strong className="text-2xl text-orange-600 block mt-1">{metrics.bmr} <small className="text-sm">kcal</small></strong>
-                  <span className="text-xs text-gray-400 font-semibold">Resting Calories</span>
+              </h4>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
+                <div className="bg-white/10 backdrop-blur-xl px-5 py-6 rounded-[2rem] border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300">
+                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">BMI Score</span>
+                  <div className="flex items-baseline gap-2">
+                    <strong className="text-3xl text-white font-black">{metrics.bmi}</strong>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase ${metrics.bmiStatus === 'Normal' ? 'bg-white/30 text-white' : 'bg-orange-400/40 text-white'}`}>
+                      {metrics.bmiStatus}
+                    </span>
+                  </div>
                 </div>
-                <div className="bg-white px-4 py-3 rounded-xl shadow-sm flex-1">
-                  <span className="block text-xs text-gray-500 uppercase font-bold">TDEE</span>
-                  <strong className="text-2xl text-green-600 block mt-1">{metrics.tdee} <small className="text-sm">kcal</small></strong>
-                  <span className="text-xs text-gray-400 font-semibold">Daily Calories</span>
+
+                <div className="bg-white/10 backdrop-blur-xl px-5 py-6 rounded-[2rem] border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300">
+                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">BMR (Rest)</span>
+                  <div className="flex items-baseline gap-2">
+                    <strong className="text-3xl text-white font-black">{metrics.bmr}</strong>
+                    <small className="text-[10px] text-white/60 font-black uppercase tracking-tighter">kcal</small>
+                  </div>
+                  <span className="text-[9px] text-white/40 font-bold block mt-1 uppercase">Basal Metabolism</span>
+                </div>
+
+                <div className="bg-white/10 backdrop-blur-xl px-5 py-6 rounded-[2rem] border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300">
+                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">TDEE (Daily)</span>
+                  <div className="flex items-baseline gap-2">
+                    <strong className="text-3xl text-white font-black">{metrics.tdee}</strong>
+                    <small className="text-[10px] text-white/60 font-black uppercase tracking-tighter">kcal</small>
+                  </div>
+                  <span className="text-[9px] text-white/40 font-bold block mt-1 uppercase">Maintenance Level</span>
+                </div>
+
+                <div className="bg-white/95 backdrop-blur-md px-5 py-6 rounded-[2rem] shadow-2xl shadow-green-900/10 hover:scale-105 transition-all duration-300">
+                  <span className="block text-[10px] text-[#3d6600]/60 uppercase font-black tracking-widest mb-3">Target Intake</span>
+                  <div className="flex items-baseline gap-2">
+                    <strong className="text-3xl text-[#3d6600] font-black">{metrics.targetCalories}</strong>
+                    <small className="text-[10px] text-[#3d6600]/60 font-black uppercase tracking-tighter">kcal</small>
+                  </div>
+                  <div className="mt-2 text-[10px] bg-[#B5E361] px-3 py-1 rounded-full text-[#3d6600] font-black inline-block shadow-sm">
+                    {healthData.goal || 'Maintain'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -116,11 +165,14 @@ function Profile() {
                   </div>
                   <div className="form-group">
                     <label>Age</label>
-                    <input type="number" value={healthData.age} disabled className="bg-gray-50 border-gray-200" />
+                    <input type="number" value={metrics.age || 0} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                   <div className="form-group">
                     <label>Gender</label>
-                    <input type="text" value={healthData.gender} disabled className="bg-gray-50 border-gray-200" />
+                    <select value={healthData.gender || 'Male'} disabled className="bg-gray-50 border-gray-200 custom-select">
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
                   </div>
                   <div className="form-group">
                     <label>Height (cm)</label>
@@ -131,12 +183,12 @@ function Profile() {
                     <input type="number" value={healthData.weight} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                   <div className="form-group">
-                    <label>Activity Level</label>
-                    <input type="text" value={healthData.activityLevel} disabled className="bg-gray-50 border-gray-200" />
+                    <label>Email Address</label>
+                    <input type="email" value={user.email} disabled className="bg-gray-50 border-gray-200" />
                   </div>
-                  <div className="form-group col-span-2">
-                    <label>Goal</label>
-                    <input type="text" value={healthData.goal} disabled className="bg-gray-50 border-gray-200" />
+                  <div className="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" value={healthData.phone || 'Not set'} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                 </div>
               </div>
@@ -144,6 +196,25 @@ function Profile() {
               <div className="profile-form border p-6 rounded-2xl border-gray-100 bg-white flex flex-col h-full">
                 <h4 className="font-bold mb-4 text-gray-800">Survey Preferences</h4>
                 <div className="form-grid opacity-80 pointer-events-none">
+                  <div className="form-group col-span-2">
+                    <label>Goal</label>
+                    <select value={healthData.goal || 'Maintain weight'} disabled className="bg-gray-50 border-gray-200 custom-select">
+                      <option value="Lose weight">Lose weight</option>
+                      <option value="Maintain weight">Maintain weight</option>
+                      <option value="Gain weight">Gain weight</option>
+                      <option value="Build muscle">Build muscle</option>
+                    </select>
+                  </div>
+                  <div className="form-group col-span-2">
+                    <label>Activity Level</label>
+                    <select value={healthData.activityLevel || 'Sedentary'} disabled className="bg-gray-50 border-gray-200 custom-select">
+                      <option value="Sedentary">Sedentary (Little or no exercise)</option>
+                      <option value="Light">Light (Exercise 1-3 times/week)</option>
+                      <option value="Moderate">Moderate (Exercise 4-5 times/week)</option>
+                      <option value="Active">Active (Daily or intense 3-4 times/week)</option>
+                      <option value="Very Active">Very Active (Intense daily exercise)</option>
+                    </select>
+                  </div>
                   <div className="form-group col-span-2">
                     <label>Dietary Preferences</label>
                     <input type="text" value={healthData.dietaryPreference || ''} disabled className="bg-gray-50 border-gray-200" />
@@ -154,7 +225,7 @@ function Profile() {
                   </div>
                   <div className="form-group col-span-2">
                     <label>Cooking Skill</label>
-                    <select value={healthData.cookingSkill || ''} disabled className="bg-gray-50 border-gray-200">
+                    <select value={healthData.cookingSkill || ''} disabled className="bg-gray-50 border-gray-200 custom-select">
                       <option value="Beginner">Beginner (Little or no experience)</option>
                       <option value="Intermediate">Intermediate (Can follow recipes easily)</option>
                       <option value="Advanced">Advanced (Experienced home cook)</option>
@@ -169,88 +240,155 @@ function Profile() {
 
       case 'Edit':
         return (
-          <div className="profile-tab-content edit-profile animate-in">
+          <div className="profile-tab-content edit-profile animate-in space-y-8">
+            <div className="bg-gradient-to-br from-[#4facfe] to-[#00f2fe] p-8 rounded-[2.5rem] mb-8 shadow-xl shadow-blue-100 relative overflow-hidden group border-none">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-125"></div>
+              <h4 className="font-black text-white mb-2 flex items-center gap-3 relative z-10">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">📝</div>
+                <div>
+                  <span className="block text-xl tracking-tight">Edit Your Profile</span>
+                  <span className="text-white/80 text-sm font-medium">Keep your health data accurate for better results</span>
+                </div>
+              </h4>
+            </div>
+
             <form
-              className="profile-form"
+              className="space-y-8"
               onSubmit={async (e) => {
                 e.preventDefault();
+                setIsSaving(true);
                 try {
                   await saveHealthToDb();
-                  alert('Profile updated!');
+                  alert('Profile updated successfully! ✨');
                   setActiveTab('Personal');
                 } catch (err) {
                   console.error(err);
-                  alert('Save failed. Please check backend & DB connection.');
+                  alert('Save failed. Please check your connection.');
+                } finally {
+                  setIsSaving(false);
                 }
               }}
             >
-              <h4 className="font-bold mb-4 text-gray-800 border-b pb-2">Basic Info</h4>
-              <div className="form-grid mb-8">
-                <div className="form-group">
-                  <label>Date of Birth</label>
-                  <input type="date" name="dateOfBirth" value={healthData.dateOfBirth} onChange={handleHealthChange} />
-                </div>
-                <div className="form-group opacity-70">
-                  <label>Age</label>
-                  <input type="number" name="age" value={healthData.age} disabled className="bg-gray-50 cursor-not-allowed" />
-                </div>
-                <div className="form-group">
-                  <label>Gender</label>
-                  <select name="gender" value={healthData.gender} onChange={handleHealthChange}>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Height (cm)</label>
-                  <input type="number" name="height" value={healthData.height} onChange={handleHealthChange} />
-                </div>
-                <div className="form-group">
-                  <label>Weight (kg)</label>
-                  <input type="number" name="weight" value={healthData.weight} onChange={handleHealthChange} />
-                </div>
-                <div className="form-group">
-                  <label>Activity Level</label>
-                  <select name="activityLevel" value={healthData.activityLevel} onChange={handleHealthChange}>
-                    <option value="Sedentary">Sedentary (Little or no exercise)</option>
-                    <option value="Light">Light (Exercise 1-3 times/week)</option>
-                    <option value="Moderate">Moderate (Exercise 4-5 times/week)</option>
-                    <option value="Active">Active (Daily exercise or intense exercise 3-4 times/week)</option>
-                    <option value="Very Active">Very Active (Intense exercise 6-7 times/week)</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Goal</label>
-                  <select name="goal" value={healthData.goal} onChange={handleHealthChange}>
-                    <option value="Lose weight">Lose weight</option>
-                    <option value="Maintain weight">Maintain weight</option>
-                    <option value="Gain weight">Gain weight</option>
-                    <option value="Build muscle">Build muscle</option>
-                  </select>
+              {/* Basic Info Section */}
+              <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl">
+                <h4 className="font-bold mb-6 text-gray-800 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-blue-500 rounded-full"></span>
+                  Basic Information
+                </h4>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleFormChange} className="bg-white/80 border-gray-100 focus:ring-2 focus:ring-blue-400 transition-all" />
+                  </div>
+                  <div className="form-group opacity-60">
+                    <label>Age</label>
+                    <input type="number" value={metrics.age || 0} disabled className="bg-gray-50/50 cursor-not-allowed" />
+                  </div>
+                  <div className="form-group">
+                    <label>Gender</label>
+                    <select name="gender" value={formData.gender || 'Male'} onChange={handleFormChange} className="custom-select bg-white/80">
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Height (cm)</label>
+                    <input type="number" name="height" value={formData.height} onChange={handleFormChange} className="bg-white/80" />
+                  </div>
+                  <div className="form-group">
+                    <label>Weight (kg)</label>
+                    <input type="number" name="weight" value={formData.weight} onChange={handleFormChange} className="bg-white/80" />
+                  </div>
+                  <div className="form-group">
+                    <label>Email Address</label>
+                    <input 
+                      type="email" 
+                      name="email" 
+                      value={formData.email} 
+                      onChange={handleFormChange} 
+                      placeholder="yourname@example.com" 
+                      className="bg-white/80"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" value={formData.phone || ''} onChange={handleFormChange} placeholder="Enter your phone number" className="bg-white/80" />
+                  </div>
                 </div>
               </div>
 
-              <h4 className="font-bold mb-4 text-gray-800 border-b pb-2">Survey Preferences</h4>
-              <div className="form-grid">
+              {/* Survey Preferences Section */}
+              <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl">
+                <h4 className="font-bold mb-6 text-gray-800 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-green-500 rounded-full"></span>
+                  Survey & Health Goals
+                </h4>
+                <div className="form-grid">
+                  <div className="form-group col-span-2">
+                    <label>Health Goal</label>
+                    <select name="goal" value={formData.goal || 'Maintain weight'} onChange={handleFormChange} className="custom-select bg-white/80">
+                      <option value="Lose weight">Lose weight</option>
+                      <option value="Maintain weight">Maintain weight</option>
+                      <option value="Gain weight">Gain weight</option>
+                      <option value="Build muscle">Build muscle</option>
+                    </select>
+                  </div>
+                  <div className="form-group col-span-2">
+                    <label>Activity Level</label>
+                    <select name="activityLevel" value={formData.activityLevel || 'Sedentary'} onChange={handleFormChange} className="custom-select bg-white/80">
+                      <option value="Sedentary">Sedentary (Little or no exercise)</option>
+                      <option value="Light">Light (Exercise 1-3 times/week)</option>
+                      <option value="Moderate">Moderate (Exercise 4-5 times/week)</option>
+                      <option value="Active">Active (Daily exercise or intense exercise 3-4 times/week)</option>
+                      <option value="Very Active">Very Active (Intense exercise 6-7 times/week)</option>
+                    </select>
+                  </div>
                   <div className="form-group col-span-2">
                     <label>Dietary Preferences</label>
-                    <input type="text" name="dietaryPreference" value={healthData.dietaryPreference || ''} onChange={handleHealthChange} />
+                    <input type="text" name="dietaryPreference" value={formData.dietaryPreference || ''} onChange={handleFormChange} placeholder="e.g., Vegan, Keto, No Seafood" className="bg-white/80" />
                   </div>
                   <div className="form-group col-span-2">
                     <label>Allergies</label>
-                    <input type="text" name="allergies" value={healthData.allergies || ''} onChange={handleHealthChange} />
+                    <input type="text" name="allergies" value={formData.allergies || ''} onChange={handleFormChange} placeholder="e.g., Peanuts, Shellfish" className="bg-white/80" />
                   </div>
                   <div className="form-group col-span-2">
                     <label>Cooking Skill</label>
-                    <select name="cookingSkill" value={healthData.cookingSkill || ''} onChange={handleHealthChange}>
+                    <select name="cookingSkill" value={formData.cookingSkill || 'Beginner'} onChange={handleFormChange} className="custom-select bg-white/80">
                       <option value="Beginner">Beginner (Little or no experience)</option>
                       <option value="Intermediate">Intermediate (Can follow recipes easily)</option>
                       <option value="Advanced">Advanced (Experienced home cook)</option>
                       <option value="Expert">Expert (Professional or highly skilled)</option>
                     </select>
                   </div>
+                </div>
               </div>
-              <button type="submit" className="btn-primary mt-6">Save Changes</button>
+
+              <div className="flex justify-end pt-4">
+                <button 
+                  type="submit" 
+                  disabled={isSaving}
+                  className={`
+                    px-10 py-4 rounded-2xl font-bold text-white shadow-lg transition-all duration-300
+                    flex items-center gap-2
+                    ${isSaving 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-[#B5E361] to-[#8CB33D] hover:scale-105 hover:shadow-green-200 active:scale-95'
+                    }
+                  `}
+                >
+                  {isSaving ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Saving Changes...
+                    </>
+                  ) : (
+                    <>
+                      <span>Save Changes</span>
+                      <span className="text-xl">✨</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
           </div>
         );
