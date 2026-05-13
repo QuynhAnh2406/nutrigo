@@ -5,18 +5,18 @@ import RightPanel from '../components/RightPanel';
 
 function MainLayout() {
   // Shared state that was previously in App.js
-  const [menuItems, setMenuItems] = useState([
+  const [menuItems] = useState([
     { name: 'Oatmeal & Berries', type: 'Breakfast', calories: 350, carbs: 45, protein: 12, fats: 8 },
     { name: 'Avocado Toast', type: 'Breakfast', calories: 250, carbs: 20, protein: 6, fats: 15 },
     { name: 'Grilled Chicken Salad', type: 'Lunch', calories: 420, carbs: 15, protein: 45, fats: 18 },
     { name: 'Quinoa Bowl', type: 'Lunch', calories: 380, carbs: 55, protein: 15, fats: 12 },
     { name: 'Baked Salmon', type: 'Dinner', calories: 480, carbs: 5, protein: 40, fats: 25 },
   ]);
-  const [newMenuItems, setNewMenuItems] = useState([
+  const [newMenuItems] = useState([
     { name: 'Beef Mignon & Asparagus', calories: 550, carbs: 10, protein: 50, fats: 28 },
     { name: 'Greek Yogurt Parfait', calories: 220, carbs: 25, protein: 18, fats: 5 },
   ]);
-  const [recommendedItems, setRecommendedItems] = useState([
+  const [recommendedItems] = useState([
     { name: 'Protein Shake', type: 'Breakfast', calories: 150, carbs: 5, protein: 25, fats: 2 },
     { name: 'Turkey Wrap', type: 'Lunch', calories: 320, carbs: 30, protein: 28, fats: 10 },
     { name: 'Almond Snacks', type: 'Snack', calories: 180, carbs: 6, protein: 6, fats: 15 },

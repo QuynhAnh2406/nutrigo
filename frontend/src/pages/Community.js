@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PostCard from '../components/PostCard';
 import PostDetailModal from '../components/PostDetailModal';
 import AddToMealPlanModal from '../components/AddToMealPlanModal';
@@ -18,11 +18,8 @@ function Community() {
   const tabs = ['For You', 'Latest', 'My Meals', 'Following', 'Popular'];
   const filters = ['All', 'Low Calorie', 'High Protein', 'Low Carb', 'Vegetarian', 'Keto', 'Under 15 mins', 'Under 30 mins'];
 
-  useEffect(() => {
-    fetchPosts();
-  }, [activeTab, activeFilter, searchQuery]);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       let url = `http://localhost:5000/api/posts?tab=${activeTab}&filter=${activeFilter}&search=${searchQuery}`;
       const res = await fetch(url);
@@ -33,7 +30,11 @@ function Community() {
     } catch (error) {
       console.error("Error fetching posts:", error);
     }
-  };
+  }, [activeTab, activeFilter, searchQuery]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
 
   const handleLike = async (postId) => {

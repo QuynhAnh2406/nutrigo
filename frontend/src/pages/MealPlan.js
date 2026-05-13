@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GroceryListModal from '../components/GroceryListModal';
 import { CalendarDays, Sparkles, ShoppingCart, Lightbulb, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -74,7 +74,7 @@ function MealPlan() {
     } catch (e) { console.error(e); }
   };
 
-  const fetchSuggestions = async () => {
+  const fetchSuggestions = useCallback(async () => {
     try {
       const res = await fetch('http://localhost:5000/api/mealplan/suggest', {
         method: 'POST',
@@ -86,13 +86,13 @@ function MealPlan() {
         setSuggestions(data.data);
       }
     } catch (e) { console.error(e); }
-  };
+  }, [userIngredients]);
 
   useEffect(() => {
     if (activeSection === 'suggestions') {
       fetchSuggestions();
     }
-  }, [userIngredients, activeSection]);
+  }, [activeSection, fetchSuggestions]);
 
   const handleAddIngredient = (e) => {
     e.preventDefault();

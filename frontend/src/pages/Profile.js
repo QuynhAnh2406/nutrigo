@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext, useLocation, useNavigate } from 'react-router-dom';
+import { useOutletContext, useLocation } from 'react-router-dom';
 import { UserCircle2, Settings } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
@@ -20,7 +20,7 @@ function Profile() {
   }, [tabParam]);
 
   // Get User Profile & Health Data from MainLayout context
-  const { user, setUser, healthData, setHealthData, metrics } = useOutletContext();
+  const { user, healthData, setHealthData, metrics } = useOutletContext();
 
   const saveHealthToDb = async () => {
     const token = localStorage.getItem('token');

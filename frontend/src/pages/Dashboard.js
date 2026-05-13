@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { X, Camera, Flame, Zap, Check, Heart, Bookmark } from 'lucide-react';
+import { X, Heart, Bookmark } from 'lucide-react';
 
 function Dashboard() {
-  const { newMenuItems, metrics, healthData } = useOutletContext();
+  const { metrics, healthData } = useOutletContext();
   const [time, setTime] = useState(new Date());
 
   const [posts, setPosts] = useState([]);
@@ -18,7 +18,6 @@ function Dashboard() {
     author: '@current_user',
     ingredients: [{ name: '', weight: '' }]
   });
-  const [reviewData, setReviewData] = useState({ stars: 5, text: '' });
 
   // Fetch data from backend
   useEffect(() => {
