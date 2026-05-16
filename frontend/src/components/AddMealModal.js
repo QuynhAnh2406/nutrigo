@@ -49,12 +49,6 @@ function AddMealModal({ day, mealType, onClose, onConfirm }) {
     }
   };
 
-  const addIngredient = (ingredientName) => {
-    const ing = allIngredients.find(i => i.name === ingredientName);
-    if (ing && !selectedIngredients.find(si => si.name === ing.name)) {
-      setSelectedIngredients([...selectedIngredients, { ...ing, weight_g: 100 }]);
-    }
-  };
 
   const removeIngredient = (index) => {
     setSelectedIngredients(selectedIngredients.filter((_, i) => i !== index));

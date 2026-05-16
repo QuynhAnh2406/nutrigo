@@ -62,11 +62,7 @@ function MealPlan() {
     } catch (e) { console.error(e); }
   };
 
-  useEffect(() => {
-    fetchWeeklyPlan();
-  }, []);
-
-  const fetchWeeklyPlan = async () => {
+  const fetchWeeklyPlan = useCallback(async () => {
     try {
       const res = await fetch('http://localhost:5000/api/mealplan');
       const data = await res.json();
@@ -74,7 +70,11 @@ function MealPlan() {
         setWeeklyPlan(data.data);
       }
     } catch (e) { console.error(e); }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchWeeklyPlan();
+  }, [fetchWeeklyPlan]);
 
   const fetchSuggestions = useCallback(async () => {
     try {
