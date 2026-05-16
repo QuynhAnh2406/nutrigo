@@ -174,3 +174,95 @@ exports.autoFillWeek = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+exports.getIngredients = async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM ingredients ORDER BY name ASC');
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.getUserRecipes = async (req, res) => {
+  const userId = getUserId(req);
+  try {
+    const { rows: posts } = await db.query(`
+      SELECT id, food_name as name, calories, carbs, protein, fat 
+      FROM posts 
+      WHERE user_id = $1 AND is_recipe = TRUE
+      ORDER BY created_at DESC
+    `, [userId]);
+
+    for (let post of posts) {
+      const { rows: ingredients } = await db.query(`
+        SELECT pi.ingredient_name as name, pi.weight_g, i.calories_per_100g, i.protein_per_100g, i.carbs_per_100g, i.fat_per_100g
+        FROM post_ingredients pi
+        LEFT JOIN ingredients i ON pi.ingredient_name = i.name
+        WHERE pi.post_id = $1
+      `, [post.id]);
+      post.ingredients = ingredients;
+    }
+
+    res.json({ success: true, data: posts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.addMealWithRecipe = async (req, res) => {
+  const { day, mealType, recipeData, saveToMyRecipe } = req.body;
+  const userId = getUserId(req);
+
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    let recipeId = recipeData.id;
+
+    if (!recipeId || saveToMyRecipe) {
+      // Calculate totals and ensure they are numbers
+      const totalCals = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.calories_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
+      const totalProtein = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.protein_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
+      const totalCarbs = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.carbs_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
+      const totalFat = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.fat_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
+
+      // Create new post/recipe
+      // Round calories to match INTEGER type in DB
+      const postRes = await client.query(`
+        INSERT INTO posts (user_id, food_name, calories, protein, carbs, fat, description, is_recipe)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id
+      `, [userId, recipeData.name, Math.round(totalCals), totalProtein, totalCarbs, totalFat, 'Added via Meal Plan', saveToMyRecipe]);
+      
+      recipeId = postRes.rows[0].id;
+
+      // Insert ingredients
+      for (let ing of recipeData.ingredients) {
+        const ingCals = (Number(ing.calories_per_100g || 0) * Number(ing.weight_g || 0) / 100);
+        await client.query(`
+          INSERT INTO post_ingredients (post_id, ingredient_name, weight_g, calories)
+          VALUES ($1, $2, $3, $4)
+        `, [recipeId, ing.name, Number(ing.weight_g || 0), ingCals]);
+      }
+    }
+
+    // Add to meal plan
+    await client.query(`
+      INSERT INTO meal_plans (user_id, day_name, meal_type, post_id)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (user_id, day_name, meal_type) 
+      DO UPDATE SET post_id = EXCLUDED.post_id
+    `, [userId, day, mealType, recipeId]);
+
+    await client.query('COMMIT');
+    res.json({ success: true, message: 'Meal added successfully' });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  } finally {
+    client.release();
+  }
+};

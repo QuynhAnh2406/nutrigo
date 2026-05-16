@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GroceryListModal from '../components/GroceryListModal';
+import AddMealModal from '../components/AddMealModal';
 import { CalendarDays, Sparkles, ShoppingCart, Lightbulb, ArrowLeft, ArrowRight } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
@@ -17,6 +18,7 @@ function MealPlan() {
   // Drag and drop state
   const [draggedMeal, setDraggedMeal] = useState(null);
   const [isGroceryModalOpen, setIsGroceryModalOpen] = useState(false);
+  const [addMealConfig, setAddMealConfig] = useState(null); // { day, mealType }
 
   // Calendar Date State
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
@@ -313,7 +315,12 @@ function MealPlan() {
                             >✕ Remove</button>
                           </div>
                         ) : (
-                          <div className="empty-recipe no-print">+ Add</div>
+                          <div 
+                            className="empty-recipe no-print cursor-pointer hover:bg-gray-50 transition-colors"
+                            onClick={() => setAddMealConfig({ day: d.day, mealType })}
+                          >
+                            + Add
+                          </div>
                         )}
                       </div>
                     )
@@ -467,6 +474,18 @@ function MealPlan() {
         <GroceryListModal 
           weeklyPlan={weeklyPlan} 
           onClose={() => setIsGroceryModalOpen(false)} 
+        />
+      )}
+
+      {addMealConfig && (
+        <AddMealModal
+          day={addMealConfig.day}
+          mealType={addMealConfig.mealType}
+          onClose={() => setAddMealConfig(null)}
+          onConfirm={() => {
+            fetchWeeklyPlan();
+            setAddMealConfig(null);
+          }}
         />
       )}
     </div>
