@@ -41,7 +41,7 @@ function Favourites() {
 
   const handleAddAllToMealPlan = async () => {
     if (favorites.length === 0) {
-      alert("You don't have any favorite meals yet!");
+      alert("Bạn chưa có món ăn yêu thích nào!");
       return;
     }
 
@@ -60,7 +60,17 @@ function Favourites() {
       });
       dayIndex++;
     }
-    alert("Added all favorite meals to this week's Meal Plan!");
+    alert("Đã thêm tất cả món ăn yêu thích vào Lịch ăn uống tuần này!");
+  };
+
+  const getFilterLabel = (filter) => {
+    switch(filter) {
+      case 'All': return 'Tất cả';
+      case 'Breakfast': return 'Bữa sáng';
+      case 'Lunch': return 'Bữa trưa';
+      case 'Dinner': return 'Bữa tối';
+      default: return filter;
+    }
   };
 
   const filteredFavorites = favorites.filter(f => {
@@ -73,17 +83,17 @@ function Favourites() {
     <div className="main-content favourites-page">
       <div className="mb-8">
         <PageHeader
-          title="Favourite Meals"
-          subtitle="Your saved meals, ready to drop into this week's plan."
+          title="Món ăn yêu thích"
+          subtitle="Các món ăn bạn đã lưu, sẵn sàng thêm vào lịch ăn uống tuần này."
           icon={Heart}
-          badge={`${favorites.length} saved`}
+          badge={`${favorites.length} đã lưu`}
           actions={
             <button
               className="inline-flex items-center gap-2 rounded-2xl bg-gray-900 px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-colors hover:bg-black"
               onClick={handleAddAllToMealPlan}
             >
               <CalendarPlus className="h-4 w-4" />
-              Add all to Meal Plan
+              Thêm tất cả vào Lịch ăn
             </button>
           }
         >
@@ -92,7 +102,7 @@ function Favourites() {
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
               <input
                 type="text"
-                placeholder="Search favorites..."
+                placeholder="Tìm kiếm món ăn yêu thích..."
                 className="w-full rounded-2xl border border-white/70 bg-white/70 py-3 pl-12 pr-4 text-sm font-semibold text-gray-900 placeholder:text-gray-500 outline-none ring-0 backdrop-blur focus:border-white"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -110,7 +120,7 @@ function Favourites() {
                   }`}
                   onClick={() => setActiveFilter(filter)}
                 >
-                  {filter}
+                  {getFilterLabel(filter)}
                 </button>
               ))}
             </div>
@@ -124,7 +134,7 @@ function Favourites() {
             <div key={fav.id} className="fav-card">
               <div className="fav-image-wrapper">
                 <img src={fav.image} alt={fav.foodName} className="fav-image" />
-                <span className="fav-meal-badge">{fav.mealType === 'Breakfast' ? 'Breakfast' : fav.mealType === 'Lunch' ? 'Lunch' : 'Dinner'}</span>
+                <span className="fav-meal-badge">{getFilterLabel(fav.mealType)}</span>
                 <button className="btn-remove-fav" onClick={() => handleRemove(fav.id)}>✕</button>
               </div>
               <div className="fav-info">
@@ -142,7 +152,7 @@ function Favourites() {
             </div>
           ))
         ) : (
-          <div className="empty-state">No matching favorite meals found.</div>
+          <div className="empty-state">Không tìm thấy món ăn yêu thích nào phù hợp.</div>
         )}
       </div>
     </div>

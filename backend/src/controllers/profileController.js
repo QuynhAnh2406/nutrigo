@@ -14,18 +14,20 @@ exports.getMyHealth = async (req, res) => {
   try {
     const { rows } = await db.query(
       `SELECT
-        TO_CHAR(date_of_birth, 'YYYY-MM-DD') as date_of_birth,
-        gender,
-        height_cm,
-        weight_kg,
-        activity_level,
-        goal,
-        dietary_preference,
-        allergies,
-        cooking_skill,
-        phone
-      FROM user_health_data
-      WHERE user_id = $1`,
+        uh.gender,
+        uh.height_cm,
+        uh.weight_kg,
+        uh.activity_level,
+        uh.goal,
+        uh.dietary_preference,
+        uh.allergies,
+        uh.cooking_skill,
+        uh.phone,
+        TO_CHAR(uh.date_of_birth, 'YYYY-MM-DD') as date_of_birth,
+        TO_CHAR(u.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at
+      FROM users u
+      LEFT JOIN user_health_data uh ON u.id = uh.user_id
+      WHERE u.id = $1`,
       [userId]
     );
 

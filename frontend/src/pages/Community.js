@@ -15,9 +15,24 @@ function Community() {
   const [selectedPost, setSelectedPost] = useState(null);
   const [postToAddPlan, setPostToAddPlan] = useState(null);
 
-  const tabs = ['For You', 'Latest', 'My Meals', 'Following', 'Popular'];
-  const filters = ['All', 'Low Calorie', 'High Protein', 'Low Carb', 'Vegetarian', 'Keto', 'Under 15 mins', 'Under 30 mins'];
+  const tabs = [
+    { value: 'For You', label: 'Dành cho bạn' },
+    { value: 'Latest', label: 'Mới nhất' },
+    { value: 'Món Ăn Của Tôi', label: 'Món ăn của tôi' },
+    { value: 'Following', label: 'Đang theo dõi' },
+    { value: 'Popular', label: 'Phổ biến' }
+  ];
 
+  const filters = [
+    { value: 'All', label: 'Tất cả' },
+    { value: 'Low Calorie', label: 'Ít calo' },
+    { value: 'High Protein', label: 'Giàu đạm' },
+    { value: 'Low Carb', label: 'Ít Carb' },
+    { value: 'Vegetarian', label: 'Ăn chay' },
+    { value: 'Keto', label: 'Keto' },
+    { value: 'Under 15 mins', label: 'Dưới 15 phút' },
+    { value: 'Under 30 mins', label: 'Dưới 30 phút' }
+  ];
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -65,17 +80,17 @@ function Community() {
     <div className="community-page main-content">
       <div className="mb-8">
         <PageHeader
-          title="HealthyLife Community"
-          subtitle="Discover recipes, save favourites, and add meals to your weekly plan."
+          title="Cộng đồng lành mạnh"
+          subtitle="Khám phá các công thức nấu ăn, lưu món ăn yêu thích và lên lịch ăn uống hàng tuần."
           icon={Users}
-          badge={`${posts.length} meals`}
+          badge={`${posts.length} món ăn`}
           actions={
             <button
               className="inline-flex items-center gap-2 rounded-2xl bg-gray-900 px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition-colors hover:bg-black"
               onClick={() => navigate('/community/create-post')}
             >
               <Plus className="h-4 w-4" />
-              Post New Meal
+              Đăng món ăn mới
             </button>
           }
         >
@@ -84,7 +99,7 @@ function Community() {
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
               <input
                 type="text"
-                placeholder="Smart search (dish name, ingredients, calories...)"
+                placeholder="Tìm kiếm thông minh (tên món ăn, nguyên liệu, calo...)"
                 className="w-full rounded-2xl border border-white/70 bg-white/70 py-3 pl-12 pr-4 text-sm font-semibold text-gray-900 placeholder:text-gray-500 outline-none ring-0 backdrop-blur focus:border-white"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -92,17 +107,17 @@ function Community() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {filters.map((filter) => (
+              {filters.map((f) => (
                 <button
-                  key={filter}
+                  key={f.value}
                   className={`rounded-full px-3 py-1.5 text-xs font-extrabold ring-1 transition-colors ${
-                    activeFilter === filter
+                    activeFilter === f.value
                       ? 'bg-gray-900 text-white ring-gray-900'
                       : 'bg-white/70 text-gray-800 ring-white/70 hover:bg-white'
                   }`}
-                  onClick={() => setActiveFilter(filter)}
+                  onClick={() => setActiveFilter(f.value)}
                 >
-                  {filter}
+                  {f.label}
                 </button>
               ))}
             </div>
@@ -112,13 +127,13 @@ function Community() {
 
       {/* TABS */}
       <div className="community-tabs">
-        {tabs.map(tab => (
+        {tabs.map(t => (
           <button 
-            key={tab} 
-            className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
+            key={t.value} 
+            className={`tab-btn ${activeTab === t.value ? 'active' : ''}`}
+            onClick={() => setActiveTab(t.value)}
           >
-            {tab}
+            {t.label}
           </button>
         ))}
       </div>
@@ -137,7 +152,7 @@ function Community() {
             />
           ))
         ) : (
-          <div className="empty-state">No meals found.</div>
+          <div className="empty-state">Không tìm thấy món ăn nào.</div>
         )}
       </div>
 

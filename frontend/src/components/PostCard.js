@@ -41,16 +41,16 @@ function PostCard({ post, onLike, onSave, onOpenDetail, onAddToPlan }) {
             💬 {post.comments.length}
           </button>
           <button className="action-btn">
-            ↗️ Share
+            ↗️ Chia sẻ
           </button>
         </div>
         
         <div className="action-group">
           <button className="action-btn add-meal-btn" onClick={() => onAddToPlan && onAddToPlan(post)}>
-            + Meal Plan
+            + Lịch ăn
           </button>
           <button className={`action-btn ${post.isSaved ? 'saved' : ''}`} onClick={() => onSave(post.id)}>
-            {post.isSaved ? '🔖 Saved' : '🔖 Save'}
+            {post.isSaved ? '🔖 Đã lưu' : '🔖 Lưu'}
           </button>
         </div>
       </div>

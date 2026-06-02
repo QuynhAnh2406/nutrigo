@@ -31,7 +31,8 @@ exports.login = async (req, res) => {
         email: user.email,
         name: user.full_name,
         avatar: user.avatar_url,
-        isPremium: user.is_premium
+        isPremium: user.is_premium,
+        createdAt: user.created_at
       }
     });
   } catch (error) {
@@ -69,7 +70,8 @@ exports.register = async (req, res) => {
         email: user.email,
         name: user.full_name,
         avatar: user.avatar_url,
-        isPremium: user.is_premium
+        isPremium: user.is_premium,
+        createdAt: user.created_at
       }
     });
   } catch (error) {

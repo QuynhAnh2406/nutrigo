@@ -1,45 +1,86 @@
 const db = require('../config/db');
 
+// Helper to get week start (Monday)
+const getWeekStart = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(d.setDate(diff));
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+};
+
 // Giả định user ID = 1 nếu không có middleware xác thực
 const getUserId = (req) => req.user ? req.user.id : 1;
 
 exports.getWeeklyPlan = async (req, res) => {
   const userId = getUserId(req);
+  const { weekStart } = req.query; // YYYY-MM-DD format
 
   try {
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
     
-    // Initialize empty plan
-    let weeklyPlan = daysOfWeek.map(day => ({
+    // Parse start date of the week
+    let start = weekStart ? new Date(weekStart) : getWeekStart(new Date());
+    start = getWeekStart(start);
+    
+    // Generate the 7 dates of the week
+    const weekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      weekDates.push(d.toISOString().split('T')[0]);
+    }
+
+    // Initialize plan structure mapped to weekday names
+    let weeklyPlan = daysOfWeek.map((day, idx) => ({
       day,
+      date: weekDates[idx], // Send the actual date string to the frontend
       meals: {
-        breakfast: null,
-        lunch: null,
-        dinner: null,
-        snack: null
+        breakfast: [],
+        lunch: [],
+        dinner: [],
+        snack: []
       }
     }));
 
-    // Fetch user's meal plan
+    // Fetch user's meal plan for the specific week dates
     const { rows: planRows } = await db.query(`
-      SELECT mp.day_name, mp.meal_type, 
-             p.id, p.food_name, p.calories
+      SELECT mp.id as meal_plan_id, mp.meal_date, mp.meal_type, 
+             p.id as recipe_id, p.food_name, p.calories
       FROM meal_plans mp
       JOIN posts p ON mp.post_id = p.id
-      WHERE mp.user_id = $1
-    `, [userId]);
+      WHERE mp.user_id = $1 AND mp.meal_date >= $2 AND mp.meal_date <= $3
+    `, [userId, weekDates[0], weekDates[6]]);
 
     planRows.forEach(row => {
-      const dayIndex = weeklyPlan.findIndex(d => d.day === row.day_name);
+      const rowDateStr = new Date(row.meal_date).toISOString().split('T')[0];
+      const dayIndex = weeklyPlan.findIndex(d => d.date === rowDateStr);
       if (dayIndex !== -1 && mealTypes.includes(row.meal_type)) {
-        weeklyPlan[dayIndex].meals[row.meal_type] = {
-          id: row.id,
+        weeklyPlan[dayIndex].meals[row.meal_type].push({
+          mealPlanId: row.meal_plan_id,
+          id: row.recipe_id,
           name: row.food_name,
-          calories: row.calories
-        };
+          calories: row.calories,
+          ingredients: [] // Will be populated next
+        });
       }
     });
+
+    // Populate ingredients for all meals in weeklyPlan
+    for (let dayPlan of weeklyPlan) {
+      for (let type of mealTypes) {
+        for (let meal of dayPlan.meals[type]) {
+          const { rows: ingredients } = await db.query(`
+            SELECT pi.ingredient_name as name
+            FROM post_ingredients pi
+            WHERE pi.post_id = $1
+          `, [meal.id]);
+          meal.ingredients = ingredients.map(i => i.name);
+        }
+      }
+    }
 
     res.json({ success: true, data: weeklyPlan });
   } catch (error) {
@@ -49,27 +90,40 @@ exports.getWeeklyPlan = async (req, res) => {
 };
 
 exports.updatePlan = async (req, res) => {
-  const { day, mealType, recipeId } = req.body;
+  const { day, mealType, recipeId, mealPlanId, mealDate } = req.body;
   const userId = getUserId(req);
 
   try {
-    if (recipeId) {
-      // Update or Insert
-      await db.query(`
-        INSERT INTO meal_plans (user_id, day_name, meal_type, post_id)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (user_id, day_name, meal_type) 
-        DO UPDATE SET post_id = EXCLUDED.post_id
-      `, [userId, day, mealType, recipeId]);
-    } else {
-      // Clear meal
+    if (mealPlanId) {
+      // Clear specific meal by its ID
       await db.query(`
         DELETE FROM meal_plans 
-        WHERE user_id = $1 AND day_name = $2 AND meal_type = $3
-      `, [userId, day, mealType]);
+        WHERE id = $1 AND user_id = $2
+      `, [mealPlanId, userId]);
+    } else if (recipeId && mealDate) {
+      const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const dayName = daysOfWeek[new Date(mealDate).getDay()];
+
+      // Insert new plan item on a specific calendar date
+      await db.query(`
+        INSERT INTO meal_plans (user_id, day_name, meal_type, post_id, meal_date)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (user_id, meal_date, meal_type, post_id) 
+        DO NOTHING
+      `, [userId, dayName, mealType, recipeId, mealDate]);
+    } else if (mealDate) {
+      // Clear all meals in slot on that date
+      await db.query(`
+        DELETE FROM meal_plans 
+        WHERE user_id = $1 AND meal_date = $2 AND meal_type = $3
+      `, [userId, mealDate, mealType]);
     }
 
-    // Call getWeeklyPlan logic internally to return updated plan
+    // Pass the weekStart of mealDate back to getWeeklyPlan to load the correct week
+    if (mealDate) {
+      const start = getWeekStart(new Date(mealDate));
+      req.query.weekStart = start.toISOString().split('T')[0];
+    }
     exports.getWeeklyPlan(req, res);
   } catch (error) {
     console.error(error);
@@ -144,6 +198,7 @@ exports.getRecipes = async (req, res) => {
 
 exports.autoFillWeek = async (req, res) => {
   const userId = getUserId(req);
+  const { weekStart } = req.query;
 
   try {
     const { rows: posts } = await db.query('SELECT id FROM posts LIMIT 50');
@@ -154,16 +209,29 @@ exports.autoFillWeek = async (req, res) => {
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
 
-    for (let day of daysOfWeek) {
+    // Generate week dates
+    let start = weekStart ? new Date(weekStart) : getWeekStart(new Date());
+    start = getWeekStart(start);
+    
+    const weekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      weekDates.push(d.toISOString().split('T')[0]);
+    }
+
+    for (let i = 0; i < 7; i++) {
+      const day = daysOfWeek[i];
+      const date = weekDates[i];
       for (let type of mealTypes) {
-        // Check if empty
-        const check = await db.query('SELECT 1 FROM meal_plans WHERE user_id = $1 AND day_name = $2 AND meal_type = $3', [userId, day, type]);
+        // Check if empty on that date
+        const check = await db.query('SELECT 1 FROM meal_plans WHERE user_id = $1 AND meal_date = $2 AND meal_type = $3', [userId, date, type]);
         if (check.rows.length === 0) {
           const randomPostId = posts[Math.floor(Math.random() * posts.length)].id;
           await db.query(`
-            INSERT INTO meal_plans (user_id, day_name, meal_type, post_id)
-            VALUES ($1, $2, $3, $4)
-          `, [userId, day, type, randomPostId]);
+            INSERT INTO meal_plans (user_id, day_name, meal_type, post_id, meal_date)
+            VALUES ($1, $2, $3, $4, $5)
+          `, [userId, day, type, randomPostId, date]);
         }
       }
     }
@@ -187,14 +255,33 @@ exports.getIngredients = async (req, res) => {
 exports.getUserRecipes = async (req, res) => {
   const userId = getUserId(req);
   try {
-    const { rows: posts } = await db.query(`
-      SELECT id, food_name as name, calories, carbs, protein, fat 
+    // 1. Fetch own recipes
+    const { rows: ownRecipes } = await db.query(`
+      SELECT id, food_name as name, calories, carbs, protein, fat, description, image_url, prep_time, 'my_recipe' as source
       FROM posts 
       WHERE user_id = $1 AND is_recipe = TRUE
       ORDER BY created_at DESC
     `, [userId]);
 
-    for (let post of posts) {
+    // 2. Fetch favorited recipes
+    const { rows: favRecipes } = await db.query(`
+      SELECT p.id, p.food_name as name, p.calories, p.carbs, p.protein, p.fat, p.description, p.image_url, p.prep_time, 'favorite' as source
+      FROM post_favorites pf
+      JOIN posts p ON pf.post_id = p.id
+      WHERE pf.user_id = $1
+      ORDER BY pf.created_at DESC
+    `, [userId]);
+
+    // 3. Merge and deduplicate
+    const combined = [...ownRecipes];
+    favRecipes.forEach(fav => {
+      if (!combined.some(r => r.id === fav.id)) {
+        combined.push(fav);
+      }
+    });
+
+    // 4. Fetch ingredients for each recipe
+    for (let post of combined) {
       const { rows: ingredients } = await db.query(`
         SELECT pi.ingredient_name as name, pi.weight_g, i.calories_per_100g, i.protein_per_100g, i.carbs_per_100g, i.fat_per_100g
         FROM post_ingredients pi
@@ -204,7 +291,7 @@ exports.getUserRecipes = async (req, res) => {
       post.ingredients = ingredients;
     }
 
-    res.json({ success: true, data: posts });
+    res.json({ success: true, data: combined });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -212,7 +299,7 @@ exports.getUserRecipes = async (req, res) => {
 };
 
 exports.addMealWithRecipe = async (req, res) => {
-  const { day, mealType, recipeData, saveToMyRecipe } = req.body;
+  const { day, mealType, recipeData, saveToMyRecipe, mealDate } = req.body;
   const userId = getUserId(req);
 
   const client = await db.pool.connect();
@@ -231,10 +318,21 @@ exports.addMealWithRecipe = async (req, res) => {
       // Create new post/recipe
       // Round calories to match INTEGER type in DB
       const postRes = await client.query(`
-        INSERT INTO posts (user_id, food_name, calories, protein, carbs, fat, description, is_recipe)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO posts (user_id, food_name, calories, protein, carbs, fat, description, prep_time, image_url, is_recipe)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING id
-      `, [userId, recipeData.name, Math.round(totalCals), totalProtein, totalCarbs, totalFat, 'Added via Meal Plan', saveToMyRecipe]);
+      `, [
+        userId, 
+        recipeData.name, 
+        Math.round(totalCals), 
+        totalProtein, 
+        totalCarbs, 
+        totalFat, 
+        recipeData.description || 'Added via Meal Plan', 
+        recipeData.prepTime || '30 min',
+        recipeData.imageUrl || '',
+        saveToMyRecipe
+      ]);
       
       recipeId = postRes.rows[0].id;
 
@@ -249,12 +347,16 @@ exports.addMealWithRecipe = async (req, res) => {
     }
 
     // Add to meal plan
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayName = mealDate ? daysOfWeek[new Date(mealDate).getDay()] : day;
+    const targetDate = mealDate || new Date().toISOString().split('T')[0];
+
     await client.query(`
-      INSERT INTO meal_plans (user_id, day_name, meal_type, post_id)
-      VALUES ($1, $2, $3, $4)
-      ON CONFLICT (user_id, day_name, meal_type) 
-      DO UPDATE SET post_id = EXCLUDED.post_id
-    `, [userId, day, mealType, recipeId]);
+      INSERT INTO meal_plans (user_id, day_name, meal_type, post_id, meal_date)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (user_id, meal_date, meal_type, post_id) 
+      DO NOTHING
+    `, [userId, dayName, mealType, recipeId, targetDate]);
 
     await client.query('COMMIT');
     res.json({ success: true, message: 'Meal added successfully' });

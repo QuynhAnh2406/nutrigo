@@ -13,11 +13,12 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
 
   useEffect(() => {
     fetchWeeklyPlan();
-  }, []);
+  }, [currentWeekStart]);
 
   const fetchWeeklyPlan = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/mealplan');
+      const weekStartStr = currentWeekStart.toISOString().split('T')[0];
+      const res = await fetch(`http://localhost:5000/api/mealplan?weekStart=${weekStartStr}`);
       const data = await res.json();
       if(data.success) {
         setWeeklyPlan(data.data);
@@ -50,16 +51,16 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
     });
   }
 
-  const handleSlotClick = async (dayName, mealType) => {
+  const handleSlotClick = async (dayName, mealType, mealDate) => {
     try {
       const res = await fetch('http://localhost:5000/api/mealplan/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ day: dayName, mealType, recipeId: post.id })
+        body: JSON.stringify({ day: dayName, mealType, recipeId: post.id, mealDate })
       });
       const data = await res.json();
       if (data.success) {
-        alert('Added to meal plan successfully!');
+        alert('Đã thêm vào lịch ăn uống thành công!');
         if (onAddSuccess) onAddSuccess();
         onClose();
       }
@@ -68,23 +69,50 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
     }
   };
 
-  const renderSlot = (dayName, mealType) => {
+  const getDayLabel = (dayName) => {
+    switch (dayName) {
+      case 'Monday': return 'Thứ Hai';
+      case 'Tuesday': return 'Thứ Ba';
+      case 'Wednesday': return 'Thứ Tư';
+      case 'Thursday': return 'Thứ Năm';
+      case 'Friday': return 'Thứ Sáu';
+      case 'Saturday': return 'Thứ Bảy';
+      case 'Sunday': return 'Chủ Nhật';
+      default: return dayName;
+    }
+  };
+
+  const getMealLabel = (mealType) => {
+    switch (mealType) {
+      case 'breakfast': return 'Bữa sáng';
+      case 'lunch': return 'Bữa trưa';
+      case 'dinner': return 'Bữa tối';
+      case 'snack': return 'Bữa phụ';
+      default: return mealType;
+    }
+  };
+
+  const renderSlot = (dayInfo, mealType) => {
+    const dayName = dayInfo.name;
     const planForDay = weeklyPlan.find(d => d.day === dayName);
-    const existingRecipe = planForDay?.meals?.[mealType];
+    const existingRecipes = planForDay?.meals?.[mealType] || [];
+    const dateStr = dayInfo.dateObj.toISOString().split('T')[0];
 
     return (
       <div 
         key={`${dayName}-${mealType}`}
         className="p-3 border rounded-xl cursor-pointer transition-colors hover:border-green-500 hover:bg-green-50 flex flex-col justify-center items-center text-center min-h-[80px]"
-        onClick={() => handleSlotClick(dayName, mealType)}
+        onClick={() => handleSlotClick(dayName, mealType, dateStr)}
       >
-        {existingRecipe ? (
-          <div className="text-xs text-gray-500 w-full truncate">
-            <span className="block text-red-400 mb-1 text-[10px] uppercase font-bold">Overwrite:</span>
-            <span className="font-medium text-gray-700 block truncate">{existingRecipe.name}</span>
+        {existingRecipes.length > 0 ? (
+          <div className="text-xs text-gray-500 w-full">
+            <span className="block text-green-700 mb-1 text-[10px] uppercase font-bold">+ Thêm tiếp vào đây</span>
+            <span className="font-medium text-gray-700 block truncate max-w-full">
+              {existingRecipes.map(r => r.name).join(', ')}
+            </span>
           </div>
         ) : (
-          <span className="text-green-600 font-bold text-sm">+ Add Here</span>
+          <span className="text-green-600 font-bold text-sm">+ Thêm vào đây</span>
         )}
       </div>
     );
@@ -95,19 +123,19 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-5xl overflow-hidden my-auto" onClick={e => e.stopPropagation()}>
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
           <div>
-            <h2 className="text-xl font-bold text-gray-800">Add to Meal Plan</h2>
-            <p className="text-sm text-gray-500 mt-1">Select a slot to add: <strong className="text-green-700">{post.foodName}</strong></p>
+            <h2 className="text-xl font-bold text-gray-800">Thêm vào lịch ăn uống</h2>
+            <p className="text-sm text-gray-500 mt-1">Chọn vị trí để thêm: <strong className="text-green-700">{post.foodName}</strong></p>
           </div>
           <button className="text-gray-400 hover:text-gray-700 text-2xl font-bold" onClick={onClose}>✕</button>
         </div>
 
         <div className="p-6">
           <div className="flex items-center justify-between mb-6 bg-white border border-gray-200 rounded-xl p-2 max-w-md mx-auto">
-            <button onClick={prevWeek} className="p-2 hover:bg-gray-100 rounded-lg font-bold text-gray-600 px-4">&lt; Prev</button>
+            <button onClick={prevWeek} className="p-2 hover:bg-gray-100 rounded-lg font-bold text-gray-600 px-4">&lt; Trước</button>
             <div className="font-bold text-gray-800 text-sm">
               {days[0].formatted} - {days[6].formatted}
             </div>
-            <button onClick={nextWeek} className="p-2 hover:bg-gray-100 rounded-lg font-bold text-gray-600 px-4">Next &gt;</button>
+            <button onClick={nextWeek} className="p-2 hover:bg-gray-100 rounded-lg font-bold text-gray-600 px-4">Sau &gt;</button>
           </div>
 
           <div className="overflow-x-auto">
@@ -117,7 +145,7 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
                 <div className="col-span-1"></div>
                 {days.map(d => (
                   <div key={d.name} className="col-span-1 text-center">
-                    <div className="font-bold text-gray-800 text-sm">{d.name.substring(0, 3)}</div>
+                    <div className="font-bold text-gray-800 text-sm">{getDayLabel(d.name)}</div>
                     <div className="text-xs text-gray-500">{d.formatted.substring(0, 5)}</div>
                   </div>
                 ))}
@@ -128,12 +156,12 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
                 <div key={mealType} className="grid grid-cols-8 gap-2 mb-2">
                   <div className="col-span-1 flex items-center justify-end pr-4">
                     <span className="font-bold text-gray-600 text-xs uppercase tracking-wider">
-                      {mealType}
+                      {getMealLabel(mealType)}
                     </span>
                   </div>
                   {days.map(d => (
                     <div key={`${d.name}-${mealType}`} className="col-span-1">
-                      {renderSlot(d.name, mealType)}
+                      {renderSlot(d, mealType)}
                     </div>
                   ))}
                 </div>

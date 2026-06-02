@@ -1,14 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, Bookmark, ArrowRight, Sparkles } from 'lucide-react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
+import PageHeader from '../components/PageHeader';
 
 function Dashboard() {
   const { metrics, healthData } = useOutletContext();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
 
+  const getGoalLabel = (goal) => {
+    switch (goal) {
+      case 'Lose weight': return 'Giảm cân';
+      case 'Maintain weight': return 'Duy trì cân nặng';
+      case 'Gain weight': return 'Tăng cân';
+      case 'Build muscle': return 'Tăng cơ';
+      default: return goal || 'Duy trì cân nặng';
+    }
+  };
+
+  const getBmiStatusLabel = (status) => {
+    switch (status) {
+      case 'Underweight': return 'Thiếu cân';
+      case 'Normal': return 'Bình thường';
+      case 'Overweight': return 'Thừa cân';
+      case 'Obese': return 'Béo phì';
+      default: return status;
+    }
+  };
+
   const [posts, setPosts] = useState([]);
   const [nutritionDB, setNutritionDB] = useState({});
+  const [weeklyPlan, setWeeklyPlan] = useState([]);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadData, setUploadData] = useState({ 
@@ -24,15 +46,24 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ingRes, postRes] = await Promise.all([
+        const today = new Date();
+        const day = today.getDay();
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(today.setDate(diff));
+        const weekStartStr = monday.toISOString().split('T')[0];
+
+        const [ingRes, postRes, mealPlanRes] = await Promise.all([
           fetch('http://localhost:5000/api/ingredients'),
-          fetch('http://localhost:5000/api/posts')
+          fetch('http://localhost:5000/api/posts'),
+          fetch(`http://localhost:5000/api/mealplan?weekStart=${weekStartStr}`)
         ]);
         const ingData = await ingRes.json();
         const postData = await postRes.json();
+        const mealPlanData = await mealPlanRes.json();
         
         if (ingData.success) setNutritionDB(ingData.data);
         if (postData.success) setPosts(postData.data);
+        if (mealPlanData.success) setWeeklyPlan(mealPlanData.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -121,13 +152,33 @@ function Dashboard() {
   }, []);
 
   const quotes = [
-    "Start your day with positive energy!",
-    "Health is the greatest wealth.",
-    "Eat healthy, live happily every day.",
-    "You are what you eat.",
-    "Today is a great day to start being healthy."
+    "Bắt đầu ngày mới với năng lượng tích cực!",
+    "Sức khỏe là vốn quý nhất.",
+    "Ăn uống lành mạnh, sống vui khỏe mỗi ngày.",
+    "Cơ thể bạn là những gì bạn ăn.",
+    "Hôm nay là một ngày tuyệt vời để bắt đầu sống khỏe mạnh."
   ];
   const quote = quotes[time.getDay() % quotes.length];
+
+  const getTodayCalories = () => {
+    const todayDayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()];
+    const todayPlan = weeklyPlan.find(d => d.day === todayDayName);
+    let total = 0;
+    if (todayPlan && todayPlan.meals) {
+      Object.values(todayPlan.meals).forEach(mealArray => {
+        if (Array.isArray(mealArray)) {
+          mealArray.forEach(m => {
+            if (m && m.calories) total += Number(m.calories);
+          });
+        }
+      });
+    }
+    return total;
+  };
+
+  const todayCalories = getTodayCalories();
+  const targetCalories = metrics.targetCalories || 2000;
+  const progressPercent = Math.min((todayCalories / targetCalories) * 100, 100);
 
   const days = [];
   for (let i = 6; i >= 0; i--) {
@@ -135,7 +186,7 @@ function Dashboard() {
     d.setDate(d.getDate() - i);
     days.push({
       date: d,
-      calories: i === 0 ? 0 : Math.floor(Math.random() * 500) + 1800
+      calories: i === 0 ? todayCalories : Math.floor(Math.random() * 500) + 1800
     });
   }
 
@@ -147,7 +198,7 @@ function Dashboard() {
           <div className="bg-white w-full max-w-4xl rounded-[2.5rem] p-8 shadow-2xl animate-in fade-in zoom-in duration-300 flex flex-col max-h-[90vh]">
             {/* Modal content */}
             <div className="flex justify-between items-center mb-6 shrink-0">
-              <h3 className="text-2xl font-bold text-gray-900">Share new meal 🥘</h3>
+              <h3 className="text-2xl font-bold text-gray-900">Chia sẻ món ăn mới 🥘</h3>
               <button onClick={() => setIsUploading(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -157,7 +208,7 @@ function Dashboard() {
                <div className="flex-1 overflow-y-auto pr-2 space-y-6">
                   <input 
                     type="text" 
-                    placeholder="Food name" 
+                    placeholder="Tên món ăn" 
                     value={uploadData.foodName} 
                     onChange={e => setUploadData({...uploadData, foodName: e.target.value})} 
                     className="w-full px-5 py-3 rounded-xl border border-gray-100 bg-gray-50 outline-none"
@@ -167,17 +218,17 @@ function Dashboard() {
                     {uploadData.ingredients.map((ing, idx) => (
                       <div key={idx} className="flex gap-2">
                         <select value={ing.name} onChange={e => updateIngredient(idx, 'name', e.target.value)} className="flex-1 px-4 py-2 border rounded-xl outline-none" required>
-                          <option value="">Ingredient...</option>
+                          <option value="">Nguyên liệu...</option>
                           {Object.keys(nutritionDB).map(name => <option key={name} value={name}>{name}</option>)}
                         </select>
-                        <input type="number" placeholder="Grams" value={ing.weight} onChange={e => updateIngredient(idx, 'weight', e.target.value)} className="w-24 px-4 py-2 border rounded-xl outline-none" required />
+                        <input type="number" placeholder="Gam (g)" value={ing.weight} onChange={e => updateIngredient(idx, 'weight', e.target.value)} className="w-24 px-4 py-2 border rounded-xl outline-none" required />
                         <button type="button" onClick={() => removeIngredient(idx)} className="text-red-500">×</button>
                       </div>
                     ))}
-                    <button type="button" onClick={addIngredient} className="text-blue-500 text-sm font-bold">+ Add ingredient</button>
+                    <button type="button" onClick={addIngredient} className="text-blue-500 text-sm font-bold">+ Thêm nguyên liệu</button>
                   </div>
                   <textarea 
-                    placeholder="Recipe instructions..." 
+                    placeholder="Hướng dẫn thực hiện..." 
                     value={uploadData.recipe} 
                     onChange={e => setUploadData({...uploadData, recipe: e.target.value})} 
                     className="w-full h-32 px-5 py-3 border rounded-xl outline-none resize-none"
@@ -185,8 +236,8 @@ function Dashboard() {
                   />
                </div>
                <div className="pt-6 flex gap-3 shrink-0">
-                  <button type="button" onClick={() => setIsUploading(false)} className="flex-1 py-3 bg-gray-100 rounded-xl font-bold">Cancel</button>
-                  <button type="submit" className="flex-1 py-3 bg-[#B5E361] rounded-xl font-bold">Post</button>
+                  <button type="button" onClick={() => setIsUploading(false)} className="flex-1 py-3 bg-gray-100 rounded-xl font-bold">Hủy</button>
+                  <button type="submit" className="flex-1 py-3 bg-[#B5E361] rounded-xl font-bold">Đăng</button>
                </div>
             </form>
           </div>
@@ -194,33 +245,21 @@ function Dashboard() {
       )}
 
       {/* Header / Date */}
-      <div style={{ flexShrink: 0 }}>
-        <div style={{
-          marginBottom: '30px',
-        padding: '30px',
-        background: 'linear-gradient(135deg, #E2F5C8 0%, #B5E361 100%)',
-        borderRadius: '24px',
-        color: '#1a3300',
-        boxShadow: '0 10px 30px rgba(167, 233, 101, 0.2)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '15px',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ position: 'absolute', right: '-20px', top: '-40px', fontSize: '150px', opacity: 0.1, pointerEvents: 'none' }}>🌿</div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <h2 style={{ fontSize: '28px', fontWeight: '700', margin: 0, zIndex: 1 }}>{time.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h2>
-          <div style={{ background: 'rgba(255,255,255,0.4)', padding: '8px 16px', borderRadius: '30px', fontWeight: '600', fontSize: '14px', backdropFilter: 'blur(4px)', zIndex: 1 }}>
-            🕒 {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+      <div className="mb-8">
+        <PageHeader
+          title={time.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          subtitle="Bắt đầu ngày mới tràn đầy năng lượng cùng Nutrigo!"
+          actions={
+            <div className="rounded-full bg-white/55 px-4 py-2 text-sm font-extrabold text-[#1f3b00] ring-1 ring-white/60 backdrop-blur">
+              🕒 {time.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          }
+        >
+          <div className="mt-1">
+            <span className="block text-[10px] text-[#3d6600]/80 font-black uppercase tracking-widest mb-1">Trích dẫn dinh dưỡng của ngày</span>
+            <p className="text-base text-[#1a3300] font-semibold italic">"{quote}"</p>
           </div>
-        </div>
-
-        <div style={{ background: 'rgba(255,255,255,0.5)', borderRadius: '16px', padding: '15px 20px', border: '1px solid rgba(255,255,255,0.6)', marginTop: '10px', zIndex: 1 }}>
-          <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '700', color: '#3d6600', marginBottom: '5px' }}>Nutrition Quote of the Day</div>
-          <p style={{ fontSize: '18px', fontWeight: '500', fontStyle: 'italic', margin: 0 }}>"{quote}"</p>
-        </div>
+        </PageHeader>
       </div>
 
       {/* COMPLETE PROFILE CTA FOR NEW USERS */}
@@ -232,9 +271,9 @@ function Dashboard() {
                 <Sparkles className="text-white w-10 h-10" />
               </div>
               <div className="text-left">
-                <h3 className="text-2xl font-black text-gray-900 mb-2">Complete Your Health Profile! ✨</h3>
+                <h3 className="text-2xl font-black text-gray-900 mb-2">Hoàn tất Hồ sơ Sức khỏe! ✨</h3>
                 <p className="text-gray-500 max-w-md leading-relaxed">
-                  To give you accurate calorie goals and personalized meal plans, we need a few details like your weight, height, and date of birth.
+                  Để cung cấp mục tiêu calo chính xác và lịch ăn uống cá nhân hóa, chúng tôi cần một số thông tin như cân nặng, chiều cao và ngày sinh của bạn.
                 </p>
               </div>
             </div>
@@ -242,16 +281,14 @@ function Dashboard() {
               onClick={() => navigate('/profile?tab=Edit')}
               className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-black flex items-center gap-3 hover:bg-gray-800 transition-all shadow-xl hover:scale-105 shrink-0"
             >
-              Fill Information
+              Điền thông tin
               <ArrowRight className="w-5 h-5 text-[#B5E361]" />
             </button>
           </div>
         </div>
       )}
 
-      <div className="section-title" style={{ marginTop: '20px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Health Dashboard</h2>
-      </div>
+      <h3 className="section-title mt-8">Bảng theo dõi sức khỏe</h3>
 
       <div className="flex flex-col lg:flex-row gap-6 mb-8">
         {/* HERO CARD: DAILY TARGET */}
@@ -262,24 +299,24 @@ function Dashboard() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">🎯</div>
-                <span className="text-white font-black uppercase tracking-[0.2em] text-xs">Daily Goal</span>
+                <span className="text-white font-black uppercase tracking-[0.2em] text-xs">Mục tiêu hàng ngày</span>
               </div>
               <h3 className="text-white text-6xl font-black mt-6 flex items-baseline gap-3">
-                {metrics.targetCalories || '--'}
+                {targetCalories}
                 <span className="text-xl text-white/50 font-bold uppercase tracking-widest">kcal</span>
               </h3>
               <p className="text-white/80 text-sm mt-3 flex items-center gap-2">
-                Target to <span className="text-white font-black px-3 py-1 bg-white/20 rounded-xl backdrop-blur-sm shadow-sm">{healthData.goal || 'Maintain weight'}</span>
+                Mục tiêu để <span className="text-white font-black px-3 py-1 bg-white/20 rounded-xl backdrop-blur-sm shadow-sm">{getGoalLabel(healthData.goal)}</span>
               </p>
             </div>
 
             <div className="mt-10">
               <div className="flex justify-between items-end mb-3">
-                <span className="text-white/70 text-xs font-black uppercase tracking-wider">Daily Progress</span>
-                <span className="text-white text-xs font-black bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">0 / {metrics.targetCalories || '--'} kcal</span>
+                <span className="text-white/70 text-xs font-black uppercase tracking-wider">Tiến trình hàng ngày</span>
+                <span className="text-white text-xs font-black bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">{todayCalories} / {targetCalories} kcal</span>
               </div>
               <div className="w-full h-4 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm border border-white/10 shadow-inner">
-                <div className="h-full bg-white rounded-full w-[2%] shadow-[0_0_20px_rgba(255,255,255,0.8)]"></div>
+                <div className="h-full bg-white rounded-full transition-all duration-500 shadow-[0_0_20px_rgba(255,255,255,0.8)]" style={{ width: `${progressPercent}%` }}></div>
               </div>
             </div>
           </div>
@@ -308,7 +345,7 @@ function Dashboard() {
               <div className="flex items-center gap-2">
                 <strong className="text-xl text-gray-900">{metrics.bmi || '--'}</strong>
                 {metrics.bmiStatus && (
-                  <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${metrics.bmiStatus === 'Normal' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>{metrics.bmiStatus}</span>
+                  <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${metrics.bmiStatus === 'Normal' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>{getBmiStatusLabel(metrics.bmiStatus)}</span>
                 )}
               </div>
             </div>
@@ -317,7 +354,7 @@ function Dashboard() {
       </div>
       
       <div className="bmi-scale-wrapper mb-8 p-6 bg-white rounded-2xl border border-gray-100">
-          <h4 className="font-bold mb-4">BMI Scale</h4>
+          <h4 className="font-bold mb-4">Thang đo BMI</h4>
           <div className="w-full h-4 rounded-full bg-gradient-to-r from-blue-400 via-green-400 to-red-500 relative">
               <div 
                   className="absolute top-[-8px] w-1 h-8 bg-black rounded" 
@@ -326,57 +363,44 @@ function Dashboard() {
           </div>
           <div className="flex justify-between text-xs text-gray-500 mt-2">
               <span>15</span>
-              <span>18.5 (Normal)</span>
-              <span>25 (Overweight)</span>
+              <span>18.5 (Bình thường)</span>
+              <span>25 (Thừa cân)</span>
               <span>40</span>
           </div>
       </div>
 
-      <div className="section-title" style={{ marginTop: '20px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Calories History (Last 7 Days)</h2>
-      </div>
+      <h3 className="section-title mt-8">Lịch sử calo (7 ngày qua)</h3>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px', marginBottom: '40px' }}>
+      <div className="grid grid-cols-7 gap-3 mb-10">
         {days.map((day, idx) => (
-          <div key={idx} style={{
-            padding: '15px 10px',
-            borderRadius: '16px',
-            backgroundColor: idx === 6 ? '#E2F5C8' : '#fff',
-            border: '1px solid #e2e8f0',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            cursor: 'pointer'
-          }}>
-            <span style={{ fontSize: '13px', color: '#64748b' }}>{day.date.toLocaleDateString('en-US', { weekday: 'short' })}</span>
-            <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{day.date.getDate()}</span>
+          <div key={idx} className={`p-4 rounded-2xl border text-center flex flex-col gap-2 cursor-pointer transition-all duration-300 hover:scale-105 ${idx === 6 ? 'bg-gradient-to-br from-[#EAF5DA] to-[#B5E361] border-[#B5E361]/40 text-[#1f3b00] shadow-sm' : 'bg-white border-gray-100 shadow-sm'}`}>
+            <span className={`text-xs ${idx === 6 ? 'text-[#3d6600]/80 font-black' : 'text-gray-400 font-bold'}`}>{day.date.toLocaleDateString('vi-VN', { weekday: 'short' })}</span>
+            <span className="text-lg font-black">{day.date.getDate()}</span>
             {day.calories > 0 ? (
-              <span style={{ fontSize: '12px', color: '#f97316', fontWeight: '600' }}>{day.calories} kcal</span>
+              <span className={`text-xs font-extrabold ${idx === 6 ? 'text-[#2d5200]' : 'text-orange-500'}`}>{day.calories} kcal</span>
             ) : (
-              <span style={{ fontSize: '12px', color: '#64748b' }}>--</span>
+              <span className="text-xs text-gray-300 font-bold">--</span>
             )}
           </div>
         ))}
       </div>
-      </div>
 
       {/* Community Section Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-black flex items-center gap-2">🌏 Community Recipes</h2>
-        <button onClick={() => setIsUploading(true)} className="px-4 py-1.5 bg-[#B5E361] text-gray-900 font-bold rounded-xl text-xs">Share Item</button>
+      <div className="flex justify-between items-center mt-8 mb-4">
+        <h3 className="section-title mb-0 flex items-center gap-2">🌏 Công thức từ Cộng đồng</h3>
+        <button onClick={() => setIsUploading(true)} className="px-4 py-2 bg-gradient-to-r from-[#B5E361] to-[#8CB33D] text-[#1f3b00] font-extrabold rounded-2xl text-xs shadow-sm hover:scale-105 active:scale-95 transition-all">Chia sẻ món ăn</button>
       </div>
 
       {/* Community Horizontal List */}
       <div className="menu-list" style={{ overflowY: 'visible', paddingBottom: '40px' }}>
         <div className="flex flex-row gap-5 overflow-x-auto pb-10 pt-2 px-1 snap-x no-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {posts.map(post => (
-            <div key={post.id} className="group bg-white rounded-3xl border border-gray-100 shadow-sm w-[260px] shrink-0 snap-center relative">
+            <div key={post.id} className="group bg-white rounded-3xl border border-gray-100 shadow-sm w-[260px] shrink-0 snap-center relative hover:shadow-md hover:border-green-100 transition-all duration-300 animate-in fade-in-50 duration-500">
               {/* Header */}
               <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-sm">{post.author === '@current_user' ? '😎' : '👩‍🍳'}</div>
-                  <div className="text-[12px] font-bold">{post.author}</div>
+                  <div className="text-[12px] font-bold">{post.author === '@current_user' ? 'Bạn' : post.author}</div>
                 </div>
                 <div className="flex gap-1">
                   <Heart className="w-4 h-4 text-gray-300" />
@@ -414,7 +438,7 @@ function Dashboard() {
                   onClick={() => toggleExpand(post.id)} 
                   className={`w-full mt-3 py-2 rounded-lg text-[10px] font-bold transition-all ${post.isExpanded ? 'bg-gray-100' : 'bg-gray-900 text-white'}`}
                 >
-                  {post.isExpanded ? 'CLOSE' : 'VIEW RECIPE'}
+                  {post.isExpanded ? 'ĐÓNG' : 'XEM CÔNG THỨC'}
                 </button>
               </div>
             </div>

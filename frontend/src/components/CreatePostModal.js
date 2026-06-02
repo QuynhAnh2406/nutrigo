@@ -59,77 +59,77 @@ function CreatePostModal({ onClose, onSubmit }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content create-post-modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Post New Meal</h2>
+          <h2>Đăng món ăn mới</h2>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="create-post-form">
           <div className="form-group">
-            <label>Food Name *</label>
-            <input type="text" name="foodName" value={formData.foodName} onChange={handleInputChange} required placeholder="e.g., Chicken Salad" />
+            <label>Tên món ăn *</label>
+            <input type="text" name="foodName" value={formData.foodName} onChange={handleInputChange} required placeholder="Ví dụ: Salad ức gà" />
           </div>
           
           <div className="form-group">
-            <label>Description</label>
-            <textarea name="description" value={formData.description} onChange={handleInputChange} placeholder="Share a little about this meal..." rows="2" />
+            <label>Mô tả</label>
+            <textarea name="description" value={formData.description} onChange={handleInputChange} placeholder="Chia sẻ một chút về món ăn này..." rows="2" />
           </div>
 
           <div className="form-group">
-            <label>Image URL</label>
+            <label>Đường dẫn hình ảnh (URL)</label>
             <input type="url" name="image" value={formData.image} onChange={handleInputChange} placeholder="https://..." />
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label>Prep Time</label>
-              <input type="text" name="prepTime" value={formData.prepTime} onChange={handleInputChange} placeholder="e.g., 20 mins" />
+              <label>Thời gian chuẩn bị</label>
+              <input type="text" name="prepTime" value={formData.prepTime} onChange={handleInputChange} placeholder="Ví dụ: 20 phút" />
             </div>
             <div className="form-group">
-              <label>Difficulty</label>
+              <label>Độ khó</label>
               <select name="difficulty" value={formData.difficulty} onChange={handleInputChange}>
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
+                <option value="Easy">Dễ</option>
+                <option value="Medium">Trung bình</option>
+                <option value="Hard">Khó</option>
               </select>
             </div>
           </div>
 
           <div className="form-group">
-            <label>Tags (comma separated)</label>
-            <input type="text" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="Low Calorie, Vegan, Keto..." />
+            <label>Nhãn (phân cách bằng dấu phẩy)</label>
+            <input type="text" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="Ít Calo, Chay, Keto..." />
           </div>
 
           <div className="form-section">
-            <h3>Ingredients</h3>
+            <h3>Nguyên liệu</h3>
             {ingredients.map((ing, index) => (
               <div key={index} className="dynamic-row">
-                <input type="text" placeholder="Ingredient (e.g., Chicken breast)" value={ing.name} onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} required />
-                <input type="text" placeholder="Amount (e.g., 100g)" value={ing.amount} onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)} />
-                <input type="number" placeholder="Calories" value={ing.calories} onChange={(e) => handleIngredientChange(index, 'calories', e.target.value)} />
+                <input type="text" placeholder="Tên nguyên liệu (Ví dụ: Ức gà)" value={ing.name} onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} required />
+                <input type="text" placeholder="Định lượng (Ví dụ: 100g)" value={ing.amount} onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)} />
+                <input type="number" placeholder="Calo" value={ing.calories} onChange={(e) => handleIngredientChange(index, 'calories', e.target.value)} />
                 <button type="button" onClick={() => removeIngredient(index)} className="btn-remove">✕</button>
               </div>
             ))}
-            <button type="button" onClick={addIngredient} className="btn-add-row">+ Add Ingredient</button>
+            <button type="button" onClick={addIngredient} className="btn-add-row">+ Thêm nguyên liệu</button>
             <div className="total-calo-preview">
-              Estimated Total Calories: <strong>{currentTotalCalories} kcal</strong>
+              Tổng lượng calo ước tính: <strong>{currentTotalCalories} kcal</strong>
             </div>
           </div>
 
           <div className="form-section">
-            <h3>Instructions</h3>
+            <h3>Các bước thực hiện</h3>
             {instructions.map((inst, index) => (
               <div key={index} className="dynamic-row">
                 <span className="step-number">{index + 1}.</span>
-                <textarea placeholder="Step description..." value={inst} onChange={(e) => handleInstructionChange(index, e.target.value)} required rows="2" />
+                <textarea placeholder="Mô tả bước này..." value={inst} onChange={(e) => handleInstructionChange(index, e.target.value)} required rows="2" />
                 <button type="button" onClick={() => removeInstruction(index)} className="btn-remove">✕</button>
               </div>
             ))}
-            <button type="button" onClick={addInstruction} className="btn-add-row">+ Add Instruction</button>
+            <button type="button" onClick={addInstruction} className="btn-add-row">+ Thêm bước</button>
           </div>
 
           <div className="form-actions">
-            <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn-primary">Post</button>
+            <button type="button" className="btn-secondary" onClick={onClose}>Hủy</button>
+            <button type="submit" className="btn-primary">Đăng</button>
           </div>
         </form>
       </div>

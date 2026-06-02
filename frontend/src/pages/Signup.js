@@ -58,20 +58,20 @@ export default function Signup() {
         <div className="relative z-10 w-full max-w-lg">
           <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-10 shadow-2xl shadow-green-900/5 border border-white/50 mb-10">
             <div className="w-16 h-16 bg-[#B5E361] rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-lg shadow-green-200">🥗</div>
-            <h2 className="text-3xl font-black text-gray-900 mb-4 leading-tight">Join 10,000+ members eating healthier every day.</h2>
+            <h2 className="text-3xl font-black text-gray-900 mb-4 leading-tight">Tham gia cùng hơn 10.000 thành viên ăn uống lành mạnh mỗi ngày.</h2>
             <p className="text-gray-600 leading-relaxed">
-              Create your account to get personalized meal plans, track your macro-nutrients, and reach your fitness goals faster.
+              Tạo tài khoản để nhận lịch ăn uống cá nhân hóa, theo dõi các chất dinh dưỡng đa lượng và đạt được mục tiêu thể hình nhanh hơn.
             </p>
           </div>
 
           <div className="flex gap-4">
              <div className="flex-1 bg-white/40 p-4 rounded-2xl border border-white/40">
                 <div className="text-2xl font-bold text-gray-900">2K+</div>
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Recipes</div>
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Công thức</div>
              </div>
              <div className="flex-1 bg-white/40 p-4 rounded-2xl border border-white/40">
                 <div className="text-2xl font-bold text-gray-900">150+</div>
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Trainers</div>
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Huấn luyện viên</div>
              </div>
           </div>
         </div>
@@ -88,8 +88,8 @@ export default function Signup() {
             <span className="text-2xl font-bold tracking-tight text-gray-900">Nutrigo</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Create an account ✨</h2>
-          <p className="text-gray-500 mb-8">Start your healthy journey with us today.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Đăng ký tài khoản ✨</h2>
+          <p className="text-gray-500 mb-8">Bắt đầu hành trình sống khỏe cùng chúng tôi ngay hôm nay.</p>
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-medium">
@@ -100,7 +100,7 @@ export default function Signup() {
           <form className="space-y-4" onSubmit={handleSignup}>
             {/* Full Name Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Họ và tên</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-gray-400" />
@@ -136,7 +136,7 @@ export default function Signup() {
 
             {/* Password Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Mật khẩu</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
@@ -161,7 +161,7 @@ export default function Signup() {
 
             {/* Confirm Password Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Xác nhận mật khẩu</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
@@ -182,7 +182,7 @@ export default function Signup() {
               disabled={isLoading}
               className={`w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-2xl shadow-sm text-base font-bold text-gray-900 bg-[#B5E361] hover:bg-[#a5d44b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#B5E361] transition-colors mt-6 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              {isLoading ? 'Creating account...' : 'Create Account'}
+              {isLoading ? 'Đang tạo tài khoản...' : 'Đăng ký'}
               {!isLoading && <ArrowRight className="ml-2 h-5 w-5" />}
             </button>
           </form>
@@ -193,7 +193,7 @@ export default function Signup() {
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium">Or sign up with</span>
+                <span className="px-4 bg-white text-gray-500 font-medium">Hoặc đăng ký bằng</span>
               </div>
             </div>
 
@@ -215,9 +215,9 @@ export default function Signup() {
           </div>
 
           <p className="mt-8 text-center text-sm text-gray-600">
-            Already have an account?{' '}
+            Đã có tài khoản?{' '}
             <Link to="/login" className="font-bold text-gray-900 hover:text-[#8cbd3e] transition-colors">
-              Log in
+              Đăng nhập
             </Link>
           </p>
 

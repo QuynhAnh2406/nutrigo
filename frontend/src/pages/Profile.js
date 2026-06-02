@@ -3,6 +3,26 @@ import { useOutletContext, useLocation } from 'react-router-dom';
 import { UserCircle2, Settings } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
+const getGoalLabel = (goal) => {
+  switch (goal) {
+    case 'Lose weight': return 'Giảm cân';
+    case 'Maintain weight': return 'Duy trì cân nặng';
+    case 'Gain weight': return 'Tăng cân';
+    case 'Build muscle': return 'Tăng cơ';
+    default: return goal || 'Duy trì cân nặng';
+  }
+};
+
+const getBmiStatusLabel = (status) => {
+  switch (status) {
+    case 'Underweight': return 'Thiếu cân';
+    case 'Normal': return 'Bình thường';
+    case 'Overweight': return 'Thừa cân';
+    case 'Obese': return 'Béo phì';
+    default: return status;
+  }
+};
+
 function Profile() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -108,48 +128,48 @@ function Profile() {
               <h4 className="font-black text-white mb-8 flex items-center gap-3 relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">🥗</div>
                 <div>
-                  <span className="block text-xl tracking-tight">Energy & Nutrition Summary</span>
-                  <span className="block text-[10px] text-white/70 font-bold uppercase tracking-[0.2em] mt-1">Personalized Health Intelligence</span>
+                  <span className="block text-xl tracking-tight">Tóm tắt Năng lượng & Dinh dưỡng</span>
+                  <span className="block text-[10px] text-white/70 font-bold uppercase tracking-[0.2em] mt-1">Thông tin Sức khỏe Cá nhân hóa</span>
                 </div>
               </h4>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
                 <div className="bg-white/10 backdrop-blur-xl px-5 py-6 rounded-[2rem] border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300">
-                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">BMI Score</span>
+                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">Chỉ số BMI</span>
                   <div className="flex items-baseline gap-2">
                     <strong className="text-3xl text-white font-black">{metrics.bmi}</strong>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase ${metrics.bmiStatus === 'Normal' ? 'bg-white/30 text-white' : 'bg-orange-400/40 text-white'}`}>
-                      {metrics.bmiStatus}
+                      {getBmiStatusLabel(metrics.bmiStatus)}
                     </span>
                   </div>
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-xl px-5 py-6 rounded-[2rem] border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300">
-                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">BMR (Rest)</span>
+                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">BMR (Nghỉ ngơi)</span>
                   <div className="flex items-baseline gap-2">
                     <strong className="text-3xl text-white font-black">{metrics.bmr}</strong>
                     <small className="text-[10px] text-white/60 font-black uppercase tracking-tighter">kcal</small>
                   </div>
-                  <span className="text-[9px] text-white/40 font-bold block mt-1 uppercase">Basal Metabolism</span>
+                  <span className="text-[9px] text-white/40 font-bold block mt-1 uppercase">Tỉ lệ trao đổi chất cơ bản</span>
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-xl px-5 py-6 rounded-[2rem] border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300">
-                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">TDEE (Daily)</span>
+                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">TDEE (Hàng ngày)</span>
                   <div className="flex items-baseline gap-2">
                     <strong className="text-3xl text-white font-black">{metrics.tdee}</strong>
                     <small className="text-[10px] text-white/60 font-black uppercase tracking-tighter">kcal</small>
                   </div>
-                  <span className="text-[9px] text-white/40 font-bold block mt-1 uppercase">Maintenance Level</span>
+                  <span className="text-[9px] text-white/40 font-bold block mt-1 uppercase">Mức năng lượng duy trì</span>
                 </div>
 
                 <div className="bg-white/95 backdrop-blur-md px-5 py-6 rounded-[2rem] shadow-2xl shadow-green-900/10 hover:scale-105 transition-all duration-300">
-                  <span className="block text-[10px] text-[#3d6600]/60 uppercase font-black tracking-widest mb-3">Target Intake</span>
+                  <span className="block text-[10px] text-[#3d6600]/60 uppercase font-black tracking-widest mb-3">Mục tiêu hấp thụ</span>
                   <div className="flex items-baseline gap-2">
                     <strong className="text-3xl text-[#3d6600] font-black">{metrics.targetCalories}</strong>
                     <small className="text-[10px] text-[#3d6600]/60 font-black uppercase tracking-tighter">kcal</small>
                   </div>
                   <div className="mt-2 text-[10px] bg-[#B5E361] px-3 py-1 rounded-full text-[#3d6600] font-black inline-block shadow-sm">
-                    {healthData.goal || 'Maintain'}
+                    {getGoalLabel(healthData.goal)}
                   </div>
                 </div>
               </div>
@@ -157,79 +177,79 @@ function Profile() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="profile-form border p-6 rounded-2xl border-gray-100 bg-white">
-                <h4 className="font-bold mb-4 text-gray-800">Basic Info</h4>
+                <h4 className="font-bold mb-4 text-gray-800">Thông tin cơ bản</h4>
                 <div className="form-grid opacity-80 pointer-events-none">
                   <div className="form-group">
-                    <label>Date of Birth</label>
+                    <label>Ngày sinh</label>
                     <input type="date" value={healthData.dateOfBirth} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                   <div className="form-group">
-                    <label>Age</label>
+                    <label>Tuổi</label>
                     <input type="number" value={metrics.age || 0} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                   <div className="form-group">
-                    <label>Gender</label>
+                    <label>Giới tính</label>
                     <select value={healthData.gender || 'Male'} disabled className="bg-gray-50 border-gray-200 custom-select">
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
+                      <option value="Male">Nam</option>
+                      <option value="Female">Nữ</option>
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Height (cm)</label>
+                    <label>Chiều cao (cm)</label>
                     <input type="number" value={healthData.height} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                   <div className="form-group">
-                    <label>Weight (kg)</label>
+                    <label>Cân nặng (kg)</label>
                     <input type="number" value={healthData.weight} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                   <div className="form-group">
-                    <label>Email Address</label>
+                    <label>Địa chỉ Email</label>
                     <input type="email" value={user.email} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                   <div className="form-group">
-                    <label>Phone Number</label>
-                    <input type="text" value={healthData.phone || 'Not set'} disabled className="bg-gray-50 border-gray-200" />
+                    <label>Số điện thoại</label>
+                    <input type="text" value={healthData.phone || 'Chưa thiết lập'} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                 </div>
               </div>
 
               <div className="profile-form border p-6 rounded-2xl border-gray-100 bg-white flex flex-col h-full">
-                <h4 className="font-bold mb-4 text-gray-800">Survey Preferences</h4>
+                <h4 className="font-bold mb-4 text-gray-800">Khảo sát & Tùy chọn</h4>
                 <div className="form-grid opacity-80 pointer-events-none">
                   <div className="form-group col-span-2">
-                    <label>Goal</label>
+                    <label>Mục tiêu</label>
                     <select value={healthData.goal || 'Maintain weight'} disabled className="bg-gray-50 border-gray-200 custom-select">
-                      <option value="Lose weight">Lose weight</option>
-                      <option value="Maintain weight">Maintain weight</option>
-                      <option value="Gain weight">Gain weight</option>
-                      <option value="Build muscle">Build muscle</option>
+                      <option value="Lose weight">Giảm cân</option>
+                      <option value="Maintain weight">Duy trì cân nặng</option>
+                      <option value="Gain weight">Tăng cân</option>
+                      <option value="Build muscle">Tăng cơ</option>
                     </select>
                   </div>
                   <div className="form-group col-span-2">
-                    <label>Activity Level</label>
+                    <label>Mức độ vận động</label>
                     <select value={healthData.activityLevel || 'Sedentary'} disabled className="bg-gray-50 border-gray-200 custom-select">
-                      <option value="Sedentary">Sedentary (Little or no exercise)</option>
-                      <option value="Light">Light (Exercise 1-3 times/week)</option>
-                      <option value="Moderate">Moderate (Exercise 4-5 times/week)</option>
-                      <option value="Active">Active (Daily or intense 3-4 times/week)</option>
-                      <option value="Very Active">Very Active (Intense daily exercise)</option>
+                      <option value="Sedentary">Ít vận động (Ít hoặc không tập thể dục)</option>
+                      <option value="Light">Nhẹ nhàng (Tập thể dục 1-3 lần/tuần)</option>
+                      <option value="Moderate">Vừa phải (Tập thể dục 4-5 lần/tuần)</option>
+                      <option value="Active">Năng động (Tập thể dục hàng ngày hoặc cường độ cao 3-4 lần/tuần)</option>
+                      <option value="Very Active">Rất năng động (Tập thể dục cường độ cao hàng ngày)</option>
                     </select>
                   </div>
                   <div className="form-group col-span-2">
-                    <label>Dietary Preferences</label>
+                    <label>Chế độ ăn ưa thích</label>
                     <input type="text" value={healthData.dietaryPreference || ''} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                   <div className="form-group col-span-2">
-                    <label>Allergies</label>
+                    <label>Dị ứng</label>
                     <input type="text" value={healthData.allergies || ''} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                   <div className="form-group col-span-2">
-                    <label>Cooking Skill</label>
+                    <label>Khả năng nấu nướng</label>
                     <select value={healthData.cookingSkill || ''} disabled className="bg-gray-50 border-gray-200 custom-select">
-                      <option value="Beginner">Beginner (Little or no experience)</option>
-                      <option value="Intermediate">Intermediate (Can follow recipes easily)</option>
-                      <option value="Advanced">Advanced (Experienced home cook)</option>
-                      <option value="Expert">Expert (Professional or highly skilled)</option>
+                      <option value="Beginner">Người mới bắt đầu (Ít hoặc không có kinh nghiệm)</option>
+                      <option value="Intermediate">Trung bình (Có thể nấu theo công thức dễ dàng)</option>
+                      <option value="Advanced">Nâng cao (Người nấu ăn gia đình có kinh nghiệm)</option>
+                      <option value="Expert">Chuyên gia (Đầu bếp chuyên nghiệp hoặc tay nghề cao)</option>
                     </select>
                   </div>
                 </div>
@@ -246,8 +266,8 @@ function Profile() {
               <h4 className="font-black text-white mb-2 flex items-center gap-3 relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">📝</div>
                 <div>
-                  <span className="block text-xl tracking-tight">Edit Your Profile</span>
-                  <span className="text-white/80 text-sm font-medium">Keep your health data accurate for better results</span>
+                  <span className="block text-xl tracking-tight">Chỉnh sửa hồ sơ của bạn</span>
+                  <span className="text-white/80 text-sm font-medium">Cập nhật dữ liệu sức khỏe chính xác để đạt kết quả tốt nhất</span>
                 </div>
               </h4>
             </div>
@@ -259,11 +279,11 @@ function Profile() {
                 setIsSaving(true);
                 try {
                   await saveHealthToDb();
-                  alert('Profile updated successfully! ✨');
+                  alert('Cập nhật hồ sơ thành công! ✨');
                   setActiveTab('Personal');
                 } catch (err) {
                   console.error(err);
-                  alert('Save failed. Please check your connection.');
+                  alert('Lưu thất bại. Vui lòng kiểm tra kết nối mạng.');
                 } finally {
                   setIsSaving(false);
                 }
@@ -273,46 +293,46 @@ function Profile() {
               <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl">
                 <h4 className="font-bold mb-6 text-gray-800 flex items-center gap-2">
                   <span className="w-2 h-6 bg-blue-500 rounded-full"></span>
-                  Basic Information
+                  Thông tin cơ bản
                 </h4>
                 <div className="form-grid">
                   <div className="form-group">
-                    <label>Date of Birth</label>
+                    <label>Ngày sinh</label>
                     <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleFormChange} className="bg-white/80 border-gray-100 focus:ring-2 focus:ring-blue-400 transition-all" />
                   </div>
                   <div className="form-group opacity-60">
-                    <label>Age</label>
+                    <label>Tuổi</label>
                     <input type="number" value={metrics.age || 0} disabled className="bg-gray-50/50 cursor-not-allowed" />
                   </div>
                   <div className="form-group">
-                    <label>Gender</label>
+                    <label>Giới tính</label>
                     <select name="gender" value={formData.gender || 'Male'} onChange={handleFormChange} className="custom-select bg-white/80">
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
+                      <option value="Male">Nam</option>
+                      <option value="Female">Nữ</option>
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Height (cm)</label>
+                    <label>Chiều cao (cm)</label>
                     <input type="number" name="height" value={formData.height} onChange={handleFormChange} className="bg-white/80" />
                   </div>
                   <div className="form-group">
-                    <label>Weight (kg)</label>
+                    <label>Cân nặng (kg)</label>
                     <input type="number" name="weight" value={formData.weight} onChange={handleFormChange} className="bg-white/80" />
                   </div>
                   <div className="form-group">
-                    <label>Email Address</label>
+                    <label>Địa chỉ Email</label>
                     <input 
                       type="email" 
                       name="email" 
                       value={formData.email} 
                       onChange={handleFormChange} 
-                      placeholder="yourname@example.com" 
+                      placeholder="tenbancuaban@example.com" 
                       className="bg-white/80"
                     />
                   </div>
                   <div className="form-group">
-                    <label>Phone Number</label>
-                    <input type="text" name="phone" value={formData.phone || ''} onChange={handleFormChange} placeholder="Enter your phone number" className="bg-white/80" />
+                    <label>Số điện thoại</label>
+                    <input type="text" name="phone" value={formData.phone || ''} onChange={handleFormChange} placeholder="Nhập số điện thoại của bạn" className="bg-white/80" />
                   </div>
                 </div>
               </div>
@@ -321,43 +341,43 @@ function Profile() {
               <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl">
                 <h4 className="font-bold mb-6 text-gray-800 flex items-center gap-2">
                   <span className="w-2 h-6 bg-green-500 rounded-full"></span>
-                  Survey & Health Goals
+                  Khảo sát & Mục tiêu sức khỏe
                 </h4>
                 <div className="form-grid">
                   <div className="form-group col-span-2">
-                    <label>Health Goal</label>
+                    <label>Mục tiêu sức khỏe</label>
                     <select name="goal" value={formData.goal || 'Maintain weight'} onChange={handleFormChange} className="custom-select bg-white/80">
-                      <option value="Lose weight">Lose weight</option>
-                      <option value="Maintain weight">Maintain weight</option>
-                      <option value="Gain weight">Gain weight</option>
-                      <option value="Build muscle">Build muscle</option>
+                      <option value="Lose weight">Giảm cân</option>
+                      <option value="Maintain weight">Duy trì cân nặng</option>
+                      <option value="Gain weight">Tăng cân</option>
+                      <option value="Build muscle">Tăng cơ</option>
                     </select>
                   </div>
                   <div className="form-group col-span-2">
-                    <label>Activity Level</label>
+                    <label>Mức độ vận động</label>
                     <select name="activityLevel" value={formData.activityLevel || 'Sedentary'} onChange={handleFormChange} className="custom-select bg-white/80">
-                      <option value="Sedentary">Sedentary (Little or no exercise)</option>
-                      <option value="Light">Light (Exercise 1-3 times/week)</option>
-                      <option value="Moderate">Moderate (Exercise 4-5 times/week)</option>
-                      <option value="Active">Active (Daily exercise or intense exercise 3-4 times/week)</option>
-                      <option value="Very Active">Very Active (Intense exercise 6-7 times/week)</option>
+                      <option value="Sedentary">Ít vận động (Ít hoặc không tập thể dục)</option>
+                      <option value="Light">Nhẹ nhàng (Tập thể dục 1-3 lần/tuần)</option>
+                      <option value="Moderate">Vừa phải (Tập thể dục 4-5 lần/tuần)</option>
+                      <option value="Active">Năng động (Tập thể dục hàng ngày hoặc cường độ cao 3-4 lần/tuần)</option>
+                      <option value="Very Active">Rất năng động (Tập thể dục cường độ cao 6-7 lần/tuần)</option>
                     </select>
                   </div>
                   <div className="form-group col-span-2">
-                    <label>Dietary Preferences</label>
-                    <input type="text" name="dietaryPreference" value={formData.dietaryPreference || ''} onChange={handleFormChange} placeholder="e.g., Vegan, Keto, No Seafood" className="bg-white/80" />
+                    <label>Chế độ ăn ưa thích</label>
+                    <input type="text" name="dietaryPreference" value={formData.dietaryPreference || ''} onChange={handleFormChange} placeholder="Ví dụ: Ăn chay, Keto, Không hải sản" className="bg-white/80" />
                   </div>
                   <div className="form-group col-span-2">
-                    <label>Allergies</label>
-                    <input type="text" name="allergies" value={formData.allergies || ''} onChange={handleFormChange} placeholder="e.g., Peanuts, Shellfish" className="bg-white/80" />
+                    <label>Dị ứng</label>
+                    <input type="text" name="allergies" value={formData.allergies || ''} onChange={handleFormChange} placeholder="Ví dụ: Đậu phộng, Động vật có vỏ" className="bg-white/80" />
                   </div>
                   <div className="form-group col-span-2">
-                    <label>Cooking Skill</label>
+                    <label>Khả năng nấu nướng</label>
                     <select name="cookingSkill" value={formData.cookingSkill || 'Beginner'} onChange={handleFormChange} className="custom-select bg-white/80">
-                      <option value="Beginner">Beginner (Little or no experience)</option>
-                      <option value="Intermediate">Intermediate (Can follow recipes easily)</option>
-                      <option value="Advanced">Advanced (Experienced home cook)</option>
-                      <option value="Expert">Expert (Professional or highly skilled)</option>
+                      <option value="Beginner">Người mới bắt đầu (Ít hoặc không có kinh nghiệm)</option>
+                      <option value="Intermediate">Trung bình (Có thể nấu theo công thức dễ dàng)</option>
+                      <option value="Advanced">Nâng cao (Người nấu ăn gia đình có kinh nghiệm)</option>
+                      <option value="Expert">Chuyên gia (Đầu bếp chuyên nghiệp hoặc tay nghề cao)</option>
                     </select>
                   </div>
                 </div>
@@ -379,11 +399,11 @@ function Profile() {
                   {isSaving ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Saving Changes...
+                      Đang lưu thay đổi...
                     </>
                   ) : (
                     <>
-                      <span>Save Changes</span>
+                      <span>Lưu thay đổi</span>
                       <span className="text-xl">✨</span>
                     </>
                   )}
@@ -399,22 +419,22 @@ function Profile() {
             <div className="settings-list">
               <div className="setting-item">
                 <div className="setting-info">
-                  <h4>Email Address</h4>
+                  <h4>Địa chỉ Email</h4>
                   <p>{user.email}</p>
                 </div>
-                <button className="btn-outline">Change</button>
+                <button className="btn-outline">Thay đổi</button>
               </div>
               <div className="setting-item">
                 <div className="setting-info">
-                  <h4>Password</h4>
-                  <p>Last changed 3 months ago</p>
+                  <h4>Mật khẩu</h4>
+                  <p>Mật khẩu</p>
                 </div>
-                <button className="btn-outline">Update</button>
+                <button className="btn-outline">Cập nhật</button>
               </div>
               <div className="setting-item">
                 <div className="setting-info">
-                  <h4>Email Notifications</h4>
-                  <p>Receive daily meal plan reminders</p>
+                  <h4>Thông báo qua Email</h4>
+                  <p>Nhận lời nhắc lịch ăn hàng ngày</p>
                 </div>
                 <label className="switch">
                   <input type="checkbox" defaultChecked />
@@ -434,7 +454,7 @@ function Profile() {
     <div className="profile-page main-content">
       <div className="mb-8">
         <PageHeader
-          title="My Profile"
+          title="Hồ sơ của tôi"
           icon={UserCircle2}
           actions={
             <div className="flex flex-wrap gap-2">
@@ -445,7 +465,7 @@ function Profile() {
                 onClick={() => setActiveTab('Personal')}
               >
                 <UserCircle2 className="h-4 w-4" />
-                Personal
+                Cá nhân
               </button>
               <button
                 className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold shadow-sm transition-colors ${
@@ -454,7 +474,7 @@ function Profile() {
                 onClick={() => setActiveTab('Settings')}
               >
                 <Settings className="h-4 w-4" />
-                Settings
+                Cài đặt
               </button>
             </div>
           }
@@ -468,14 +488,14 @@ function Profile() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="section-title mb-0">
               {activeTab === 'Settings'
-                ? 'Account Settings'
+                ? 'Cài đặt tài khoản'
                 : activeTab === 'Edit'
-                  ? 'Edit Info'
-                  : 'Personal Information'}
+                  ? 'Chỉnh sửa thông tin'
+                  : 'Thông tin cá nhân'}
             </h3>
             {activeTab === 'Personal' ? (
               <button className="btn-primary" onClick={() => setActiveTab('Edit')}>
-                Edit Info
+                Chỉnh sửa thông tin
               </button>
             ) : activeTab === 'Edit' ? (
               <button
@@ -483,7 +503,7 @@ function Profile() {
                 className="btn-secondary"
                 onClick={() => setActiveTab('Personal')}
               >
-                Back
+                Quay lại
               </button>
             ) : null}
           </div>
@@ -500,26 +520,26 @@ function Profile() {
             <div className="px-6 pb-6 flex flex-col items-center text-center relative">
               <img 
                 src={user.avatar} 
-                alt="Profile" 
+                alt="Ảnh đại diện" 
                 className="w-24 h-24 rounded-full border-4 border-white shadow-md -mt-12 mb-3 bg-white object-cover" 
               />
               <h2 className="text-xl font-bold text-gray-800">
-                {user.name} {user.isPremium && <span title="Premium Member" className="text-yellow-500">👑</span>}
+                {user.name} {user.isPremium && <span title="Thành viên Premium" className="text-yellow-500">👑</span>}
               </h2>
               <p className="text-gray-500 text-sm mb-6">{user.email}</p>
               
               <div className="flex gap-8 w-full justify-center border-t border-b border-gray-100 py-4 mb-6">
                 <div className="text-center cursor-pointer hover:text-green-600 transition-colors">
                   <strong className="block text-xl text-gray-800">{user.followers}</strong>
-                  <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Followers</span>
+                  <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Người theo dõi</span>
                 </div>
                 <div className="text-center cursor-pointer hover:text-green-600 transition-colors">
                   <strong className="block text-xl text-gray-800">{user.following}</strong>
-                  <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Following</span>
+                  <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Đang theo dõi</span>
                 </div>
               </div>
               
-              <button className="btn-secondary w-full">Share Profile</button>
+              <button className="btn-secondary w-full">Chia sẻ hồ sơ</button>
             </div>
           </div>
         </div>

@@ -53,24 +53,24 @@ export default function Login() {
           {/* Mô phỏng một card giao diện giống trong dashboard */}
           <div className="bg-[#B5E361] rounded-[2rem] p-8 shadow-lg text-gray-900 mb-8 transform -rotate-2 hover:rotate-0 transition-transform duration-300">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Daily Nutrition</h2>
+              <h2 className="text-2xl font-bold">Dinh dưỡng hàng ngày</h2>
               <div className="bg-white/30 px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                 <Leaf className="w-4 h-4 mr-1" /> Fresh
+                 <Leaf className="w-4 h-4 mr-1" /> Tươi ngon
               </div>
             </div>
             <div className="bg-white/40 rounded-2xl p-6">
               <p className="font-medium text-lg italic mb-2">
-                "Start your day with positive energy and healthy meals!"
+                "Bắt đầu ngày mới với năng lượng tích cực và những bữa ăn lành mạnh!"
               </p>
-              <p className="text-sm font-medium mt-4">NUTRITION QUOTE OF THE DAY</p>
+              <p className="text-sm font-medium mt-4">TRÍCH DẪN DINH DƯỠNG CỦA NGÀY</p>
             </div>
           </div>
 
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
-            Your health journey <br/> starts here.
+            Hành trình sức khỏe <br/> bắt đầu từ đây.
           </h1>
           <p className="text-gray-600 text-lg">
-            Log in to Nutrigo to track calories, plan meals, and connect with a healthy food community.
+            Đăng nhập vào Nutrigo để theo dõi calo, lên lịch ăn uống và kết nối với cộng đồng ăn uống lành mạnh.
           </p>
         </div>
       </div>
@@ -87,8 +87,8 @@ export default function Login() {
             <span className="text-2xl font-bold tracking-tight text-gray-900">Nutrigo</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back! 👋</h2>
-          <p className="text-gray-500 mb-6">Please enter your details to access your dashboard.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Chào mừng quay trở lại! 👋</h2>
+          <p className="text-gray-500 mb-6">Vui lòng nhập thông tin của bạn để truy cập trang chủ.</p>
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-medium">
@@ -117,7 +117,7 @@ export default function Login() {
 
             {/* Password Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Mật khẩu</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
@@ -150,12 +150,12 @@ export default function Login() {
                   className="h-4 w-4 text-[#B5E361] focus:ring-[#B5E361] border-gray-300 rounded cursor-pointer accent-[#B5E361]"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600 cursor-pointer">
-                  Remember me
+                  Ghi nhớ đăng nhập
                 </label>
               </div>
               <div className="text-sm">
                 <a href="#forgot" className="font-semibold text-gray-700 hover:text-[#8cbd3e] transition-colors">
-                  Forgot password?
+                  Quên mật khẩu?
                 </a>
               </div>
             </div>
@@ -166,7 +166,7 @@ export default function Login() {
               disabled={isLoading}
               className={`w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-2xl shadow-sm text-base font-bold text-gray-900 bg-[#B5E361] hover:bg-[#a5d44b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#B5E361] transition-colors mt-6 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
               {!isLoading && <ArrowRight className="ml-2 h-5 w-5" />}
             </button>
           </form>
@@ -178,7 +178,7 @@ export default function Login() {
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium">Or continue with</span>
+                <span className="px-4 bg-white text-gray-500 font-medium">Hoặc tiếp tục bằng</span>
               </div>
             </div>
 
@@ -201,9 +201,9 @@ export default function Login() {
           </div>
 
           <p className="mt-8 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
+            Chưa có tài khoản?{' '}
             <Link to="/signup" className="font-bold text-gray-900 hover:text-[#8cbd3e] transition-colors">
-              Sign up now
+              Đăng ký ngay
             </Link>
           </p>
 

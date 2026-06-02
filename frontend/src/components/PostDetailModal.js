@@ -40,7 +40,7 @@ function PostDetailModal({ post, onClose }) {
           </div>
 
           <div className="detail-section">
-            <h3>Ingredients</h3>
+            <h3>Nguyên liệu</h3>
             <ul className="ingredient-list">
               {post.ingredients.map((ing, idx) => (
                 <li key={idx} className="ingredient-item">
@@ -52,7 +52,7 @@ function PostDetailModal({ post, onClose }) {
           </div>
 
           <div className="detail-section">
-            <h3>Instructions</h3>
+            <h3>Các bước thực hiện</h3>
             <ol className="instruction-list">
               {post.instructions.map((step, idx) => (
                 <li key={idx} className="instruction-step">
@@ -63,7 +63,7 @@ function PostDetailModal({ post, onClose }) {
           </div>
           
           <div className="detail-section">
-            <h3>Comments ({post.comments.length})</h3>
+            <h3>Bình luận ({post.comments.length})</h3>
             <div className="comment-list">
               {post.comments.map(c => (
                 <div key={c.id} className="comment-item">
@@ -72,8 +72,8 @@ function PostDetailModal({ post, onClose }) {
               ))}
             </div>
             <div className="comment-input-area">
-               <input type="text" placeholder="Add a comment..." className="comment-input" />
-               <button className="btn-primary btn-small">Post</button>
+               <input type="text" placeholder="Thêm bình luận..." className="comment-input" />
+               <button className="btn-primary btn-small">Đăng</button>
             </div>
           </div>
         </div>

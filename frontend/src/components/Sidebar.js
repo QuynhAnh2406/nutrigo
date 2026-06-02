@@ -6,9 +6,9 @@ function Sidebar({ user }) {
 
   // Fallback for user if prop is missing somehow
   const currentUser = user || {
-    name: 'Guest User',
-    email: 'guest@example.com',
-    avatar: 'https://ui-avatars.com/api/?name=Guest+User&background=random'
+    name: 'Khách',
+    email: 'khach@example.com',
+    avatar: 'https://ui-avatars.com/api/?name=Khach&background=random'
   };
 
   const handleLogout = () => {
@@ -25,16 +25,16 @@ function Sidebar({ user }) {
       </div>
       <ul className="nav-menu">
         <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <span className="nav-icon">⊞</span> Dashboard
+          <span className="nav-icon">⊞</span> Trang chủ
         </NavLink>
         <NavLink to="/meal-plan" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <span className="nav-icon">📋</span> Meal Plan
+          <span className="nav-icon">📋</span> Lịch ăn uống
         </NavLink>
         <NavLink to="/community" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <span className="nav-icon">👥</span> HealthyLife Community
+          <span className="nav-icon">👥</span> Cộng đồng lành mạnh
         </NavLink>
         <NavLink to="/favourites" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <span className="nav-icon">❤️</span> Favourites
+          <span className="nav-icon">❤️</span> Yêu thích
         </NavLink>
       </ul>
 
@@ -54,13 +54,13 @@ function Sidebar({ user }) {
         {isDropdownOpen && (
           <div className="profile-dropdown">
             <button className="dropdown-item" onClick={() => window.location.href = '/profile?tab=Personal'}>
-              👤 Personal Information
+              👤 Thông tin cá nhân
             </button>
             <button className="dropdown-item" onClick={() => window.location.href = '/profile?tab=Settings'}>
-              ⚙️ Account Settings
+              ⚙️ Cài đặt tài khoản
             </button>
             <button className="dropdown-item text-red" onClick={handleLogout}>
-              🚪 Logout
+              🚪 Đăng xuất
             </button>
           </div>
         )}

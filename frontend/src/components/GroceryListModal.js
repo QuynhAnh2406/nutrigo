@@ -7,14 +7,18 @@ function GroceryListModal({ weeklyPlan, onClose }) {
 
     weeklyPlan.forEach(day => {
       ['breakfast', 'lunch', 'dinner', 'snack'].forEach(mealType => {
-        const recipe = day.meals[mealType];
-        if (recipe && recipe.ingredients) {
-          recipe.ingredients.forEach(ing => {
-            const lowerIng = ing.toLowerCase().trim();
-            if (ingredientCounts[lowerIng]) {
-              ingredientCounts[lowerIng].count += 1;
-            } else {
-              ingredientCounts[lowerIng] = { name: ing, count: 1 };
+        const recipeList = day.meals[mealType];
+        if (recipeList && Array.isArray(recipeList)) {
+          recipeList.forEach(recipe => {
+            if (recipe && recipe.ingredients) {
+              recipe.ingredients.forEach(ing => {
+                const lowerIng = ing.toLowerCase().trim();
+                if (ingredientCounts[lowerIng]) {
+                  ingredientCounts[lowerIng].count += 1;
+                } else {
+                  ingredientCounts[lowerIng] = { name: ing, count: 1 };
+                }
+              });
             }
           });
         }
@@ -31,8 +35,8 @@ function GroceryListModal({ weeklyPlan, onClose }) {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
           <div>
-            <h2 className="text-xl font-bold text-gray-800">🛒 Grocery List</h2>
-            <p className="text-sm text-gray-500 mt-1">Items needed for this week's meals</p>
+            <h2 className="text-xl font-bold text-gray-800">🛒 Danh sách mua sắm</h2>
+            <p className="text-sm text-gray-500 mt-1">Các nguyên liệu cần thiết cho tuần này</p>
           </div>
           <button className="text-gray-400 hover:text-gray-700 text-2xl font-bold" onClick={onClose}>✕</button>
         </div>
@@ -53,15 +57,15 @@ function GroceryListModal({ weeklyPlan, onClose }) {
           ) : (
             <div className="text-center py-8 text-gray-500">
               <span className="text-4xl mb-3 block">🤷‍♂️</span>
-              <p>Your meal plan is empty.</p>
-              <p className="text-sm mt-1">Add some meals to generate a grocery list!</p>
+              <p>Kế hoạch ăn uống của bạn đang trống.</p>
+              <p className="text-sm mt-1">Hãy thêm món ăn để tạo danh sách mua sắm!</p>
             </div>
           )}
         </div>
 
         <div className="p-6 border-t border-gray-100 bg-gray-50">
-          <button className="w-full btn-primary py-3 rounded-xl font-bold text-lg" onClick={() => alert("Copied to clipboard! (Mock)")}>
-            Copy to Clipboard
+          <button className="w-full btn-primary py-3 rounded-xl font-bold text-lg" onClick={() => alert("Đã sao chép vào bộ nhớ tạm!")}>
+            Sao chép vào bộ nhớ tạm
           </button>
         </div>
       </div>

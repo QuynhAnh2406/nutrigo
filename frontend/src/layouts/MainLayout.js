@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import RightPanel from '../components/RightPanel';
 
 function MainLayout() {
   // Shared state that was previously in App.js
@@ -25,9 +24,9 @@ function MainLayout() {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : {
-      name: 'Guest User',
-      email: 'guest@example.com',
-      avatar: 'https://ui-avatars.com/api/?name=Guest+User&background=random',
+      name: 'Khách',
+      email: 'khach@example.com',
+      avatar: 'https://ui-avatars.com/api/?name=Khach&background=random',
       followers: 0,
       following: 0,
       isPremium: false
@@ -82,6 +81,13 @@ function MainLayout() {
             cookingSkill: row.cooking_skill || 'Beginner',
             phone: row.phone || ''
           });
+          if (row.created_at) {
+            setUser(prev => {
+              const updated = { ...prev, createdAt: row.created_at };
+              localStorage.setItem('user', JSON.stringify(updated));
+              return updated;
+            });
+          }
         }
       } catch (err) {
         console.error('Failed to fetch health data:', err);
@@ -142,14 +148,10 @@ function MainLayout() {
     calculateMetrics();
   }, [healthData]);
 
-  const location = useLocation();
-  const isDashboard = location.pathname === '/dashboard' || location.pathname === '/';
-
   return (
     <div className="dashboard-container">
       <Sidebar user={user} />
       <Outlet context={{ menuItems, newMenuItems, recommendedItems, user, setUser, healthData, setHealthData, metrics }} />
-      {isDashboard && <RightPanel items={newMenuItems} />}
     </div>
   );
 }
