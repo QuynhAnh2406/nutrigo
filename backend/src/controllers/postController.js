@@ -32,6 +32,8 @@ exports.getPosts = async (req, res) => {
       paramCount++;
       baseQuery += ` AND p.user_id = $${paramCount}`;
       queryParams.push(userId);
+    } else if (tab === 'My Recipes') {
+      baseQuery += ` AND (p.user_id = $1 OR EXISTS(SELECT 1 FROM post_favorites pf WHERE pf.post_id = p.id AND pf.user_id = $1))`;
     } else if (tab === 'Following') {
       // Mock Following filter for now
     } else if (tab === 'Popular') {
@@ -49,6 +51,9 @@ exports.getPosts = async (req, res) => {
       post.image = post.image_url;
       post.prepTime = post.prep_time;
       post.macros = { carbs: post.carbs, protein: post.protein, fat: post.fat };
+      post.mealType = post.meal_type;
+      post.category = post.category || 'food';
+      post.healthLevel = post.health_level || 'medium';
       post.timeAgo = 'Vừa xong'; // Mock time
       post.comments = []; // Mock comments
 
@@ -84,7 +89,7 @@ exports.getPosts = async (req, res) => {
 };
 
 exports.createPost = async (req, res) => {
-  const { foodName, description, image, prepTime, difficulty, tags, ingredients, instructions } = req.body;
+  const { foodName, description, image, prepTime, difficulty, tags, ingredients, instructions, isRecipe, mealType, category, healthLevel } = req.body;
   const userId = getUserId(req);
 
   if (!foodName || !ingredients || !instructions) {
@@ -106,14 +111,18 @@ exports.createPost = async (req, res) => {
 
     // 1. Insert post
     const postRes = await client.query(`
-      INSERT INTO posts (user_id, food_name, description, image_url, prep_time, difficulty, calories, carbs, protein, fat, rating)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *
+      INSERT INTO posts (user_id, food_name, description, image_url, prep_time, difficulty, calories, carbs, protein, fat, rating, is_recipe, meal_type, category, health_level)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *
     `, [
       userId, foodName, description, 
       image || 'https://images.unsplash.com/photo-1498837167922-41cfa6f500ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       prepTime || 'Unknown', difficulty || 'Medium', 
       totalCal > 0 ? totalCal : 300, 
-      30, 20, 10, 0 // Mock macros
+      30, 20, 10, 0, // Mock macros
+      isRecipe !== undefined ? isRecipe : true,
+      mealType || null,
+      category || 'food',
+      healthLevel || 'medium'
     ]);
 
     const postId = postRes.rows[0].id;

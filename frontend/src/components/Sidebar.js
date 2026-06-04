@@ -33,8 +33,11 @@ function Sidebar({ user }) {
         <NavLink to="/community" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <span className="nav-icon">👥</span> Cộng đồng lành mạnh
         </NavLink>
-        <NavLink to="/favourites" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <span className="nav-icon">❤️</span> Yêu thích
+        <NavLink to="/my-recipes" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <span className="nav-icon">🍳</span> Công thức của tôi
+        </NavLink>
+        <NavLink to="/ingredients" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <span className="nav-icon">🍏</span> Tra cứu dinh dưỡng
         </NavLink>
       </ul>
 

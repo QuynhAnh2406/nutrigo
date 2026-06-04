@@ -46,7 +46,12 @@ CREATE TABLE ingredients (
     calories_per_100g NUMERIC(6,2) DEFAULT 0,
     protein_per_100g NUMERIC(6,2) DEFAULT 0,
     carbs_per_100g NUMERIC(6,2) DEFAULT 0,
-    fat_per_100g NUMERIC(6,2) DEFAULT 0
+    fat_per_100g NUMERIC(6,2) DEFAULT 0,
+    fiber_per_100g NUMERIC(6,2) DEFAULT 0,
+    type VARCHAR(50) DEFAULT 'ingredient',
+    serving_unit VARCHAR(50) DEFAULT '100g',
+    category VARCHAR(50) DEFAULT 'food',
+    brand_name VARCHAR(100)
 );
 
 -- ==========================================
@@ -66,6 +71,10 @@ CREATE TABLE posts (
     fat NUMERIC(6,2),
     recipe_instructions TEXT, -- Dùng cho text thuần hoặc fallback
     rating NUMERIC(3,2) DEFAULT 0,
+    is_recipe BOOLEAN DEFAULT FALSE,
+    meal_type VARCHAR(50),
+    category VARCHAR(50) DEFAULT 'food',
+    health_level VARCHAR(50) DEFAULT 'medium',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -141,5 +150,6 @@ CREATE TABLE meal_plans (
     day_name VARCHAR(20) NOT NULL, -- Ví dụ: 'Monday', 'Tuesday'
     meal_type VARCHAR(50) NOT NULL, -- 'breakfast', 'lunch', 'dinner', 'snack'
     post_id INTEGER REFERENCES posts(id) ON DELETE SET NULL, -- Tham chiếu tới công thức nấu ăn
-    UNIQUE (user_id, day_name, meal_type)
+    meal_date DATE NOT NULL,
+    UNIQUE (user_id, meal_date, meal_type, post_id)
 );

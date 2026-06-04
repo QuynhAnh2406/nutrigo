@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import AddMealModal from '../components/AddMealModal';
+import PageHeader from '../components/PageHeader';
 import { CalendarDays, Sparkles, ShoppingCart, Lightbulb, ArrowLeft, ArrowRight, Plus, Trash2, ChefHat, Flame, Copy, Check, Download } from 'lucide-react';
 
 const getWeekStart = (date) => {
@@ -51,6 +52,7 @@ function MealPlan() {
   const [activeSection, setActiveSection] = useState('calendar'); // 'calendar' or 'suggestions'
   const [activeTab, setActiveTab] = useState('weekly-planner'); // 'weekly-planner' or 'shopping-list'
   const [weeklyPlan, setWeeklyPlan] = useState([]);
+  const [checkedIngredients, setCheckedIngredients] = useState([]);
   
   // Suggestion State
   const [userIngredients, setUserIngredients] = useState(['Trứng', 'Thịt bò']);
@@ -64,6 +66,11 @@ function MealPlan() {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     return getWeekStart(new Date());
   });
+
+  // Reset checked ingredients when changing weeks
+  useEffect(() => {
+    setCheckedIngredients([]);
+  }, [currentWeekStart]);
 
   const nextWeek = () => {
     const next = new Date(currentWeekStart);
@@ -222,6 +229,14 @@ function MealPlan() {
 
   const ingredientsList = extractIngredients();
 
+  const toggleIngredientChecked = (ingName) => {
+    if (checkedIngredients.includes(ingName)) {
+      setCheckedIngredients(checkedIngredients.filter(name => name !== ingName));
+    } else {
+      setCheckedIngredients([...checkedIngredients, ingName]);
+    }
+  };
+
   const handleExportTXT = () => {
     const startStr = days[0]?.formatted ? days[0].formatted.replace(/\//g, '-') : 'tuan-nay';
     const endStr = days[6]?.formatted ? days[6].formatted.replace(/\//g, '-') : '';
@@ -230,10 +245,12 @@ function MealPlan() {
     txtContent += `   Tuần: ${days[0]?.formatted || ''} - ${days[6]?.formatted || ''}\n`;
     txtContent += `=========================================\n\n`;
     
-    if (ingredientsList.length === 0) {
-      txtContent += `Chưa có nguyên liệu nào được lên lịch.\n`;
+    const remaining = ingredientsList.filter(ing => !checkedIngredients.includes(ing.name));
+    
+    if (remaining.length === 0) {
+      txtContent += `Tất cả nguyên liệu đã được mua hoặc chưa lên lịch.\n`;
     } else {
-      ingredientsList.forEach((ing, idx) => {
+      remaining.forEach((ing, idx) => {
         txtContent += `${idx + 1}. [ ] ${ing.name.padEnd(25)} (x${ing.count})\n`;
       });
     }
@@ -270,27 +287,11 @@ function MealPlan() {
 
       {activeSection === 'calendar' && (
         <div className="no-print mb-8">
-          {/* Horizontal PageHeader Card with high contrast green gradient */}
-          <div className="relative overflow-hidden rounded-[24px] border border-white/50 bg-gradient-to-br from-[#EAF5DA] via-[#DDF7B0] to-[#B5E361] p-5 shadow-[0_12px_30px_rgba(167,233,101,0.15)]">
-            {/* Decorative blobs */}
-            <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/30 blur-3xl" />
-            <div className="pointer-events-none absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-white/25 blur-3xl" />
-
-            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 z-10 w-full">
-              {/* Left Side: Icon + Title & Description */}
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/55 shadow-sm ring-1 ring-white/60 backdrop-blur">
-                  <ChefHat className="h-6 w-6 text-[#1f3b00]" />
-                </div>
-                <div className="text-left">
-                  <h1 className="text-xl font-extrabold tracking-tight text-[#183000]">Lịch ăn uống</h1>
-                  <p className="mt-0.5 text-xs font-semibold text-[#2d5200]/80">
-                    Lên kế hoạch các bữa ăn trong tuần và tự động tạo danh sách đi chợ.
-                  </p>
-                </div>
-              </div>
-
-              {/* Right Side: Week Selector & Smart Actions */}
+          <PageHeader
+            title="Lịch ăn uống"
+            subtitle="Lên kế hoạch các bữa ăn trong tuần và tự động tạo danh sách đi chợ."
+            icon={ChefHat}
+            actions={
               <div className="flex flex-wrap items-center gap-3">
                 {/* Week selector */}
                 <div className="inline-flex items-center rounded-2xl bg-white/65 backdrop-blur ring-1 ring-white/60 p-1 shadow-sm h-[34px]">
@@ -334,38 +335,37 @@ function MealPlan() {
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
+            }
+          />
         </div>
       )}
 
-      {/* Switcher Toggle as Tabs connected to the content below */}
+      {/* Switcher Toggle as Tabs */}
       {activeSection === 'calendar' && (
-        <div className="w-full px-2 sm:px-6 no-print -mb-[1px]">
-          <div className="flex gap-1">
+        <div className="w-full px-2 sm:px-6 no-print">
+          <div className="community-tabs">
             {/* Tab: Lịch tuần */}
             <button 
               type="button"
               onClick={() => setActiveTab('weekly-planner')}
-              className={`px-6 py-2.5 rounded-t-2xl font-black text-xs transition-all duration-300 border-t border-l border-r ${
-                activeTab === 'weekly-planner' 
-                  ? 'bg-white text-[#1f3b00] border-gray-100/80 shadow-[0_-4px_10px_rgba(0,0,0,0.02)] z-10 relative' 
-                  : 'bg-gray-50/70 text-gray-400 border-transparent hover:bg-gray-100 hover:text-gray-600'
-              }`}
+              className={`tab-btn ${activeTab === 'weekly-planner' ? 'active' : ''}`}
             >
+              <CalendarDays className="h-4 w-4" />
               Lịch tuần
             </button>
             {/* Tab: Nguyên liệu */}
             <button 
               type="button"
               onClick={() => setActiveTab('shopping-list')}
-              className={`px-6 py-2.5 rounded-t-2xl font-black text-xs transition-all duration-300 border-t border-l border-r ${
-                activeTab === 'shopping-list' 
-                  ? 'bg-white text-[#1f3b00] border-gray-100/80 shadow-[0_-4px_10px_rgba(0,0,0,0.02)] z-10 relative' 
-                  : 'bg-gray-50/70 text-gray-400 border-transparent hover:bg-gray-100 hover:text-gray-600'
-              }`}
+              className={`tab-btn ${activeTab === 'shopping-list' ? 'active' : ''}`}
             >
+              <ShoppingCart className="h-4 w-4" />
               Nguyên liệu
+              {ingredientsList.length > 0 && (
+                <span className="tab-btn-badge">
+                  {ingredientsList.filter(ing => !checkedIngredients.includes(ing.name)).length}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -374,7 +374,7 @@ function MealPlan() {
       {/* Main Container */}
       <div className="w-full px-2 sm:px-6">
         {activeSection === 'calendar' && (
-          <div className="bg-white rounded-b-3xl rounded-tr-3xl border border-gray-100/80 shadow-sm p-6 min-h-[500px]">
+          <div className="bg-white rounded-[28px] border border-gray-100/80 shadow-sm p-6 min-h-[500px]">
             {activeTab === 'weekly-planner' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 w-full animate-in fade-in-50 duration-500">
                 {weeklyPlan.map(planDay => {
@@ -487,9 +487,14 @@ function MealPlan() {
                       <div className="flex gap-2">
                         <button 
                           onClick={() => {
-                            const text = ingredientsList.map(ing => `- ${ing.name} ${ing.count > 1 ? `(x${ing.count})` : ''}`).join('\n');
+                            const remaining = ingredientsList.filter(ing => !checkedIngredients.includes(ing.name));
+                            if (remaining.length === 0) {
+                              alert("Tất cả nguyên liệu đã được chọn mua!");
+                              return;
+                            }
+                            const text = remaining.map(ing => `- ${ing.name} ${ing.count > 1 ? `(x${ing.count})` : ''}`).join('\n');
                             navigator.clipboard.writeText(text);
-                            alert("Đã sao chép danh sách nguyên liệu vào bộ nhớ tạm! 📋");
+                            alert("Đã sao chép danh sách nguyên liệu chưa mua vào bộ nhớ tạm! 📋");
                           }}
                           className="px-4 py-2 bg-gradient-to-r from-[#B5E361] to-[#8CB33D] text-[#1f3b00] font-extrabold rounded-2xl text-[10px] hover:scale-105 active:scale-95 transition-all shadow-sm flex items-center gap-1.5"
                         >
@@ -509,8 +514,19 @@ function MealPlan() {
                     <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
                       {ingredientsList.map((ing, index) => (
                         <label key={index} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl cursor-pointer border border-transparent hover:border-gray-100 transition-all duration-300">
-                          <input type="checkbox" className="w-5 h-5 text-green-600 rounded border-gray-350 focus:ring-[#B5E361]" />
-                          <span className="flex-1 text-gray-800 font-bold text-base">{ing.name}</span>
+                          <input 
+                            type="checkbox" 
+                            className="w-5 h-5 text-green-600 rounded border-gray-350 focus:ring-[#B5E361]" 
+                            checked={checkedIngredients.includes(ing.name)}
+                            onChange={() => toggleIngredientChecked(ing.name)}
+                          />
+                          <span className={`flex-1 text-gray-800 font-bold text-base transition-all ${
+                            checkedIngredients.includes(ing.name) 
+                              ? 'line-through text-gray-400 opacity-60' 
+                              : ''
+                          }`}>
+                            {ing.name}
+                          </span>
                           <span className="text-xs font-extrabold bg-green-50 text-green-700 px-3.5 py-1.5 rounded-full border border-green-100">
                             {ing.count > 1 ? `x${ing.count}` : 'x1'}
                           </span>
@@ -546,101 +562,170 @@ function MealPlan() {
 
         {activeSection === 'suggestions' && (
           <div className="w-full">
-            {/* suggestions centered header card */}
             <div className="no-print mb-8">
-              <div className="relative overflow-hidden rounded-[28px] border border-white/50 bg-gradient-to-br from-[#EAF5DA] via-[#DDF7B0] to-[#B5E361] p-6 shadow-[0_18px_45px_rgba(167,233,101,0.25)] flex flex-col items-center text-center">
-                {/* Decorative blobs */}
-                <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/30 blur-3xl" />
-                <div className="pointer-events-none absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-white/25 blur-3xl" />
-
-                <div className="relative flex flex-col items-center gap-4 z-10 w-full">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/55 shadow-sm ring-1 ring-white/60 backdrop-blur">
-                    <Lightbulb className="h-6 w-6 text-[#1f3b00] animate-pulse" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-extrabold tracking-tight text-[#183000] sm:text-3xl">Gợi ý thông minh</h1>
-                    <p className="mt-1 text-sm font-semibold text-[#2d5200]/80">
-                      Cho biết trong tủ lạnh của bạn có gì — chúng tôi sẽ tìm các món ăn phù hợp.
-                    </p>
-                  </div>
+              <PageHeader
+                title="Gợi ý thông minh"
+                subtitle="Cho biết trong tủ lạnh của bạn có gì — chúng tôi sẽ tìm các món ăn phù hợp."
+                icon={Lightbulb}
+                actions={
                   <button
-                    className="inline-flex items-center gap-1.5 rounded-2xl bg-[#1f3b00] px-4 py-2 mt-2 text-xs font-black text-white shadow-sm transition-colors hover:bg-black"
+                    className="inline-flex items-center gap-1.5 rounded-2xl bg-[#1f3b00] px-4 py-2 text-xs font-black text-white shadow-sm transition-colors hover:bg-black"
                     onClick={() => setActiveSection('calendar')}
                   >
                     <CalendarDays className="h-3.5 w-3.5" />
                     Quay lại Lịch ăn
                   </button>
-                </div>
-              </div>
+                }
+              />
             </div>
 
             <div className="suggestions-section animate-in fade-in-50 duration-500">
-              <div className="ingredients-panel">
-                <h3>Tủ lạnh của bạn</h3>
-                <form onSubmit={handleAddIngredient} className="ingredient-form">
+              <div className="ingredients-panel bg-white rounded-[24px] border border-gray-100/85 shadow-[0_8px_30px_rgba(0,0,0,0.02)] p-6 h-fit transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
+                <div className="mb-4">
+                  <h3 className="font-extrabold text-gray-800 text-base m-0 flex items-center gap-2">
+                    <span className="text-xl relative -top-[1.5px] select-none">❄️</span>
+                    <span>Tủ lạnh của bạn</span>
+                  </h3>
+                </div>
+                
+                <form onSubmit={handleAddIngredient} className="flex gap-2 mb-5">
                   <input 
                     type="text" 
                     value={ingredientInput} 
                     onChange={(e) => setIngredientInput(e.target.value)} 
                     placeholder="Thêm nguyên liệu (VD: Cá hồi)"
+                    className="flex-1 px-4 py-2.5 rounded-2xl border border-gray-100 bg-gray-50/50 outline-none text-sm font-semibold placeholder:text-gray-400 focus:bg-white focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15 transition-all"
                   />
-                  <button type="submit" className="btn-primary">+</button>
+                  <button 
+                    type="submit" 
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#B5E361] to-[#8CB33D] text-[#1f3b00] shadow-sm hover:scale-105 active:scale-95 transition-all duration-200"
+                  >
+                    <Plus className="h-5 w-5 font-bold" />
+                  </button>
                 </form>
-                <ul className="user-ingredients-list">
-                  {userIngredients.map((ing, idx) => (
-                    <li key={idx}>
-                      {ing} <button onClick={() => removeIngredient(ing)}>✕</button>
-                    </li>
-                  ))}
-                </ul>
+
+                {userIngredients.length > 0 ? (
+                  <ul className="flex flex-wrap gap-2 list-none m-0 p-0">
+                    {userIngredients.map((ing, idx) => (
+                      <li 
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 bg-[#F4FBE7] border border-[#B5E361]/40 px-3.5 py-1.5 rounded-2xl text-xs font-black text-[#1f3b00] hover:border-[#B5E361] hover:bg-[#EAF7D5] transition-all duration-200 animate-in zoom-in-95 duration-200"
+                      >
+                        {ing} 
+                        <button 
+                          onClick={() => removeIngredient(ing)}
+                          className="h-4 w-4 rounded-full flex items-center justify-center text-[#ef4444] hover:bg-red-50 hover:text-red-700 transition-colors ml-1 text-[10px]"
+                          title="Xóa nguyên liệu"
+                        >
+                          ✕
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-center py-6 text-gray-400 text-xs font-semibold">
+                    Tủ lạnh đang trống. Hãy thêm nguyên liệu!
+                  </div>
+                )}
               </div>
 
-              <div className="suggestions-panel">
-                <h3>Món ăn gợi ý ({suggestions.length})</h3>
-                <div className="suggestions-list">
-                  {suggestions.map(s => (
-                    <div key={s.id} className="suggestion-card">
-                      <div className="sugg-header">
-                        <h4>{s.name}</h4>
-                        <span className={`match-badge ${s.missingCount === 0 ? 'perfect' : 'partial'}`}>
-                          {s.matchPercentage}% ({getMatchStatusLabel(s.matchStatus)})
-                        </span>
-                      </div>
-                      <div className="sugg-details">
-                        <span>🔥 {s.calories} kcal</span>
-                        <span>⏱ {s.prepTime}</span>
-                      </div>
-                      <div className="sugg-ingredients">
-                        <strong>Nguyên liệu: </strong>
-                        {s.ingredients.map(ing => {
-                          const hasIt = userIngredients.some(ui => ui.toLowerCase() === ing.toLowerCase());
-                          return <span key={ing} className={hasIt ? 'has-ing' : 'miss-ing'}>{ing}</span>;
-                        })}
-                      </div>
-                      <div className="sugg-actions">
-                        <select id={`day-${s.id}`} className="sugg-select">
-                          {weeklyPlan.map(d => <option key={d.day} value={d.date}>{getDayTranslation(d.day)} ({d.date.substring(5,10)})</option>)}
-                        </select>
-                        <select id={`meal-${s.id}`} className="sugg-select">
-                          <option value="breakfast">Bữa sáng</option>
-                          <option value="lunch">Bữa trưa</option>
-                          <option value="dinner">Bữa tối</option>
-                          <option value="snack">Bữa phụ</option>
-                        </select>
-                        <button 
-                          className="btn-primary btn-small"
-                          onClick={() => {
-                            const date = document.getElementById(`day-${s.id}`).value;
-                            const meal = document.getElementById(`meal-${s.id}`).value;
-                            addToPlan(s, date, meal);
-                          }}
-                        >
-                          + Thêm vào Lịch ăn
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+              <div className="suggestions-panel bg-white rounded-[24px] border border-gray-100/85 shadow-[0_8px_30px_rgba(0,0,0,0.02)] p-6 transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
+                <div className="mb-6">
+                  <h3 className="font-extrabold text-gray-800 text-base m-0 flex items-center gap-2">
+                    <span className="text-xl relative -top-[2px] select-none">💡</span>
+                    <span>Món ăn gợi ý ({suggestions.length})</span>
+                  </h3>
                 </div>
+
+                {suggestions.length > 0 ? (
+                  <div className="suggestions-list grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {suggestions.map(s => (
+                      <div key={s.id} className="suggestion-card bg-[#FBFDF8] border border-[#B5E361]/35 hover:border-[#B5E361] rounded-[22px] p-5 shadow-sm transition-all duration-300 hover:shadow-md flex flex-col justify-between hover:scale-[1.01]">
+                        {/* Card Content */}
+                        <div>
+                          <div className="flex justify-between items-start gap-3 mb-2.5">
+                            <h4 className="font-extrabold text-[#183000] text-base leading-snug truncate" title={s.name}>
+                              {s.name}
+                            </h4>
+                            <span className={`shrink-0 rounded-xl px-2.5 py-1 text-[10px] font-black tracking-wide ${
+                              s.missingCount === 0 
+                                ? 'bg-[#EAF7D5] border border-[#B5E361]/50 text-[#2d5200]' 
+                                : 'bg-[#FFF9E6] border border-[#F59E0B]/30 text-[#B45309]'
+                            }`}>
+                              {s.matchPercentage}% {s.missingCount === 0 ? 'Khớp 100%' : `Thiếu ${s.missingCount}`}
+                            </span>
+                          </div>
+
+                          {/* Calories and prep time */}
+                          <div className="flex gap-2.5 mb-4">
+                            <span className="inline-flex items-center gap-1 font-extrabold text-[10px] text-orange-600 bg-orange-50/50 px-2.5 py-1 rounded-lg border border-orange-100/20">
+                              🔥 {s.calories} kcal
+                            </span>
+                            <span className="inline-flex items-center gap-1 font-extrabold text-[10px] text-[#3d6600] bg-[#F4FBE7] px-2.5 py-1 rounded-lg border border-[#B5E361]/20">
+                              ⏱ {s.prepTime}
+                            </span>
+                          </div>
+
+                          {/* Ingredients tags list */}
+                          <div className="mb-5">
+                            <span className="block text-[10px] text-gray-400 font-black uppercase tracking-wider mb-2">Nguyên liệu</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {s.ingredients.map(ing => {
+                                const hasIt = userIngredients.some(ui => ui.toLowerCase() === ing.toLowerCase());
+                                return (
+                                  <span 
+                                    key={ing} 
+                                    className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border ${
+                                      hasIt 
+                                        ? 'bg-[#F4FBE7] border-[#B5E361]/40 text-[#1f3b00]' 
+                                        : 'bg-red-50/50 border-red-100/70 text-red-700'
+                                    }`}
+                                  >
+                                    {ing}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions wrapper */}
+                        <div className="pt-4 border-t border-dashed border-[#B5E361]/25 flex flex-col gap-3">
+                          <div className="flex gap-2 w-full">
+                            <select id={`day-${s.id}`} className="flex-1 bg-white border border-gray-200/80 rounded-xl px-2.5 py-2 text-[11px] font-black text-[#1f3b00] cursor-pointer hover:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15 outline-none transition-all">
+                              {weeklyPlan.map(d => <option key={d.day} value={d.date}>{getDayTranslation(d.day)} ({d.date.substring(5,10)})</option>)}
+                            </select>
+                            <select id={`meal-${s.id}`} className="flex-1 bg-white border border-gray-200/80 rounded-xl px-2.5 py-2 text-[11px] font-black text-[#1f3b00] cursor-pointer hover:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15 outline-none transition-all">
+                              <option value="breakfast">Bữa sáng</option>
+                              <option value="lunch">Bữa trưa</option>
+                              <option value="dinner">Bữa tối</option>
+                              <option value="snack">Bữa phụ</option>
+                            </select>
+                          </div>
+                          
+                          <button 
+                            className="w-full bg-[#1f3b00] hover:bg-black text-white hover:scale-[1.01] active:scale-[0.99] font-black text-xs py-2.5 px-4 rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center gap-1.5"
+                            onClick={() => {
+                              const date = document.getElementById(`day-${s.id}`).value;
+                              const meal = document.getElementById(`meal-${s.id}`).value;
+                              addToPlan(s, date, meal);
+                            }}
+                          >
+                            + Thêm vào Lịch ăn
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-center py-12 px-4 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                    <span className="text-3xl mb-3">🍳</span>
+                    <h4 className="font-extrabold text-gray-800 text-sm mb-1">Chưa có món ăn gợi ý</h4>
+                    <p className="text-xs text-gray-400 font-semibold max-w-xs leading-relaxed">
+                      Hãy thêm các nguyên liệu trong tủ lạnh của bạn để chúng tôi gợi ý các món ăn phù hợp!
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

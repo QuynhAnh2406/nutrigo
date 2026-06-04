@@ -11,10 +11,12 @@ export default function PageHeader({
   const isCompact = !subtitle && !children;
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/50 bg-gradient-to-br from-[#EAF5DA] via-[#DDF7B0] to-[#B5E361] p-6 shadow-[0_18px_45px_rgba(167,233,101,0.25)]">
-      {/* Decorative blobs */}
-      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/30 blur-3xl" />
-      <div className="pointer-events-none absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-white/25 blur-3xl" />
+    <div className="relative rounded-[28px] border border-white/50 bg-gradient-to-br from-[#EAF5DA] via-[#DDF7B0] to-[#B5E361] p-6 shadow-[0_18px_45px_rgba(167,233,101,0.25)]">
+      {/* Decorative blobs wrapped in overflow-hidden */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[28px]">
+        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/30 blur-3xl" />
+        <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-white/25 blur-3xl" />
+      </div>
 
       <div className="relative flex flex-col gap-4">
         <div className={`flex flex-wrap justify-between gap-4 ${isCompact ? 'items-center' : 'items-start'}`}>

@@ -11,9 +11,10 @@ import Dashboard from './pages/Dashboard';
 import MealPlan from './pages/MealPlan';
 import Community from './pages/Community';
 import CreatePost from './pages/CreatePost';
-import Favourites from './pages/Favourites';
 import Profile from './pages/Profile';
 import Signup from './pages/Signup';
+import Ingredients from './pages/Ingredients';
+import MyRecipes from './pages/MyRecipes';
 
 function App() {
   return (
@@ -29,7 +30,8 @@ function App() {
           <Route path="/meal-plan" element={<MealPlan />} />
           <Route path="/community" element={<Community />} />
           <Route path="/community/create-post" element={<CreatePost />} />
-          <Route path="/favourites" element={<Favourites />} />
+          <Route path="/ingredients" element={<Ingredients />} />
+          <Route path="/my-recipes" element={<MyRecipes />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
 
