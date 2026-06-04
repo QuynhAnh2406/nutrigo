@@ -102,6 +102,51 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
     ));
   };
 
+  const handleIngredientNameChange = (index, value) => {
+    setSelectedIngredients(selectedIngredients.map((item, i) => {
+      if (i === index) {
+        return {
+          ...item,
+          name: value,
+          showDropdown: true
+        };
+      }
+      return item;
+    }));
+  };
+
+  const handleSelectIngredient = (index, ing) => {
+    setSelectedIngredients(selectedIngredients.map((item, i) => {
+      if (i === index) {
+        return {
+          ...item,
+          name: ing.name,
+          calories_per_100g: parseFloat(ing.calories_per_100g || 0),
+          protein_per_100g: parseFloat(ing.protein_per_100g || 0),
+          carbs_per_100g: parseFloat(ing.carbs_per_100g || 0),
+          fat_per_100g: parseFloat(ing.fat_per_100g || 0),
+          showDropdown: false
+        };
+      }
+      return item;
+    }));
+  };
+
+  const handleIngredientBlur = (index) => {
+    setTimeout(() => {
+      setSelectedIngredients(prev => prev.map((item, i) => 
+        i === index ? { ...item, showDropdown: false } : item
+      ));
+    }, 200);
+  };
+
+  const filterIngredients = (query) => {
+    if (!query) return allIngredients.slice(0, 10);
+    return allIngredients
+      .filter(ing => ing.name.toLowerCase().includes(query.toLowerCase()))
+      .slice(0, 10);
+  };
+
   const calculateTotals = () => {
     return selectedIngredients.reduce((totals, ing) => {
       const factor = (ing.weight_g || 0) / 100;
@@ -360,7 +405,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
                   <label className="text-[11px] font-black text-gray-800 uppercase tracking-wider pl-1">Nguyên liệu & Dinh dưỡng từng phần</label>
                   <button 
                     type="button"
-                    onClick={() => setSelectedIngredients([...selectedIngredients, { name: '', weight_g: 100, calories_per_100g: 100, protein_per_100g: 0, carbs_per_100g: 0, fat_per_100g: 0 }])}
+                    onClick={() => setSelectedIngredients([...selectedIngredients, { name: '', weight_g: 100, calories_per_100g: 100, protein_per_100g: 0, carbs_per_100g: 0, fat_per_100g: 0, showDropdown: false }])}
                     className="bg-[#B5E361] hover:bg-[#98d15a] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
                   >
                     <Plus size={14} />
@@ -371,29 +416,43 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
                 <div className="space-y-3">
                   {selectedIngredients.map((ing, idx) => (
                     <div key={idx} className="flex flex-col gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-[#B5E361]/20 transition-all duration-300">
-                      {/* Name input */}
-                      <div className="flex-1">
+                      {/* Name input with custom Dropdown */}
+                      <div className="relative flex-1">
                         <input 
                           type="text"
-                          list="ingredients-list"
                           placeholder="Nhập tên nguyên liệu (ví dụ: Ức gà)..."
                           value={ing.name}
-                          onChange={(e) => {
-                            const newName = e.target.value;
-                            const matched = allIngredients.find(i => i.name.toLowerCase() === newName.toLowerCase());
+                          onChange={(e) => handleIngredientNameChange(idx, e.target.value)}
+                          onFocus={() => {
                             setSelectedIngredients(selectedIngredients.map((item, i) => 
-                              i === idx ? { 
-                                ...item, 
-                                name: newName,
-                                ...(matched ? matched : { calories_per_100g: item.calories_per_100g || 100, protein_per_100g: 0, carbs_per_100g: 0, fat_per_100g: 0 })
-                              } : item
+                              i === idx ? { ...item, showDropdown: true } : item
                             ));
                           }}
+                          onBlur={() => handleIngredientBlur(idx)}
                           className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/25 focus:border-[#B5E361] transition-all"
                         />
-                        <datalist id="ingredients-list">
-                          {allIngredients.map(i => <option key={i.id} value={i.name} />)}
-                        </datalist>
+                        {ing.showDropdown && (
+                          <div className="absolute left-0 right-0 top-full mt-1 z-50 max-h-48 overflow-y-auto bg-white border border-gray-150 rounded-xl shadow-lg">
+                            {filterIngredients(ing.name).map((dbIng) => (
+                              <button
+                                key={dbIng.id}
+                                type="button"
+                                onMouseDown={() => handleSelectIngredient(idx, dbIng)}
+                                className="w-full text-left px-3.5 py-2 text-xs font-semibold hover:bg-[#F4FBE7] hover:text-[#1f3b00] transition-colors border-b border-gray-50 last:border-0 flex justify-between items-center"
+                              >
+                                <span>{dbIng.name}</span>
+                                <span className="text-[10px] text-gray-400">
+                                  {dbIng.calories_per_100g} kcal / {dbIng.serving_unit || '100g'}
+                                </span>
+                              </button>
+                            ))}
+                            {filterIngredients(ing.name).length === 0 && (
+                              <div className="px-3.5 py-2 text-xs text-gray-400 italic">
+                                Không tìm thấy nguyên liệu
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* Weight and Custom Calories */}

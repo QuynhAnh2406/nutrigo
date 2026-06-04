@@ -15,6 +15,7 @@ import Profile from './pages/Profile';
 import Signup from './pages/Signup';
 import Ingredients from './pages/Ingredients';
 import MyRecipes from './pages/MyRecipes';
+import CreateRecipe from './pages/CreateRecipe';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/community/create-post" element={<CreatePost />} />
           <Route path="/ingredients" element={<Ingredients />} />
           <Route path="/my-recipes" element={<MyRecipes />} />
+          <Route path="/my-recipes/create" element={<CreateRecipe />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import AddMealModal from '../components/AddMealModal';
 import PageHeader from '../components/PageHeader';
-import { CalendarDays, Sparkles, ShoppingCart, Lightbulb, ArrowLeft, ArrowRight, Plus, Trash2, ChefHat, Flame, Copy, Check, Download } from 'lucide-react';
+import { CalendarDays, Sparkles, ShoppingCart, Lightbulb, ArrowLeft, ArrowRight, Plus, ChefHat, Flame, Copy, Download } from 'lucide-react';
 
 const getWeekStart = (date) => {
   const d = new Date(date);
@@ -200,6 +200,14 @@ function MealPlan() {
     return total;
   };
 
+  const calculateWeeklyTotalCalories = () => {
+    let total = 0;
+    weeklyPlan.forEach(planDay => {
+      total += calculateDailyTotal(planDay.meals);
+    });
+    return total;
+  };
+
   // Extract and deduplicate ingredients
   const extractIngredients = () => {
     const ingredientCounts = {};
@@ -291,52 +299,54 @@ function MealPlan() {
             title="Lịch ăn uống"
             subtitle="Lên kế hoạch các bữa ăn trong tuần và tự động tạo danh sách đi chợ."
             icon={ChefHat}
-            actions={
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Week selector */}
-                <div className="inline-flex items-center rounded-2xl bg-white/65 backdrop-blur ring-1 ring-white/60 p-1 shadow-sm h-[34px]">
-                  <button
-                    onClick={prevWeek}
-                    disabled={isPrevDisabled()}
-                    className={`p-1.5 rounded-xl transition-all ${
-                      isPrevDisabled()
-                        ? 'text-gray-300 cursor-not-allowed opacity-50'
-                        : 'text-gray-700 hover:bg-white hover:text-black'
-                    }`}
-                  >
-                    <ArrowLeft size={14} />
-                  </button>
-                  <div className="px-2.5 text-[11px] font-black text-gray-900 whitespace-nowrap">
-                    {days[0].formatted} - {days[6].formatted}
-                  </div>
-                  <button
-                    onClick={nextWeek}
-                    className="p-1.5 rounded-xl text-gray-700 hover:bg-white hover:text-black transition-all"
-                  >
-                    <ArrowRight size={14} />
-                  </button>
+            badge={`${calculateWeeklyTotalCalories()} kcal`}
+          >
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+              {/* Week selector */}
+              <div className="inline-flex items-center rounded-2xl bg-white/65 backdrop-blur ring-1 ring-white/60 p-1 shadow-sm h-[38px] w-fit">
+                <button
+                  onClick={prevWeek}
+                  disabled={isPrevDisabled()}
+                  className={`p-2 rounded-xl transition-all ${
+                    isPrevDisabled()
+                      ? 'text-gray-300 cursor-not-allowed opacity-50'
+                      : 'text-gray-700 hover:bg-white hover:text-black'
+                  }`}
+                >
+                  <ArrowLeft size={14} />
+                </button>
+                <div className="px-3 text-xs font-black text-gray-900 whitespace-nowrap">
+                  Tuần: {days[0].formatted} - {days[6].formatted}
                 </div>
-
-                {/* Autofill & Smart suggestion actions */}
-                <div className="flex gap-2">
-                  <button
-                    className="inline-flex items-center gap-1.5 rounded-2xl bg-white/70 ring-1 ring-white/60 px-3 py-1.5 text-xs font-black text-gray-800 shadow-sm transition-all hover:bg-white h-[34px]"
-                    onClick={() => setActiveSection('suggestions')}
-                  >
-                    <Lightbulb className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
-                    Gợi ý
-                  </button>
-                  <button
-                    className="inline-flex items-center gap-1.5 rounded-2xl bg-[#1f3b00] px-3 py-1.5 text-xs font-black text-white shadow-sm transition-all hover:bg-black h-[34px]"
-                    onClick={handleAutoFill}
-                  >
-                    <Sparkles className="h-3.5 w-3.5 text-[#B5E361]" />
-                    Tự động điền
-                  </button>
-                </div>
+                <button
+                  onClick={nextWeek}
+                  className="p-2 rounded-xl text-gray-700 hover:bg-white hover:text-black transition-all"
+                >
+                  <ArrowRight size={14} />
+                </button>
               </div>
-            }
-          />
+
+              {/* Autofill & Smart suggestion actions */}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-white/70 ring-1 ring-white/60 px-4 py-2 text-xs sm:text-sm font-extrabold text-gray-800 shadow-sm transition-all hover:bg-white h-[38px]"
+                  onClick={() => setActiveSection('suggestions')}
+                >
+                  <Lightbulb className="h-4 w-4 text-amber-500 animate-pulse" />
+                  Gợi ý thông minh
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-[#1f3b00] px-4 py-2 text-xs sm:text-sm font-extrabold text-white shadow-sm transition-all hover:bg-black h-[38px]"
+                  onClick={handleAutoFill}
+                >
+                  <Sparkles className="h-4 w-4 text-[#B5E361]" />
+                  Tự động điền
+                </button>
+              </div>
+            </div>
+          </PageHeader>
         </div>
       )}
 

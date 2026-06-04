@@ -4,7 +4,7 @@ import PostCard from '../components/PostCard';
 import PostDetailModal from '../components/PostDetailModal';
 import AddToMealPlanModal from '../components/AddToMealPlanModal';
 import PageHeader from '../components/PageHeader';
-import { ChefHat, Plus, Search, X, Check, Flame, Clock, Users, Trash2, Sparkles, Heart, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { ChefHat, Plus, Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
 
 function MyRecipes() {
   const navigate = useNavigate();
@@ -14,8 +14,6 @@ function MyRecipes() {
   const [activeTab, setActiveTab] = useState('All'); // 'All', 'created', 'saved'
   const [selectedPost, setSelectedPost] = useState(null);
   const [postToAddPlan, setPostToAddPlan] = useState(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   // Advanced Filter State
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
@@ -38,21 +36,6 @@ function MyRecipes() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showAdvancedFilter]);
-
-  // Form State for new recipe creation
-  const [formData, setFormData] = useState({
-    foodName: '',
-    description: '',
-    image: '',
-    prepTime: '',
-    difficulty: 'Easy',
-    tags: '',
-    mealType: 'breakfast',
-    category: 'food',
-    healthLevel: 'medium'
-  });
-  const [ingredients, setIngredients] = useState([{ name: '', amount: '', calories: '' }]);
-  const [instructions, setInstructions] = useState(['']);
 
   const fetchRecipes = useCallback(async () => {
     try {
@@ -94,83 +77,6 @@ function MyRecipes() {
     }
   };
 
-  const handleFormInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleIngredientChange = (index, field, value) => {
-    const newIngs = [...ingredients];
-    newIngs[index][field] = value;
-    setIngredients(newIngs);
-  };
-
-  const handleInstructionChange = (index, value) => {
-    const newInsts = [...instructions];
-    newInsts[index] = value;
-    setInstructions(newInsts);
-  };
-
-  const addIngredientRow = () => setIngredients([...ingredients, { name: '', amount: '', calories: '' }]);
-  const removeIngredientRow = (index) => setIngredients(ingredients.filter((_, i) => i !== index));
-
-  const addInstructionRow = () => setInstructions([...instructions, '']);
-  const removeInstructionRow = (index) => setInstructions(instructions.filter((_, i) => i !== index));
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.foodName.trim()) return;
-
-    setLoading(true);
-    const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(t => t);
-    const totalCal = ingredients.reduce((sum, ing) => sum + (Number(ing.calories) || 0), 0);
-
-    const newRecipeData = {
-      ...formData,
-      tags: tagsArray,
-      ingredients: ingredients.filter(i => i.name),
-      instructions: instructions.filter(i => i),
-      calories: totalCal,
-      isRecipe: true
-    };
-
-    try {
-      const res = await fetch('http://localhost:5000/api/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newRecipeData)
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('Đã tạo công thức thành công! 🎉');
-        setIsCreateModalOpen(false);
-        setFormData({
-          foodName: '',
-          description: '',
-          image: '',
-          prepTime: '',
-          difficulty: 'Easy',
-          tags: '',
-          mealType: 'breakfast',
-          category: 'food',
-          healthLevel: 'medium'
-        });
-        setIngredients([{ name: '', amount: '', calories: '' }]);
-        setInstructions(['']);
-        fetchRecipes();
-      } else {
-        alert(data.message || 'Lỗi khi tạo công thức.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Không thể kết nối tới server.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Filter recipes based on active tab and advanced filters
   const filteredRecipes = recipes.filter(r => {
     const isOwn = r.user_id === (user ? user.id : 1);
@@ -186,8 +92,6 @@ function MyRecipes() {
     return matchMealType && matchCategory && matchHealthLevel && matchRating;
   });
 
-  const totalCaloriesCount = ingredients.reduce((sum, ing) => sum + (Number(ing.calories) || 0), 0);
-
   return (
     <div className="my-recipes-page main-content" style={{ overflowY: 'auto', paddingBottom: '80px' }}>
       <div className="mb-8 relative z-30">
@@ -199,7 +103,7 @@ function MyRecipes() {
           actions={
             <button
               className="inline-flex items-center gap-2 rounded-2xl bg-gray-900 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-white shadow-sm transition-all hover:bg-black hover:scale-105 active:scale-95"
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => navigate('/my-recipes/create')}
             >
               <Plus className="h-4 w-4" />
               Tạo công thức mới
@@ -464,7 +368,7 @@ function MyRecipes() {
               Lưu bài đăng từ cộng đồng lành mạnh hoặc tự tạo công thức của riêng bạn ngay bây giờ!
             </p>
             <button
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => navigate('/my-recipes/create')}
               className="px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-black hover:bg-black transition-all"
             >
               + Tạo công thức đầu tiên
@@ -486,267 +390,6 @@ function MyRecipes() {
           post={postToAddPlan}
           onClose={() => setPostToAddPlan(null)}
         />
-      )}
-
-      {/* Create Recipe Modal */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-2xl rounded-[28px] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-300 flex flex-col max-h-[90vh] overflow-y-auto">
-            
-            {/* Header */}
-            <div className="flex justify-between items-center mb-5 border-b border-gray-50 pb-3 shrink-0">
-              <h3 className="font-extrabold text-gray-900 text-base flex items-center gap-1.5">
-                <Sparkles className="h-5 w-5 text-green-600 animate-pulse" /> Tạo công thức nấu ăn mới
-              </h3>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleFormSubmit} className="space-y-5">
-              {/* Basic Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-group flex flex-col gap-1">
-                  <label className="text-xs font-black text-gray-700 uppercase tracking-wider pl-1">Tên món ăn *</label>
-                  <input
-                    type="text"
-                    name="foodName"
-                    value={formData.foodName}
-                    onChange={handleFormInputChange}
-                    placeholder="Ví dụ: Salad ức gà, Bún chả..."
-                    required
-                    className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361]"
-                  />
-                </div>
-
-                <div className="form-group flex flex-col gap-1">
-                  <label className="text-xs font-black text-gray-700 uppercase tracking-wider pl-1">Đường dẫn hình ảnh (URL)</label>
-                  <input
-                    type="url"
-                    name="image"
-                    value={formData.image}
-                    onChange={handleFormInputChange}
-                    placeholder="Nhập liên kết ảnh (Tùy chọn)..."
-                    className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361]"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group flex flex-col gap-1">
-                <label className="text-xs font-black text-gray-700 uppercase tracking-wider pl-1">Mô tả công thức</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleFormInputChange}
-                  placeholder="Nhập mô tả ngắn gọn về món ăn..."
-                  rows="2"
-                  className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="form-group flex flex-col gap-1">
-                  <label className="text-xs font-black text-gray-700 uppercase tracking-wider pl-1">Thời gian nấu</label>
-                  <input
-                    type="text"
-                    name="prepTime"
-                    value={formData.prepTime}
-                    onChange={handleFormInputChange}
-                    placeholder="VD: 25 phút"
-                    className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361]"
-                  />
-                </div>
-
-                <div className="form-group flex flex-col gap-1">
-                  <label className="text-xs font-black text-gray-700 uppercase tracking-wider pl-1">Độ khó</label>
-                  <select
-                    name="difficulty"
-                    value={formData.difficulty}
-                    onChange={handleFormInputChange}
-                    className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] bg-white cursor-pointer"
-                  >
-                    <option value="Easy">Dễ (Easy)</option>
-                    <option value="Medium">Trung bình (Medium)</option>
-                    <option value="Hard">Khó (Hard)</option>
-                  </select>
-                </div>
-
-                <div className="form-group flex flex-col gap-1">
-                  <label className="text-xs font-black text-gray-700 uppercase tracking-wider pl-1">Nhãn dán (cách bằng dấu phẩy)</label>
-                  <input
-                    type="text"
-                    name="tags"
-                    value={formData.tags}
-                    onChange={handleFormInputChange}
-                    placeholder="VD: Ít Calo, Giàu đạm, Chay..."
-                    className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361]"
-                  />
-                </div>
-              </div>
-
-              {/* Advanced recipe options */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="form-group flex flex-col gap-1">
-                  <label className="text-xs font-black text-gray-700 uppercase tracking-wider pl-1">Bữa ăn đề xuất</label>
-                  <select
-                    name="mealType"
-                    value={formData.mealType}
-                    onChange={handleFormInputChange}
-                    className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] bg-white cursor-pointer"
-                  >
-                    <option value="breakfast">🍳 Bữa sáng (Breakfast)</option>
-                    <option value="lunch">🍲 Bữa trưa (Lunch)</option>
-                    <option value="snack">🍪 Bữa phụ (Snack)</option>
-                    <option value="dinner">🌃 Bữa tối (Dinner)</option>
-                  </select>
-                </div>
-
-                <div className="form-group flex flex-col gap-1">
-                  <label className="text-xs font-black text-gray-700 uppercase tracking-wider pl-1">Phân loại chi tiết</label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleFormInputChange}
-                    className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] bg-white cursor-pointer"
-                  >
-                    <option value="food">🍲 Đồ ăn (Food)</option>
-                    <option value="drink">🥤 Đồ uống (Drink)</option>
-                    <option value="snack">🍪 Ăn vặt (Snack)</option>
-                    <option value="fruit">🍎 Hoa quả (Fruit)</option>
-                  </select>
-                </div>
-
-                <div className="form-group flex flex-col gap-1">
-                  <label className="text-xs font-black text-gray-700 uppercase tracking-wider pl-1">Tốt cho sức khỏe</label>
-                  <select
-                    name="healthLevel"
-                    value={formData.healthLevel}
-                    onChange={handleFormInputChange}
-                    className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] bg-white cursor-pointer"
-                  >
-                    <option value="excellent">🟢 Rất tốt</option>
-                    <option value="good">🟡 Tốt</option>
-                    <option value="medium">🟠 Bình thường</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Ingredients List Builder */}
-              <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col gap-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider pl-1">Danh sách nguyên liệu chi tiết</span>
-                  <button
-                    type="button"
-                    onClick={addIngredientRow}
-                    className="text-[10px] font-black text-green-600 hover:text-green-700"
-                  >
-                    + THÊM DÒNG
-                  </button>
-                </div>
-
-                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                  {ingredients.map((ing, idx) => (
-                    <div key={idx} className="flex gap-2 items-center">
-                      <input
-                        type="text"
-                        placeholder="Tên nguyên liệu (VD: Ức gà)"
-                        value={ing.name}
-                        onChange={(e) => handleIngredientChange(idx, 'name', e.target.value)}
-                        required
-                        className="flex-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none focus:border-[#B5E361] min-w-0"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Định lượng (VD: 150g)"
-                        value={ing.amount}
-                        onChange={(e) => handleIngredientChange(idx, 'amount', e.target.value)}
-                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none focus:border-[#B5E361] min-w-0"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Calo"
-                        value={ing.calories}
-                        onChange={(e) => handleIngredientChange(idx, 'calories', e.target.value)}
-                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none focus:border-[#B5E361] min-w-0"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeIngredientRow(idx)}
-                        disabled={ingredients.length <= 1}
-                        className="p-1.5 text-gray-300 hover:text-red-500 disabled:opacity-30"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-2 border-t border-dashed border-gray-200 text-right text-xs font-bold text-gray-600">
-                  Tổng Calo ước tính: <span className="text-sm font-black text-green-600">{totalCaloriesCount} kcal</span>
-                </div>
-              </div>
-
-              {/* Instructions steps */}
-              <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col gap-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-wider pl-1">Các bước chế biến</span>
-                  <button
-                    type="button"
-                    onClick={addInstructionRow}
-                    className="text-[10px] font-black text-green-600 hover:text-green-700"
-                  >
-                    + THÊM BƯỚC
-                  </button>
-                </div>
-
-                <div className="space-y-3 max-h-40 overflow-y-auto pr-1">
-                  {instructions.map((inst, idx) => (
-                    <div key={idx} className="flex gap-2 items-start">
-                      <span className="text-xs font-black text-gray-400 mt-2.5 w-4">{idx + 1}.</span>
-                      <textarea
-                        placeholder="Mô tả bước làm này..."
-                        value={inst}
-                        onChange={(e) => handleInstructionChange(idx, e.target.value)}
-                        required
-                        rows="1"
-                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none focus:border-[#B5E361] resize-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeInstructionRow(idx)}
-                        disabled={instructions.length <= 1}
-                        className="p-1.5 text-gray-300 hover:text-red-500 mt-1 disabled:opacity-30"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Footer buttons */}
-              <div className="flex gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl font-extrabold text-sm text-gray-700 transition-colors"
-                >
-                  Hủy bỏ
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 py-2.5 bg-gradient-to-r from-[#B5E361] to-[#8CB33D] text-[#1f3b00] hover:scale-[1.02] active:scale-[0.98] rounded-xl font-extrabold text-sm transition-all shadow-sm shadow-[#B5E361]/10"
-                >
-                  {loading ? 'Đang tạo...' : 'Tạo công thức'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
       )}
     </div>
   );
