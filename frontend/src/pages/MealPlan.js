@@ -278,7 +278,7 @@ function MealPlan() {
   };
 
   return (
-    <div className="mealplan-page main-content" style={{ overflowY: 'auto', paddingBottom: '80px' }}>
+    <div className="mealplan-page main-content h-full flex flex-col" style={{ overflow: 'hidden', paddingBottom: '20px' }}>
       {/* Breadcrumb - Only visible in suggestions mode */}
       {activeSection === 'suggestions' && (
         <nav className="flex items-center gap-2 mb-6">
@@ -299,7 +299,6 @@ function MealPlan() {
             title="Lịch ăn uống"
             subtitle="Lên kế hoạch các bữa ăn trong tuần và tự động tạo danh sách đi chợ."
             icon={ChefHat}
-            badge={`${calculateWeeklyTotalCalories()} kcal`}
           >
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
               {/* Week selector */}
@@ -315,7 +314,7 @@ function MealPlan() {
                 >
                   <ArrowLeft size={14} />
                 </button>
-                <div className="px-3 text-xs font-black text-gray-900 whitespace-nowrap">
+                <div className="px-3 text-sm font-black text-gray-900 whitespace-nowrap">
                   Tuần: {days[0].formatted} - {days[6].formatted}
                 </div>
                 <button
@@ -382,48 +381,51 @@ function MealPlan() {
       )}
 
       {/* Main Container */}
-      <div className="w-full px-2 sm:px-6">
+      <div className="w-full px-2 sm:px-6 flex-1 min-h-0">
         {activeSection === 'calendar' && (
-          <div className="bg-white rounded-[28px] border border-gray-100/80 shadow-sm p-6 min-h-[500px]">
+          <div className="bg-white rounded-[28px] border border-gray-100/80 shadow-sm p-4 sm:p-6 h-full flex flex-col min-h-0">
             {activeTab === 'weekly-planner' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 w-full animate-in fade-in-50 duration-500">
+              <div className="overflow-auto flex-1 custom-scrollbar w-full rounded-2xl">
+                <div className="flex gap-4 min-w-max p-2 h-full">
                 {weeklyPlan.map(planDay => {
                   const dateObj = days.find(dayInfo => dayInfo.name === planDay.day);
                   const dateStr = dateObj ? dateObj.dateObj.toISOString().split('T')[0] : '';
                   const dailyTotal = calculateDailyTotal(planDay.meals);
                   return (
-                    <div key={planDay.day} className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 flex flex-col gap-4 min-w-[140px] hover:border-[#B5E361] hover:shadow-lg transition-all duration-300">
-                      {/* Day Header */}
-                      <div className="text-center pb-3 border-b border-gray-50 flex flex-col gap-1 shrink-0">
-                        <span className="font-extrabold text-gray-800 text-sm">{getDayTranslation(planDay.day)}</span>
-                        {dateObj && <span className="text-[10px] text-gray-400 font-bold">{dateObj.formatted}</span>}
-                        {/* Calorie summary */}
-                        <div className="mt-1 text-[9px] text-[#1f3b00] font-black bg-[#F4FBE7] px-2.5 py-0.5 rounded-full inline-block self-center border border-[#B5E361]/25">
-                          {dailyTotal} kcal
+                    <div key={planDay.day} className="bg-[#FCFEF8] rounded-3xl border-2 border-[#B5E361]/30 shadow-sm flex flex-col w-[220px] shrink-0 hover:border-[#B5E361] hover:shadow-md transition-all duration-300 relative">
+                      {/* Sticky Day Header Wrapper */}
+                      <div className="sticky top-0 z-20 bg-[#FCFEF8] pt-3.5 px-3.5 pb-2 rounded-t-[22px]">
+                        <div className="text-center pb-3 flex flex-col gap-1.5 shrink-0 bg-gradient-to-b from-[#1f3b00] to-[#162a00] rounded-[20px] pt-4 px-2 shadow-inner">
+                          <span className="font-black text-white text-base uppercase tracking-wide">{getDayTranslation(planDay.day)}</span>
+                          {dateObj && <span className="text-[11px] text-[#B5E361] font-extrabold">{dateObj.formatted}</span>}
+                          {/* Calorie summary */}
+                          <div className="mt-2 text-[11px] text-[#1f3b00] font-black bg-gradient-to-r from-[#B5E361] to-[#8CB33D] px-3.5 py-1.5 rounded-full inline-block self-center shadow-sm">
+                            {dailyTotal} kcal
+                          </div>
                         </div>
                       </div>
 
                       {/* Meal Slots Stack */}
-                      <div className="flex flex-col gap-3.5">
+                      <div className="flex flex-col gap-3.5 px-3.5 pb-3.5">
                         {['breakfast', 'lunch', 'dinner', 'snack'].map(mealType => {
                           const recipeList = planDay.meals[mealType] || [];
                           const hasMeals = recipeList.length > 0;
                           return (
-                            <div key={mealType} className="flex flex-col gap-1.5">
+                            <div key={mealType} className="flex flex-col gap-2">
                               {/* Small label for slot */}
-                              <span className="text-[9px] text-gray-400 font-black uppercase tracking-wider pl-1">{getMealTypeLabel(mealType)}</span>
+                              <span className="text-[11px] text-gray-400 font-black uppercase tracking-wider pl-1">{getMealTypeLabel(mealType)}</span>
                               
                               {/* List of planned dishes inside this slot */}
                               {hasMeals && (
-                                <div className="flex flex-col gap-1.5">
+                                <div className="flex flex-col gap-2">
                                   {recipeList.map(recipe => (
-                                    <div key={recipe.mealPlanId} className="group bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] border border-[#B5E361]/35 hover:border-[#B5E361]/60 rounded-2xl p-3 flex flex-col justify-between min-h-[75px] relative hover:shadow-sm transition-all duration-300 animate-in zoom-in-95 duration-200">
+                                    <div key={recipe.mealPlanId} className="group bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] border border-[#B5E361]/35 hover:border-[#B5E361]/60 rounded-2xl p-4 flex flex-col justify-between min-h-[85px] relative hover:shadow-sm transition-all duration-300 animate-in zoom-in-95 duration-200">
                                       <div>
-                                        <div className="font-extrabold text-[#1f3b00] text-xs leading-snug pr-4 truncate" title={recipe.name}>
+                                        <div className="font-extrabold text-[#1f3b00] text-sm leading-snug pr-5" title={recipe.name}>
                                           {recipe.name}
                                         </div>
-                                        <div className="text-[9px] font-black text-green-700 mt-1 flex items-center gap-0.5">
-                                          <Flame size={10} />
+                                        <div className="text-[11px] font-black text-green-700 mt-2 flex items-center gap-1">
+                                          <Flame size={12} />
                                           {recipe.calories} kcal
                                         </div>
                                       </div>
@@ -449,19 +451,19 @@ function MealPlan() {
                                 // Smaller compact add button since there are already dishes
                                 <button
                                   onClick={() => setAddMealConfig({ day: planDay.day, mealType, mealDate: dateStr })}
-                                  className="border border-dashed border-[#B5E361]/30 hover:border-[#B5E361] hover:bg-[#F4FBE7]/15 rounded-xl py-2 px-3 flex items-center justify-center gap-1.5 text-gray-400 hover:text-green-700 transition-all duration-300"
+                                  className="border border-dashed border-[#B5E361]/50 hover:border-[#B5E361] hover:bg-[#F4FBE7]/40 rounded-xl py-2.5 px-3 flex items-center justify-center gap-1.5 text-gray-400 hover:text-green-700 transition-all duration-300"
                                 >
-                                  <span className="text-xs font-black">+</span>
-                                  <span className="text-[9px] font-black uppercase tracking-wider">Thêm món</span>
+                                  <span className="text-sm font-black">+</span>
+                                  <span className="text-[11px] font-black uppercase tracking-wider">Thêm món</span>
                                 </button>
                               ) : (
                                 // Normal empty slot (Mockup 1 style)
                                 <button
                                   onClick={() => setAddMealConfig({ day: planDay.day, mealType, mealDate: dateStr })}
-                                  className="border-2 border-dashed border-gray-200 hover:border-[#B5E361] hover:bg-[#F4FBE7]/30 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[90px] text-gray-400 hover:text-green-700 transition-all duration-300 group"
+                                  className="border-2 border-dashed border-gray-200 hover:border-[#B5E361] hover:bg-[#F4FBE7]/40 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[100px] text-gray-400 hover:text-green-700 transition-all duration-300 group"
                                 >
-                                  <span className="text-sm font-black group-hover:scale-125 transition-transform">+</span>
-                                  <span className="text-[9px] font-black mt-1 uppercase tracking-wider">{getMealTypeLabel(mealType)}</span>
+                                  <span className="text-base font-black group-hover:scale-125 transition-transform">+</span>
+                                  <span className="text-[11px] font-black mt-1.5 uppercase tracking-wider">{getMealTypeLabel(mealType)}</span>
                                 </button>
                               )}
                             </div>
@@ -471,11 +473,12 @@ function MealPlan() {
                     </div>
                   );
                 })}
+                </div>
               </div>
             )}
 
             {activeTab === 'shopping-list' && (
-              <div className="max-w-xl mx-auto w-full animate-in fade-in-50 duration-500">
+              <div className="max-w-xl mx-auto w-full animate-in fade-in-50 duration-500 overflow-y-auto h-full pr-2 custom-scrollbar pb-10">
                 {ingredientsList.length > 0 ? (
                   <div>
                     {/* Print-only Header */}
@@ -521,7 +524,7 @@ function MealPlan() {
                       </div>
                     </div>
                     
-                    <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
+                    <div className="space-y-2">
                       {ingredientsList.map((ing, index) => (
                         <label key={index} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl cursor-pointer border border-transparent hover:border-gray-100 transition-all duration-300">
                           <input 
@@ -571,8 +574,8 @@ function MealPlan() {
         )}
 
         {activeSection === 'suggestions' && (
-          <div className="w-full">
-            <div className="no-print mb-8">
+          <div className="w-full h-full flex flex-col min-h-0">
+            <div className="no-print mb-8 shrink-0">
               <PageHeader
                 title="Gợi ý thông minh"
                 subtitle="Cho biết trong tủ lạnh của bạn có gì — chúng tôi sẽ tìm các món ăn phù hợp."
@@ -589,8 +592,8 @@ function MealPlan() {
               />
             </div>
 
-            <div className="suggestions-section animate-in fade-in-50 duration-500">
-              <div className="ingredients-panel bg-white rounded-[24px] border border-gray-100/85 shadow-[0_8px_30px_rgba(0,0,0,0.02)] p-6 h-fit transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
+            <div className="suggestions-section animate-in fade-in-50 duration-500 overflow-y-auto flex-1 custom-scrollbar pb-10 pr-2">
+              <div className="ingredients-panel bg-white rounded-[24px] border border-gray-100/85 shadow-[0_8px_30px_rgba(0,0,0,0.02)] p-6 h-fit mb-6 transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
                 <div className="mb-4">
                   <h3 className="font-extrabold text-gray-800 text-base m-0 flex items-center gap-2">
                     <span className="text-xl relative -top-[1.5px] select-none">❄️</span>
