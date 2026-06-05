@@ -48,7 +48,8 @@ const getMatchStatusLabel = (status) => {
 
 function MealPlan() {
   const navigate = useNavigate();
-  const { user } = useOutletContext();
+  const { user, metrics } = useOutletContext();
+  const targetCalories = metrics?.targetCalories || 2000;
   const [activeSection, setActiveSection] = useState('calendar'); // 'calendar' or 'suggestions'
   const [activeTab, setActiveTab] = useState('weekly-planner'); // 'weekly-planner' or 'shopping-list'
   const [weeklyPlan, setWeeklyPlan] = useState([]);
@@ -386,20 +387,28 @@ function MealPlan() {
           <div className="bg-white rounded-[28px] border border-gray-100/80 shadow-sm p-4 sm:p-6 h-full flex flex-col min-h-0">
             {activeTab === 'weekly-planner' && (
               <div className="overflow-auto flex-1 custom-scrollbar w-full rounded-2xl">
-                <div className="flex gap-4 min-w-max p-2 h-full">
+                <div className="flex gap-4 min-w-max p-2 min-h-full">
                 {weeklyPlan.map(planDay => {
                   const dateObj = days.find(dayInfo => dayInfo.name === planDay.day);
                   const dateStr = dateObj ? dateObj.dateObj.toISOString().split('T')[0] : '';
                   const dailyTotal = calculateDailyTotal(planDay.meals);
+                  
+                  const isOverCalories = dailyTotal > targetCalories;
+                  const calorieBgClasses = isOverCalories
+                    ? "from-red-400 to-red-600 text-white shadow-red-500/30"
+                    : "from-[#B5E361] to-[#8CB33D] text-[#1f3b00] shadow-sm";
+
                   return (
                     <div key={planDay.day} className="bg-[#FCFEF8] rounded-3xl border-2 border-[#B5E361]/30 shadow-sm flex flex-col w-[220px] shrink-0 hover:border-[#B5E361] hover:shadow-md transition-all duration-300 relative">
                       {/* Sticky Day Header Wrapper */}
                       <div className="sticky top-0 z-20 bg-[#FCFEF8] pt-3.5 px-3.5 pb-2 rounded-t-[22px]">
-                        <div className="text-center pb-3 flex flex-col gap-1.5 shrink-0 bg-gradient-to-b from-[#1f3b00] to-[#162a00] rounded-[20px] pt-4 px-2 shadow-inner">
-                          <span className="font-black text-white text-base uppercase tracking-wide">{getDayTranslation(planDay.day)}</span>
-                          {dateObj && <span className="text-[11px] text-[#B5E361] font-extrabold">{dateObj.formatted}</span>}
+                        <div className="flex flex-col items-center justify-center gap-1 shrink-0 bg-gradient-to-b from-[#1f3b00] to-[#162a00] rounded-[14px] py-2 px-2 shadow-inner">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-black text-white text-sm uppercase tracking-wide">{getDayTranslation(planDay.day)}</span>
+                            {dateObj && <span className="text-[13px] text-[#B5E361] font-extrabold">{dateObj.formatted}</span>}
+                          </div>
                           {/* Calorie summary */}
-                          <div className="mt-2 text-[11px] text-[#1f3b00] font-black bg-gradient-to-r from-[#B5E361] to-[#8CB33D] px-3.5 py-1.5 rounded-full inline-block self-center shadow-sm">
+                          <div className={`text-[10px] font-black bg-gradient-to-r px-2.5 py-0.5 rounded-full ${calorieBgClasses}`}>
                             {dailyTotal} kcal
                           </div>
                         </div>
