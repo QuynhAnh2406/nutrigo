@@ -1,5 +1,5 @@
 require('dotenv').config();
-const runMigrations = require('./src/config/migrate');
+const runMigrations = require('./src/database_schema/migrate');
 
 async function migrate() {
   try {

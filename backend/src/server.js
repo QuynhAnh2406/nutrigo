@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Setup database migrations
-const runMigrations = require('./config/migrate');
+const runMigrations = require('./database_schema/migrate');
 (async () => {
   try {
     await runMigrations();

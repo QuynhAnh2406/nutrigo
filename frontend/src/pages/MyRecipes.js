@@ -18,9 +18,7 @@ function MyRecipes() {
   // Advanced Filter State
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState('All'); // 'All', 'breakfast', 'lunch', 'dinner', 'snack'
-  const [selectedCategory, setSelectedCategory] = useState('All'); // 'All', 'food', 'drink', 'snack', 'fruit'
-  const [selectedHealthLevel, setSelectedHealthLevel] = useState('All'); // 'All', 'excellent', 'good', 'medium'
-  const [selectedRating, setSelectedRating] = useState('All'); // 'All', '4.5', '4.0', '3.0'
+  const [selectedCategory, setSelectedCategory] = useState('All'); // 'All', 'food', 'drink', 'snack', 'fruit', 'other'
   const popoverContainerRef = useRef(null);
 
   useEffect(() => {
@@ -86,10 +84,8 @@ function MyRecipes() {
     // Advanced Filters
     const matchMealType = selectedMealType === 'All' || r.mealType === selectedMealType;
     const matchCategory = selectedCategory === 'All' || r.category === selectedCategory;
-    const matchHealthLevel = selectedHealthLevel === 'All' || r.healthLevel === selectedHealthLevel;
-    const matchRating = selectedRating === 'All' || parseFloat(r.rating || 0) >= parseFloat(selectedRating);
 
-    return matchMealType && matchCategory && matchHealthLevel && matchRating;
+    return matchMealType && matchCategory;
   });
 
   return (
@@ -130,7 +126,7 @@ function MyRecipes() {
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 <span className="hidden sm:inline">Bộ lọc nâng cao</span>
-                {(selectedMealType !== 'All' || selectedCategory !== 'All' || selectedHealthLevel !== 'All' || selectedRating !== 'All') && (
+                {(selectedMealType !== 'All' || selectedCategory !== 'All') && (
                   <span className="w-2 h-2 rounded-full bg-red-500"></span>
                 )}
               </button>
@@ -221,89 +217,24 @@ function MyRecipes() {
                         >
                           🍎 Hoa quả
                         </button>
-                      </div>
-                    </div>
-
-                    {/* Row 3: Health Level Filter */}
-                    <div className="flex flex-col gap-2 pt-3 border-t border-dashed border-gray-100">
-                      <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Tốt cho sức khỏe</span>
-                      <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
-                          onClick={() => setSelectedHealthLevel('All')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${selectedHealthLevel === 'All' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                          onClick={() => setSelectedCategory('other')}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'other' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                         >
-                          Tất cả
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedHealthLevel('excellent')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedHealthLevel === 'excellent' ? 'bg-green-600 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          🟢 Rất tốt
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedHealthLevel('good')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedHealthLevel === 'good' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          🟡 Tốt
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedHealthLevel('medium')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedHealthLevel === 'medium' ? 'bg-orange-500 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          🟠 Bình thường
+                          Khác
                         </button>
                       </div>
                     </div>
 
-                    {/* Row 4: Rating Filter */}
-                    <div className="flex flex-col gap-2 pt-3 border-t border-dashed border-gray-100">
-                      <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Đánh giá sao</span>
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedRating('All')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${selectedRating === 'All' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          Tất cả
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedRating('4.5')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedRating === '4.5' ? 'bg-yellow-500 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          ⭐ 4.5+
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedRating('4.0')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedRating === '4.0' ? 'bg-yellow-500 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          ⭐ 4.0+
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedRating('3.0')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedRating === '3.0' ? 'bg-yellow-500 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          ⭐ 3.0+
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Row 5: Action Reset Button */}
-                    {(selectedMealType !== 'All' || selectedCategory !== 'All' || selectedHealthLevel !== 'All' || selectedRating !== 'All') && (
+                    {/* Row 3: Action Reset Button */}
+                    {(selectedMealType !== 'All' || selectedCategory !== 'All') && (
                       <div className="flex justify-end pt-3 border-t border-dashed border-gray-100">
                         <button
                           type="button"
                           onClick={() => {
                             setSelectedMealType('All');
                             setSelectedCategory('All');
-                            setSelectedHealthLevel('All');
-                            setSelectedRating('All');
                           }}
                           className="flex items-center gap-1 text-xs text-red-500 font-bold hover:text-red-700 transition-colors"
                         >
