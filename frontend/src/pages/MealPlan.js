@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import AddMealModal from '../components/AddMealModal';
+import MealDetailModal from '../components/MealDetailModal';
 import PageHeader from '../components/PageHeader';
 import { CalendarDays, Sparkles, ShoppingCart, Lightbulb, ArrowLeft, ArrowRight, Plus, ChefHat, Flame, Copy, Download } from 'lucide-react';
 
@@ -62,6 +63,25 @@ function MealPlan() {
 
   // Modal control state
   const [addMealConfig, setAddMealConfig] = useState(null); // { day, mealType, mealDate }
+  const [selectedRecipeDetail, setSelectedRecipeDetail] = useState(null);
+
+  const handleRecipeClick = async (recipe, day, mealType, mealDate) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/posts/${recipe.recipeId || recipe.id}`);
+      const data = await res.json();
+      if (data.success) {
+        setSelectedRecipeDetail({ 
+          ...data.data, 
+          mealPlanId: recipe.mealPlanId,
+          day,
+          mealType,
+          mealDate
+        });
+      }
+    } catch (e) {
+      console.error("Failed to fetch recipe detail", e);
+    }
+  };
 
   // Calendar Date State
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
@@ -428,7 +448,11 @@ function MealPlan() {
                               {hasMeals && (
                                 <div className="flex flex-col gap-2">
                                   {recipeList.map(recipe => (
-                                    <div key={recipe.mealPlanId} className="group bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] border border-[#B5E361]/35 hover:border-[#B5E361]/60 rounded-2xl p-4 flex flex-col justify-between min-h-[85px] relative hover:shadow-sm transition-all duration-300 animate-in zoom-in-95 duration-200">
+                                    <div 
+                                      key={recipe.mealPlanId} 
+                                      className="group bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] border border-[#B5E361]/35 hover:border-[#B5E361]/60 rounded-2xl p-4 flex flex-col justify-between min-h-[85px] relative hover:shadow-sm transition-all duration-300 animate-in zoom-in-95 duration-200 cursor-pointer"
+                                      onClick={() => handleRecipeClick(recipe, planDay.day, mealType, dateStr)}
+                                    >
                                       <div>
                                         <div className="font-extrabold text-[#1f3b00] text-sm leading-snug pr-5" title={recipe.name}>
                                           {recipe.name}
@@ -763,6 +787,26 @@ function MealPlan() {
           onConfirm={() => {
             fetchWeeklyPlan();
             setAddMealConfig(null);
+          }}
+        />
+      )}
+
+      {selectedRecipeDetail && (
+        <MealDetailModal 
+          meal={selectedRecipeDetail} 
+          onClose={() => setSelectedRecipeDetail(null)} 
+          onDelete={() => {
+            handleClearMealAt(
+              selectedRecipeDetail.day, 
+              selectedRecipeDetail.mealType, 
+              selectedRecipeDetail.mealPlanId, 
+              selectedRecipeDetail.mealDate
+            );
+            setSelectedRecipeDetail(null);
+          }}
+          onSaveSuccess={() => {
+            fetchWeeklyPlan();
+            setSelectedRecipeDetail(null);
           }}
         />
       )}
