@@ -49,5 +49,5 @@ cd backend && npm run dev
 cd frontend && npm start
 ```
 
-Backend chạy trên port (xem server.js)
+Backend chạy trên http://localhost:8000
 Frontend chạy trên http://localhost:3000

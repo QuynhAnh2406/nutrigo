@@ -61,7 +61,7 @@ function MainLayout() {
       if (!token) return;
 
       try {
-        const res = await fetch('http://localhost:5000/api/profile/health', {
+        const res = await fetch('http://localhost:5002/api/profile/health', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

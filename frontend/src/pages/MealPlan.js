@@ -67,7 +67,7 @@ function MealPlan() {
 
   const handleRecipeClick = async (recipe, day, mealType, mealDate) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/posts/${recipe.recipeId || recipe.id}`);
+      const res = await fetch(`http://localhost:5002/api/posts/${recipe.recipeId || recipe.id}`);
       const data = await res.json();
       if (data.success) {
         setSelectedRecipeDetail({ 
@@ -127,7 +127,7 @@ function MealPlan() {
   const handleAutoFill = async () => {
     try {
       const weekStartStr = currentWeekStart.toISOString().split('T')[0];
-      const res = await fetch(`http://localhost:5000/api/mealplan/autofill?weekStart=${weekStartStr}`, { method: 'POST' });
+      const res = await fetch(`http://localhost:5002/api/mealplan/autofill?weekStart=${weekStartStr}`, { method: 'POST' });
       const data = await res.json();
       if(data.success) {
         setWeeklyPlan(data.data);
@@ -138,7 +138,7 @@ function MealPlan() {
   const fetchWeeklyPlan = useCallback(async () => {
     try {
       const weekStartStr = currentWeekStart.toISOString().split('T')[0];
-      const res = await fetch(`http://localhost:5000/api/mealplan?weekStart=${weekStartStr}`);
+      const res = await fetch(`http://localhost:5002/api/mealplan?weekStart=${weekStartStr}`);
       const data = await res.json();
       if(data.success) {
         setWeeklyPlan(data.data);
@@ -152,7 +152,7 @@ function MealPlan() {
 
   const fetchSuggestions = useCallback(async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/mealplan/suggest', {
+      const res = await fetch('http://localhost:5002/api/mealplan/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userIngredients })
@@ -184,7 +184,7 @@ function MealPlan() {
 
   const handleClearMealAt = async (day, mealType, mealPlanId, mealDate) => {
     try {
-      const res = await fetch('http://localhost:5000/api/mealplan/update', {
+      const res = await fetch('http://localhost:5002/api/mealplan/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ day, mealType, recipeId: null, mealPlanId, mealDate })
@@ -200,7 +200,7 @@ function MealPlan() {
   };
 
   const addToPlan = async (recipe, mealDate, mealType) => {
-    await fetch('http://localhost:5000/api/mealplan/update', {
+    await fetch('http://localhost:5002/api/mealplan/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mealDate, mealType, recipeId: recipe.id })

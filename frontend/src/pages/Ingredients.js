@@ -46,7 +46,7 @@ function Ingredients() {
 
   const fetchIngredients = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/mealplan/ingredients');
+      const res = await fetch('http://localhost:5002/api/mealplan/ingredients');
       const data = await res.json();
       if (data.success && data.data) {
         setIngredients(data.data);
@@ -73,7 +73,7 @@ function Ingredients() {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/ingredients', {
+      const res = await fetch('http://localhost:5002/api/ingredients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

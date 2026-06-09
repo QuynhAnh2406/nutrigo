@@ -30,7 +30,7 @@ function CreateRecipe() {
   useEffect(() => {
     const fetchDbIngredients = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/mealplan/ingredients');
+        const res = await fetch('http://localhost:5002/api/mealplan/ingredients');
         const data = await res.json();
         if (data.success && data.data) {
           setDbIngredients(data.data);
@@ -200,7 +200,7 @@ function CreateRecipe() {
     };
 
     try {
-      const res = await fetch('http://localhost:5000/api/posts', {
+      const res = await fetch('http://localhost:5002/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newRecipeData)

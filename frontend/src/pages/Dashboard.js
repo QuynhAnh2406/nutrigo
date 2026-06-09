@@ -53,9 +53,9 @@ function Dashboard() {
         const weekStartStr = monday.toISOString().split('T')[0];
 
         const [ingRes, postRes, mealPlanRes] = await Promise.all([
-          fetch('http://localhost:5000/api/ingredients'),
-          fetch('http://localhost:5000/api/posts'),
-          fetch(`http://localhost:5000/api/mealplan?weekStart=${weekStartStr}`)
+          fetch('http://localhost:5002/api/ingredients'),
+          fetch('http://localhost:5002/api/posts'),
+          fetch(`http://localhost:5002/api/mealplan?weekStart=${weekStartStr}`)
         ]);
         const ingData = await ingRes.json();
         const postData = await postRes.json();
@@ -97,7 +97,7 @@ function Dashboard() {
     if (!uploadData.foodName || !uploadData.calories || !uploadData.recipe) return;
     
     try {
-      const response = await fetch('http://localhost:5000/api/posts', {
+      const response = await fetch('http://localhost:5002/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

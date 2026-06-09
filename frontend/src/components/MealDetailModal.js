@@ -60,7 +60,7 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess }) {
     };
 
     try {
-      const res = await fetch(`http://localhost:5000/api/posts/${meal.id}`, {
+      const res = await fetch(`http://localhost:5002/api/posts/${meal.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedPostData)

@@ -34,7 +34,7 @@ function Community() {
 
   const fetchPosts = useCallback(async () => {
     try {
-      let url = `http://localhost:5000/api/posts?tab=${activeTab}&search=${searchQuery}`;
+      let url = `http://localhost:5002/api/posts?tab=${activeTab}&search=${searchQuery}`;
       const res = await fetch(url);
       const data = await res.json();
       if(data.success) {
@@ -66,7 +66,7 @@ function Community() {
 
   const handleLike = async (postId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/posts/${postId}/like`, { method: 'POST' });
+      const res = await fetch(`http://localhost:5002/api/posts/${postId}/like`, { method: 'POST' });
       const data = await res.json();
       if(data.success) {
         setPosts(posts.map(p => p.id === postId ? { ...p, isLiked: data.isLiked, likes: data.likes } : p));
@@ -78,7 +78,7 @@ function Community() {
 
   const handleSave = async (postId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/posts/${postId}/favorite`, { method: 'POST' });
+      const res = await fetch(`http://localhost:5002/api/posts/${postId}/favorite`, { method: 'POST' });
       const data = await res.json();
       if(data.success) {
         setPosts(posts.map(p => p.id === postId ? { ...p, isSaved: data.isSaved } : p));

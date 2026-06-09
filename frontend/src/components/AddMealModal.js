@@ -21,8 +21,8 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
     const fetchData = async () => {
       try {
         const [recipesRes, ingsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/mealplan/user-recipes'),
-          fetch('http://localhost:5000/api/mealplan/ingredients')
+          fetch('http://localhost:5002/api/mealplan/user-recipes'),
+          fetch('http://localhost:5002/api/mealplan/ingredients')
         ]);
         const recipesData = await recipesRes.json();
         const ingsData = await ingsRes.json();
@@ -63,7 +63,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
 
   const handleSelectRecipe = async (recipe) => {
     try {
-      const res = await fetch('http://localhost:5000/api/mealplan/update', {
+      const res = await fetch('http://localhost:5002/api/mealplan/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -181,7 +181,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
     };
 
     try {
-      const res = await fetch('http://localhost:5000/api/mealplan/add-with-recipe', {
+      const res = await fetch('http://localhost:5002/api/mealplan/add-with-recipe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

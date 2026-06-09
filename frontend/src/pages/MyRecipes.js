@@ -37,7 +37,7 @@ function MyRecipes() {
 
   const fetchRecipes = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/posts?tab=My Recipes&search=${searchQuery}`);
+      const res = await fetch(`http://localhost:5002/api/posts?tab=My Recipes&search=${searchQuery}`);
       const data = await res.json();
       if (data.success && data.data) {
         setRecipes(data.data);
@@ -53,7 +53,7 @@ function MyRecipes() {
 
   const handleLike = async (recipeId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/posts/${recipeId}/like`, { method: 'POST' });
+      const res = await fetch(`http://localhost:5002/api/posts/${recipeId}/like`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         setRecipes(recipes.map(r => r.id === recipeId ? { ...r, isLiked: data.isLiked, likes: data.likes } : r));
@@ -65,7 +65,7 @@ function MyRecipes() {
 
   const handleSave = async (recipeId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/posts/${recipeId}/favorite`, { method: 'POST' });
+      const res = await fetch(`http://localhost:5002/api/posts/${recipeId}/favorite`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         setRecipes(recipes.map(r => r.id === recipeId ? { ...r, isSaved: data.isSaved } : r));
