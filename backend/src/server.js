@@ -7,7 +7,7 @@ dotenv.config();
 const routes = require('./routes');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -15,33 +15,33 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Setup database migrations
 const runMigrations = require('./database_schema/migrate');
-(async () => {
-  try {
-    await runMigrations();
-  } catch (err) {
-    console.error("Server startup migrations failed:", err);
-  }
+(async() => {
+    try {
+        await runMigrations();
+    } catch (err) {
+        console.error("Server startup migrations failed:", err);
+    }
 })();
 
 // Setup routes
 app.use('/api', routes);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true });
+    res.json({ ok: true });
 });
 
 // 404 for unknown API routes
 app.use('/api', (_req, res) => {
-  res.status(404).json({ success: false, message: 'Not found' });
+    res.status(404).json({ success: false, message: 'Not found' });
 });
 
 // Generic error handler
 app.use((err, _req, res, _next) => {
-  // eslint-disable-next-line no-console
-  console.error(err);
-  res.status(500).json({ success: false, message: 'Server error' });
+    // eslint-disable-next-line no-console
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
