@@ -89,6 +89,41 @@ exports.getWeeklyPlan = async (req, res) => {
   }
 };
 
+exports.getMonthlyPlan = async (req, res) => {
+  const userId = getUserId(req);
+  const { year, month } = req.query; // e.g. year=2026, month=6 (1-indexed)
+
+  try {
+    const y = parseInt(year);
+    const m = parseInt(month) - 1; // JS months are 0-indexed
+    
+    // Get first day of the month
+    const startOfMonth = new Date(y, m, 1);
+    // Get last day of the month
+    const endOfMonth = new Date(y, m + 1, 0);
+
+    const startDateStr = startOfMonth.toISOString().split('T')[0];
+    const endDateStr = endOfMonth.toISOString().split('T')[0];
+
+    const { rows } = await db.query(`
+      SELECT DISTINCT meal_date
+      FROM meal_plans
+      WHERE user_id = $1 AND meal_date >= $2 AND meal_date <= $3
+    `, [userId, startDateStr, endDateStr]);
+
+    const daysWithMeals = rows.map(r => {
+        // Handle timezone issues carefully
+        const d = new Date(r.meal_date);
+        return d.toISOString().split('T')[0];
+    });
+
+    res.json({ success: true, data: daysWithMeals });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 exports.updatePlan = async (req, res) => {
   const { day, mealType, recipeId, mealPlanId, mealDate } = req.body;
   const userId = getUserId(req);
@@ -125,6 +160,29 @@ exports.updatePlan = async (req, res) => {
       req.query.weekStart = start.toISOString().split('T')[0];
     }
     exports.getWeeklyPlan(req, res);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.clearDay = async (req, res) => {
+  const { mealDate } = req.body;
+  const userId = getUserId(req);
+
+  try {
+    if (!mealDate) {
+      return res.status(400).json({ success: false, message: 'mealDate is required' });
+    }
+    
+    const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(mealDate).getDay()];
+
+    const result = await db.query(`
+      DELETE FROM meal_plans 
+      WHERE user_id = $1 AND (meal_date = $2 OR (meal_date IS NULL AND day_name = $3))
+    `, [userId, mealDate, dayName]);
+
+    res.json({ success: true, deletedCount: result.rowCount });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });

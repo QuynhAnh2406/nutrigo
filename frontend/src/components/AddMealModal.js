@@ -21,8 +21,8 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
     const fetchData = async () => {
       try {
         const [recipesRes, ingsRes] = await Promise.all([
-          fetch('http://localhost:5002/api/mealplan/user-recipes'),
-          fetch('http://localhost:5002/api/mealplan/ingredients')
+          fetch('http://localhost:5002/api/mealplan/user-recipes', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } }),
+          fetch('http://localhost:5002/api/mealplan/ingredients', { headers: { Authorization: 'Bearer ' + localStorage.getItem('token') } })
         ]);
         const recipesData = await recipesRes.json();
         const ingsData = await ingsRes.json();
@@ -65,7 +65,10 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
     try {
       const res = await fetch('http://localhost:5002/api/mealplan/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        },
         body: JSON.stringify({
           day,
           mealType,
@@ -183,7 +186,10 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
     try {
       const res = await fetch('http://localhost:5002/api/mealplan/add-with-recipe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        },
         body: JSON.stringify({
           day,
           mealType: category, // Save to the chosen category

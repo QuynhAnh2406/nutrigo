@@ -11,9 +11,9 @@ export default function PageHeader({
   const isCompact = !subtitle && !children;
 
   return (
-    <div className="relative rounded-[28px] border border-white/50 bg-gradient-to-br from-[#EAF5DA] via-[#DDF7B0] to-[#B5E361] p-6 shadow-[0_18px_45px_rgba(167,233,101,0.25)]">
+    <div className="relative border-b border-white/50 bg-gradient-to-br from-[#EAF5DA] via-[#DDF7B0] to-[#B5E361] shadow-[0_18px_45px_rgba(167,233,101,0.25)] -mt-[30px] -mx-[40px] px-[40px] pt-[30px] pb-6 mb-8">
       {/* Decorative blobs wrapped in overflow-hidden */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[28px]">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/30 blur-3xl" />
         <div className="absolute -left-24 -bottom-24 h-72 w-72 rounded-full bg-white/25 blur-3xl" />
       </div>

@@ -18,7 +18,9 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
   const fetchWeeklyPlan = async () => {
     try {
       const weekStartStr = currentWeekStart.toISOString().split('T')[0];
-      const res = await fetch(`http://localhost:5002/api/mealplan?weekStart=${weekStartStr}`);
+      const res = await fetch(`http://localhost:5002/api/mealplan?weekStart=${weekStartStr}`, {
+        headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+      });
       const data = await res.json();
       if(data.success) {
         setWeeklyPlan(data.data);
@@ -55,7 +57,10 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
     try {
       const res = await fetch('http://localhost:5002/api/mealplan/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        },
         body: JSON.stringify({ day: dayName, mealType, recipeId: post.id, mealDate })
       });
       const data = await res.json();

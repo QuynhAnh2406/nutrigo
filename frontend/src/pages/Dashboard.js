@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Heart, Bookmark, ArrowRight, Sparkles } from 'lucide-react';
+import { X, Heart, Bookmark, ArrowRight, Sparkles, ChevronRight, Activity, TrendingUp, Calendar, Award } from 'lucide-react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 
@@ -55,7 +55,9 @@ function Dashboard() {
         const [ingRes, postRes, mealPlanRes] = await Promise.all([
           fetch('http://localhost:5002/api/ingredients'),
           fetch('http://localhost:5002/api/posts'),
-          fetch(`http://localhost:5002/api/mealplan?weekStart=${weekStartStr}`)
+          fetch(`http://localhost:5002/api/mealplan?weekStart=${weekStartStr}`, {
+            headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+          })
         ]);
         const ingData = await ingRes.json();
         const postData = await postRes.json();
@@ -100,7 +102,8 @@ function Dashboard() {
       const response = await fetch('http://localhost:5002/api/posts', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         },
         body: JSON.stringify(uploadData)
       });
