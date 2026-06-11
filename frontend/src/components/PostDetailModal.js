@@ -61,21 +61,7 @@ function PostDetailModal({ post, onClose }) {
               ))}
             </ol>
           </div>
-          
-          <div className="detail-section">
-            <h3>Bình luận ({post.comments.length})</h3>
-            <div className="comment-list">
-              {post.comments.map(c => (
-                <div key={c.id} className="comment-item">
-                  <strong>{c.user}:</strong> {c.text}
-                </div>
-              ))}
-            </div>
-            <div className="comment-input-area">
-               <input type="text" placeholder="Thêm bình luận..." className="comment-input" />
-               <button className="btn-primary btn-small">Đăng</button>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

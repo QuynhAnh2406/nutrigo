@@ -115,26 +115,6 @@ CREATE TABLE post_instruction_steps (
 );
 
 -- ==========================================
--- BẢNG LIKES (Lượt thích bài viết)
--- ==========================================
-CREATE TABLE post_likes (
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, post_id)
-);
-
--- ==========================================
--- BẢNG FAVORITES (Bài viết đã lưu / Yêu thích)
--- ==========================================
-CREATE TABLE post_favorites (
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, post_id)
-);
-
--- ==========================================
 -- BẢNG USER_FRIDGE (Tủ lạnh của người dùng - Nguyên liệu có sẵn)
 -- ==========================================
 CREATE TABLE user_fridge (

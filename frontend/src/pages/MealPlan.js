@@ -24,6 +24,7 @@ function MealPlan() {
   const [addMealConfig, setAddMealConfig] = useState(null);
   const [selectedRecipeDetail, setSelectedRecipeDetail] = useState(null);
   const [isClearDayModalOpen, setIsClearDayModalOpen] = useState(false);
+  const [mealToDelete, setMealToDelete] = useState(null);
 
   // Resizable panel logic
   const [leftWidth, setLeftWidth] = useState(40); // Percentage
@@ -136,8 +137,8 @@ function MealPlan() {
 
 
 
-  const handleClearMealAt = async (day, mealType, mealPlanId, mealDate) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa món này?")) return;
+  const confirmDeleteMeal = async () => {
+    if (!mealToDelete) return;
     try {
       await fetch('http://localhost:5002/api/mealplan/update', {
         method: 'POST',
@@ -146,14 +147,15 @@ function MealPlan() {
           Authorization: 'Bearer ' + localStorage.getItem('token')
         },
         body: JSON.stringify({
-          day,
-          mealType,
-          mealPlanId,
+          day: mealToDelete.day,
+          mealType: mealToDelete.mealType,
+          mealPlanId: mealToDelete.mealPlanId,
           action: 'delete'
         })
       });
       fetchSelectedPlanData();
       fetchMonthlyMeals();
+      setMealToDelete(null);
     } catch (e) {
       console.error(e);
     }
@@ -248,9 +250,13 @@ function MealPlan() {
         <div style={{ width: `calc(${100 - leftWidth}%)` }} className="flex-1 h-full p-4 sm:p-6 flex flex-col min-h-0">
           <div className="border-b border-gray-100 pb-4 mb-4 shrink-0 flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-extrabold text-[#1f3b00]">
-                {selectedDate.toDateString() === new Date().toDateString() ? 'Hôm nay, ' : ''}
+              <h3 className="text-xl font-extrabold text-[#1f3b00] flex items-center gap-3">
                 {selectedDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                {selectedDate.toDateString() === new Date().toDateString() && (
+                  <span className="text-xs font-black bg-[#B5E361] text-[#1f3b00] px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                    Hôm nay
+                  </span>
+                )}
               </h3>
               <p className="text-sm font-semibold text-green-700 mt-1">Chi tiết lịch ăn uống</p>
             </div>
@@ -352,12 +358,7 @@ function MealPlan() {
           meal={selectedRecipeDetail} 
           onClose={() => setSelectedRecipeDetail(null)} 
           onDelete={() => {
-            handleClearMealAt(
-              selectedRecipeDetail.day, 
-              selectedRecipeDetail.mealType, 
-              selectedRecipeDetail.mealPlanId, 
-              selectedRecipeDetail.mealDate
-            );
+            setMealToDelete(selectedRecipeDetail);
             setSelectedRecipeDetail(null);
           }}
           onSaveSuccess={() => {
@@ -394,6 +395,35 @@ function MealPlan() {
                 className="flex-1 px-6 py-3.5 rounded-2xl font-black text-[#1f3b00] bg-[#B5E361] hover:bg-[#a3d14f] shadow-lg shadow-[#B5E361]/30 transition-all hover:-translate-y-0.5 active:translate-y-0"
               >
                 Xóa sạch
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Meal Confirmation Modal */}
+      {mealToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1f3b00]/40 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-white rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#B5E361]/30 p-8 w-[90%] max-w-md text-center transform transition-all scale-100 animate-in zoom-in-95 duration-200">
+            <div className="w-20 h-20 bg-[#EAF7D5] rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <Trash2 className="text-[#3d6600]" size={36} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-2xl font-black text-[#1f3b00] mb-3 uppercase tracking-wide">Xóa món ăn?</h3>
+            <p className="text-gray-600 mb-8 font-medium leading-relaxed">
+              Bạn có chắc chắn muốn xóa món ăn <span className="font-extrabold text-[#3d6600]">{mealToDelete.foodName || mealToDelete.title}</span> cho bữa <span className="font-extrabold text-[#3d6600]">{mealTypeLabels[mealToDelete.mealType] || mealToDelete.mealType}</span> vào ngày <span className="font-extrabold text-[#3d6600]">{new Date(mealToDelete.mealDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span> khỏi lịch không?
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button 
+                onClick={() => setMealToDelete(null)}
+                className="flex-1 px-6 py-3.5 rounded-2xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+              >
+                Trở lại
+              </button>
+              <button 
+                onClick={confirmDeleteMeal}
+                className="flex-1 px-6 py-3.5 rounded-2xl font-black text-[#1f3b00] bg-[#B5E361] hover:bg-[#a3d14f] shadow-lg shadow-[#B5E361]/30 transition-all hover:-translate-y-0.5 active:translate-y-0"
+              >
+                Xóa món
               </button>
             </div>
           </div>

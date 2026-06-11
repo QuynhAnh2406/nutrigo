@@ -51,35 +51,8 @@ function MyRecipes() {
     fetchRecipes();
   }, [fetchRecipes]);
 
-  const handleLike = async (recipeId) => {
-    try {
-      const res = await fetch(`http://localhost:5002/api/posts/${recipeId}/like`, { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        setRecipes(recipes.map(r => r.id === recipeId ? { ...r, isLiked: data.isLiked, likes: data.likes } : r));
-      }
-    } catch (e) {
-      console.error('Error liking recipe:', e);
-    }
-  };
-
-  const handleSave = async (recipeId) => {
-    try {
-      const res = await fetch(`http://localhost:5002/api/posts/${recipeId}/favorite`, { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        setRecipes(recipes.map(r => r.id === recipeId ? { ...r, isSaved: data.isSaved } : r));
-      }
-    } catch (e) {
-      console.error('Error saving recipe:', e);
-    }
-  };
-
-  // Filter recipes based on active tab and advanced filters
+  // Filter recipes based on advanced filters
   const filteredRecipes = recipes.filter(r => {
-    const isOwn = r.user_id === (user ? user.id : 1);
-    if (activeTab === 'created' && !isOwn) return false;
-    if (activeTab === 'saved' && isOwn) return false;
 
     // Advanced Filters
     const matchMealType = selectedMealType === 'All' || r.mealType === selectedMealType;
@@ -251,30 +224,7 @@ function MyRecipes() {
         </PageHeader>
       </div>
 
-      {/* Tabs Switcher */}
-      <div className="community-tabs">
-        <button
-          className={`tab-btn ${activeTab === 'All' ? 'active' : ''}`}
-          onClick={() => setActiveTab('All')}
-        >
-          Tất cả công thức
-          <span className="tab-btn-badge">{recipes.length}</span>
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'created' ? 'active' : ''}`}
-          onClick={() => setActiveTab('created')}
-        >
-          Tự chế biến
-          <span className="tab-btn-badge">{recipes.filter(r => r.user_id === (user ? user.id : 1)).length}</span>
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'saved' ? 'active' : ''}`}
-          onClick={() => setActiveTab('saved')}
-        >
-          Đã lưu từ cộng đồng
-          <span className="tab-btn-badge">{recipes.filter(r => r.user_id !== (user ? user.id : 1)).length}</span>
-        </button>
-      </div>
+
 
       {/* Recipe Grid */}
       <div className="feed-container mt-6">
@@ -284,8 +234,6 @@ function MyRecipes() {
               <PostCard
                 key={recipe.id}
                 post={recipe}
-                onLike={handleLike}
-                onSave={handleSave}
                 onOpenDetail={(p) => setSelectedPost(p)}
                 onAddToPlan={(p) => setPostToAddPlan(p)}
               />
@@ -296,7 +244,7 @@ function MyRecipes() {
             <span className="text-3xl mb-3">🍳</span>
             <h4 className="font-extrabold text-gray-800 text-base mb-1">Chưa có công thức nào</h4>
             <p className="text-xs text-gray-400 font-semibold max-w-xs leading-relaxed mb-4">
-              Lưu bài đăng từ cộng đồng lành mạnh hoặc tự tạo công thức của riêng bạn ngay bây giờ!
+              Bạn chưa có công thức nào. Hãy tự tạo công thức của riêng bạn ngay bây giờ!
             </p>
             <button
               onClick={() => navigate('/my-recipes/create')}

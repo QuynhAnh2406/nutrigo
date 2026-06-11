@@ -1,6 +1,6 @@
 import React from 'react';
 
-function PostCard({ post, onLike, onSave, onOpenDetail, onAddToPlan }) {
+function PostCard({ post, onOpenDetail, onAddToPlan }) {
   return (
     <div className="post-card">
       <div className="post-header">
@@ -33,24 +33,9 @@ function PostCard({ post, onLike, onSave, onOpenDetail, onAddToPlan }) {
       </div>
 
       <div className="post-actions">
-        <div className="action-group">
-          <button className={`action-btn ${post.isLiked ? 'liked' : ''}`} onClick={() => onLike(post.id)}>
-            {post.isLiked ? '❤️' : '🤍'} {post.likes}
-          </button>
-          <button className="action-btn" onClick={() => onOpenDetail(post)}>
-            💬 {post.comments.length}
-          </button>
-          <button className="action-btn">
-            ↗️ Chia sẻ
-          </button>
-        </div>
-        
-        <div className="action-group">
-          <button className="action-btn add-meal-btn" onClick={() => onAddToPlan && onAddToPlan(post)}>
-            + Lịch ăn
-          </button>
-          <button className={`action-btn ${post.isSaved ? 'saved' : ''}`} onClick={() => onSave(post.id)}>
-            {post.isSaved ? '🔖 Đã lưu' : '🔖 Lưu'}
+        <div className="action-group" style={{ width: '100%' }}>
+          <button className="action-btn add-meal-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={() => onAddToPlan && onAddToPlan(post)}>
+            + Thêm vào Lịch ăn
           </button>
         </div>
       </div>

@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 
 function Sidebar({ user }) {
-    const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Fallback for user if prop is missing somehow
     const currentUser = user || {
@@ -43,12 +54,6 @@ function Sidebar({ user }) {
         <
         span className = "nav-icon" > 🗓️ < /span> Lịch ăn uống <
         /NavLink> <
-        NavLink to = "/community"
-        className = {
-            ({ isActive }) => `nav-item ${isActive ? 'active' : ''}` } >
-        <
-        span className = "nav-icon" > 👥 < /span> Cộng đồng lành mạnh <
-        /NavLink> <
         NavLink to = "/my-recipes"
         className = {
             ({ isActive }) => `nav-item ${isActive ? 'active' : ''}` } >
@@ -63,10 +68,7 @@ function Sidebar({ user }) {
         /NavLink> <
         /ul>
 
-        <
-        div className = "user-profile-wrapper"
-        style = {
-            { marginTop: 'auto', position: 'relative' } } >
+        <div className="user-profile-wrapper" ref={dropdownRef} style={{ marginTop: 'auto', position: 'relative' }}>
         <
         div className = "user-profile-block"
         onClick = {

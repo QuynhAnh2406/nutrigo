@@ -9,13 +9,10 @@ exports.getPosts = async (req, res) => {
   
   try {
     let baseQuery = `
-      SELECT p.*, u.full_name as author, u.avatar_url as avatar,
-      (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) as likes,
-      EXISTS(SELECT 1 FROM post_likes pl WHERE pl.post_id = p.id AND pl.user_id = $1) as "isLiked",
-      EXISTS(SELECT 1 FROM post_favorites pf WHERE pf.post_id = p.id AND pf.user_id = $1) as "isSaved"
+      SELECT p.*, u.full_name as author, u.avatar_url as avatar
       FROM posts p
       LEFT JOIN users u ON p.user_id = u.id
-      WHERE 1=1
+      WHERE p.user_id = $1
     `;
     const queryParams = [userId];
     let paramCount = 1;
@@ -25,19 +22,6 @@ exports.getPosts = async (req, res) => {
       paramCount++;
       baseQuery += ` AND (p.food_name ILIKE $${paramCount} OR p.description ILIKE $${paramCount})`;
       queryParams.push(`%${search}%`);
-    }
-
-    // Tab filtering
-    if (tab === 'Món Ăn Của Tôi') {
-      paramCount++;
-      baseQuery += ` AND p.user_id = $${paramCount}`;
-      queryParams.push(userId);
-    } else if (tab === 'My Recipes') {
-      baseQuery += ` AND (p.user_id = $1 OR EXISTS(SELECT 1 FROM post_favorites pf WHERE pf.post_id = p.id AND pf.user_id = $1))`;
-    } else if (tab === 'Following') {
-      // Mock Following filter for now
-    } else if (tab === 'Popular') {
-      // Order by rating or likes later
     }
 
     // Execute base query
@@ -314,66 +298,3 @@ exports.updatePost = async (req, res) => {
   }
 };
 
-
-exports.likePost = async (req, res) => {
-  const { id } = req.params;
-  const userId = getUserId(req);
-
-  try {
-    const checkRes = await db.query('SELECT 1 FROM post_likes WHERE post_id = $1 AND user_id = $2', [id, userId]);
-    let isLiked = false;
-
-    if (checkRes.rows.length > 0) {
-      await db.query('DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2', [id, userId]);
-      isLiked = false;
-    } else {
-      await db.query('INSERT INTO post_likes (post_id, user_id) VALUES ($1, $2)', [id, userId]);
-      isLiked = true;
-    }
-
-    const likesRes = await db.query('SELECT COUNT(*) FROM post_likes WHERE post_id = $1', [id]);
-    res.json({ success: true, isLiked, likes: parseInt(likesRes.rows[0].count) });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-exports.favoritePost = async (req, res) => {
-  const { id } = req.params;
-  const userId = getUserId(req);
-
-  try {
-    const checkRes = await db.query('SELECT 1 FROM post_favorites WHERE post_id = $1 AND user_id = $2', [id, userId]);
-    let isSaved = false;
-
-    if (checkRes.rows.length > 0) {
-      await db.query('DELETE FROM post_favorites WHERE post_id = $1 AND user_id = $2', [id, userId]);
-      isSaved = false;
-    } else {
-      await db.query('INSERT INTO post_favorites (post_id, user_id) VALUES ($1, $2)', [id, userId]);
-      isSaved = true;
-    }
-
-    res.json({ success: true, isSaved });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-exports.commentPost = (req, res) => {
-  // Not fully implemented with DB yet, returning mock success
-  const { id } = req.params;
-  const { text } = req.body;
-  if(text) {
-    const newComment = { id: Date.now(), user: '@current_user', text };
-    res.json({ success: true, comment: newComment });
-  } else {
-    res.status(400).json({ success: false, message: 'Invalid request' });
-  }
-};
-
-exports.reportPost = (req, res) => {
-  res.json({ success: true, message: 'Đã báo cáo bài viết. Chúng tôi sẽ xem xét.' });
-};

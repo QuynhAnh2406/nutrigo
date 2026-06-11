@@ -9,8 +9,7 @@ import MainLayout from './layouts/MainLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import MealPlan from './pages/MealPlan';
-import Community from './pages/Community';
-import CreatePost from './pages/CreatePost';
+
 import Profile from './pages/Profile';
 import Signup from './pages/Signup';
 import Ingredients from './pages/Ingredients';
@@ -29,8 +28,7 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/meal-plan" element={<MealPlan />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/community/create-post" element={<CreatePost />} />
+
           <Route path="/ingredients" element={<Ingredients />} />
           <Route path="/my-recipes" element={<MyRecipes />} />
           <Route path="/my-recipes/create" element={<CreateRecipe />} />
