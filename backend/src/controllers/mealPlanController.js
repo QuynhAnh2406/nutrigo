@@ -10,11 +10,14 @@ const getWeekStart = (date) => {
   return monday;
 };
 
-// Giả định user ID = 1 nếu không có middleware xác thực
-const getUserId = (req) => req.user ? req.user.id : 1;
+const getUserId = async (req) => {
+  if (req.user) return req.user.id;
+  const { rows } = await db.query('SELECT id FROM users LIMIT 1');
+  return rows.length > 0 ? rows[0].id : 1;
+};
 
 exports.getWeeklyPlan = async (req, res) => {
-  const userId = getUserId(req);
+  const userId = await getUserId(req);
   const { weekStart } = req.query; // YYYY-MM-DD format
 
   try {
@@ -30,7 +33,10 @@ exports.getWeeklyPlan = async (req, res) => {
     for (let i = 0; i < 7; i++) {
       const d = new Date(start);
       d.setDate(d.getDate() + i);
-      weekDates.push(d.toISOString().split('T')[0]);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const date = String(d.getDate()).padStart(2, '0');
+      weekDates.push(`${year}-${month}-${date}`);
     }
 
     // Initialize plan structure mapped to weekday names
@@ -47,7 +53,7 @@ exports.getWeeklyPlan = async (req, res) => {
 
     // Fetch user's meal plan for the specific week dates
     const { rows: planRows } = await db.query(`
-      SELECT mp.id as meal_plan_id, mp.meal_date, mp.meal_type, 
+      SELECT mp.id as meal_plan_id, TO_CHAR(mp.meal_date, 'YYYY-MM-DD') as meal_date_str, mp.meal_type, 
              p.id as recipe_id, p.food_name, p.calories
       FROM meal_plans mp
       JOIN posts p ON mp.post_id = p.id
@@ -55,7 +61,7 @@ exports.getWeeklyPlan = async (req, res) => {
     `, [userId, weekDates[0], weekDates[6]]);
 
     planRows.forEach(row => {
-      const rowDateStr = new Date(row.meal_date).toISOString().split('T')[0];
+      const rowDateStr = row.meal_date_str;
       const dayIndex = weeklyPlan.findIndex(d => d.date === rowDateStr);
       if (dayIndex !== -1 && mealTypes.includes(row.meal_type)) {
         weeklyPlan[dayIndex].meals[row.meal_type].push({
@@ -90,32 +96,39 @@ exports.getWeeklyPlan = async (req, res) => {
 };
 
 exports.getMonthlyPlan = async (req, res) => {
-  const userId = getUserId(req);
-  const { year, month } = req.query; // e.g. year=2026, month=6 (1-indexed)
+  const userId = await getUserId(req);
+  const { year, month, start, end } = req.query;
 
   try {
-    const y = parseInt(year);
-    const m = parseInt(month) - 1; // JS months are 0-indexed
-    
-    // Get first day of the month
-    const startOfMonth = new Date(y, m, 1);
-    // Get last day of the month
-    const endOfMonth = new Date(y, m + 1, 0);
+    let startDateStr, endDateStr;
+    if (start && end) {
+      startDateStr = start;
+      endDateStr = end;
+    } else {
+      const y = parseInt(year);
+      const m = parseInt(month) - 1; // JS months are 0-indexed
+      const startOfMonth = new Date(y, m, 1);
+      const endOfMonth = new Date(y, m + 1, 0);
+      
+      const startYear = startOfMonth.getFullYear();
+      const startM = String(startOfMonth.getMonth() + 1).padStart(2, '0');
+      const startD = String(startOfMonth.getDate()).padStart(2, '0');
+      
+      const endYear = endOfMonth.getFullYear();
+      const endM = String(endOfMonth.getMonth() + 1).padStart(2, '0');
+      const endD = String(endOfMonth.getDate()).padStart(2, '0');
 
-    const startDateStr = startOfMonth.toISOString().split('T')[0];
-    const endDateStr = endOfMonth.toISOString().split('T')[0];
+      startDateStr = `${startYear}-${startM}-${startD}`;
+      endDateStr = `${endYear}-${endM}-${endD}`;
+    }
 
     const { rows } = await db.query(`
-      SELECT DISTINCT meal_date
+      SELECT DISTINCT TO_CHAR(meal_date, 'YYYY-MM-DD') as meal_date_str
       FROM meal_plans
       WHERE user_id = $1 AND meal_date >= $2 AND meal_date <= $3
     `, [userId, startDateStr, endDateStr]);
 
-    const daysWithMeals = rows.map(r => {
-        // Handle timezone issues carefully
-        const d = new Date(r.meal_date);
-        return d.toISOString().split('T')[0];
-    });
+    const daysWithMeals = rows.map(r => r.meal_date_str);
 
     res.json({ success: true, data: daysWithMeals });
   } catch (error) {
@@ -126,7 +139,7 @@ exports.getMonthlyPlan = async (req, res) => {
 
 exports.updatePlan = async (req, res) => {
   const { day, mealType, recipeId, mealPlanId, mealDate } = req.body;
-  const userId = getUserId(req);
+  const userId = await getUserId(req);
 
   try {
     if (mealPlanId) {
@@ -168,7 +181,7 @@ exports.updatePlan = async (req, res) => {
 
 exports.clearDay = async (req, res) => {
   const { mealDate } = req.body;
-  const userId = getUserId(req);
+  const userId = await getUserId(req);
 
   try {
     if (!mealDate) {
@@ -255,7 +268,7 @@ exports.getRecipes = async (req, res) => {
 };
 
 exports.autoFillWeek = async (req, res) => {
-  const userId = getUserId(req);
+  const userId = await getUserId(req);
   const { weekStart } = req.query;
 
   try {
@@ -275,7 +288,10 @@ exports.autoFillWeek = async (req, res) => {
     for (let i = 0; i < 7; i++) {
       const d = new Date(start);
       d.setDate(d.getDate() + i);
-      weekDates.push(d.toISOString().split('T')[0]);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const date = String(d.getDate()).padStart(2, '0');
+      weekDates.push(`${year}-${month}-${date}`);
     }
 
     for (let i = 0; i < 7; i++) {
@@ -311,7 +327,7 @@ exports.getIngredients = async (req, res) => {
 };
 
 exports.getUserRecipes = async (req, res) => {
-  const userId = getUserId(req);
+  const userId = await getUserId(req);
   try {
     // 1. Fetch own recipes
     const { rows: ownRecipes } = await db.query(`
@@ -358,7 +374,7 @@ exports.getUserRecipes = async (req, res) => {
 
 exports.addMealWithRecipe = async (req, res) => {
   const { day, mealType, recipeData, saveToMyRecipe, mealDate } = req.body;
-  const userId = getUserId(req);
+  const userId = await getUserId(req);
 
   const client = await db.pool.connect();
   try {
@@ -420,8 +436,8 @@ exports.addMealWithRecipe = async (req, res) => {
     res.json({ success: true, message: 'Meal added successfully' });
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error("ADD MEAL ERROR:", error);
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   } finally {
     client.release();
   }

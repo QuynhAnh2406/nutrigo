@@ -8,7 +8,8 @@ CREATE TABLE users (
     full_name VARCHAR(255) NOT NULL,
     avatar_url TEXT,
     is_premium BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -24,7 +25,8 @@ CREATE TABLE user_health_data (
     goal VARCHAR(100),
     dietary_preference VARCHAR(255),
     allergies TEXT,
-    cooking_skill VARCHAR(50)
+    cooking_skill VARCHAR(50),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -75,7 +77,8 @@ CREATE TABLE posts (
     meal_type VARCHAR(50),
     category VARCHAR(50) DEFAULT 'food',
     health_level VARCHAR(50) DEFAULT 'medium',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ==========================================
@@ -153,3 +156,127 @@ CREATE TABLE meal_plans (
     meal_date DATE NOT NULL,
     UNIQUE (user_id, meal_date, meal_type, post_id)
 );
+
+
+-- ==========================================
+-- FUNCTIONS (Hàm)
+-- ==========================================
+
+-- Hàm tự động cập nhật updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Hàm tính toán tổng calories cho một post dựa trên post_ingredients (nếu cần dùng)
+CREATE OR REPLACE FUNCTION calculate_post_calories(p_post_id INTEGER)
+RETURNS NUMERIC AS $$
+DECLARE
+    total_cal NUMERIC;
+BEGIN
+    SELECT COALESCE(SUM(calories), 0) INTO total_cal
+    FROM post_ingredients
+    WHERE post_id = p_post_id;
+    
+    RETURN total_cal;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Hàm tính TDEE dựa trên thông tin sức khỏe của user
+CREATE OR REPLACE FUNCTION calculate_user_tdee(p_user_id INTEGER)
+RETURNS NUMERIC AS $$
+DECLARE
+    v_health_data RECORD;
+    v_age INTEGER;
+    v_bmr NUMERIC;
+    v_tdee NUMERIC;
+BEGIN
+    SELECT * INTO v_health_data FROM user_health_data WHERE user_id = p_user_id;
+    IF NOT FOUND OR v_health_data.weight_kg IS NULL OR v_health_data.height_cm IS NULL THEN
+        RETURN 0;
+    END IF;
+
+    -- Tính tuổi
+    IF v_health_data.date_of_birth IS NOT NULL THEN
+        v_age := extract(year from age(current_date, v_health_data.date_of_birth));
+    ELSE
+        v_age := 25; 
+    END IF;
+
+    -- Tính BMR 
+    IF v_health_data.gender = 'Male' THEN
+        v_bmr := (10 * v_health_data.weight_kg) + (6.25 * v_health_data.height_cm) - (5 * v_age) + 5;
+    ELSIF v_health_data.gender = 'Female' THEN
+        v_bmr := (10 * v_health_data.weight_kg) + (6.25 * v_health_data.height_cm) - (5 * v_age) - 161;
+    ELSE
+        v_bmr := (10 * v_health_data.weight_kg) + (6.25 * v_health_data.height_cm) - (5 * v_age) - 78;
+    END IF;
+
+    -- Tính TDEE
+    IF v_health_data.activity_level = 'Sedentary' THEN
+        v_tdee := v_bmr * 1.2;
+    ELSIF v_health_data.activity_level = 'Lightly Active' THEN
+        v_tdee := v_bmr * 1.375;
+    ELSIF v_health_data.activity_level = 'Moderately Active' THEN
+        v_tdee := v_bmr * 1.55;
+    ELSIF v_health_data.activity_level = 'Very Active' THEN
+        v_tdee := v_bmr * 1.725;
+    ELSIF v_health_data.activity_level = 'Extra Active' THEN
+        v_tdee := v_bmr * 1.9;
+    ELSE
+        v_tdee := v_bmr * 1.2; 
+    END IF;
+
+    -- Điều chỉnh theo mục tiêu
+    IF v_health_data.goal = 'Lose Weight' THEN
+        v_tdee := v_tdee - 500;
+    ELSIF v_health_data.goal = 'Gain Weight' THEN
+        v_tdee := v_tdee + 500;
+    END IF;
+
+    RETURN ROUND(v_tdee, 2);
+END;
+$$ LANGUAGE plpgsql;
+
+-- ==========================================
+-- PROCEDURES (Thủ tục)
+-- ==========================================
+
+-- Thủ tục thêm nguyên liệu vào tủ lạnh của người dùng
+CREATE OR REPLACE PROCEDURE add_to_fridge(p_user_id INTEGER, p_ingredient_name VARCHAR)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO user_fridge (user_id, ingredient_name)
+    VALUES (p_user_id, p_ingredient_name)
+    ON CONFLICT (user_id, ingredient_name) DO NOTHING;
+END;
+$$;
+
+-- ==========================================
+-- TRIGGERS (Trình kích hoạt)
+-- ==========================================
+
+-- Trigger cập nhật updated_at cho users
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger cập nhật updated_at cho user_health_data
+DROP TRIGGER IF EXISTS update_user_health_data_updated_at ON user_health_data;
+CREATE TRIGGER update_user_health_data_updated_at
+    BEFORE UPDATE ON user_health_data
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger cập nhật updated_at cho posts
+DROP TRIGGER IF EXISTS update_posts_updated_at ON posts;
+CREATE TRIGGER update_posts_updated_at
+    BEFORE UPDATE ON posts
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();

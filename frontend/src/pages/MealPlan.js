@@ -50,7 +50,10 @@ function MealPlan() {
   const fetchSelectedPlanData = useCallback(async () => {
     try {
       const weekStart = getWeekStart(selectedDate);
-      const weekStartStr = weekStart.toISOString().split('T')[0];
+      const year = weekStart.getFullYear();
+      const month = String(weekStart.getMonth() + 1).padStart(2, '0');
+      const date = String(weekStart.getDate()).padStart(2, '0');
+      const weekStartStr = `${year}-${month}-${date}`;
       const res = await fetch(`http://localhost:5002/api/mealplan?weekStart=${weekStartStr}`, {
         headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
       });
@@ -71,7 +74,15 @@ function MealPlan() {
       const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
       const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
       
-      const res = await fetch(`http://localhost:5002/api/mealplan/monthly?start=${startOfMonth.toISOString().split('T')[0]}&end=${endOfMonth.toISOString().split('T')[0]}`, {
+      const startYear = startOfMonth.getFullYear();
+      const startM = String(startOfMonth.getMonth() + 1).padStart(2, '0');
+      const startD = String(startOfMonth.getDate()).padStart(2, '0');
+      
+      const endYear = endOfMonth.getFullYear();
+      const endM = String(endOfMonth.getMonth() + 1).padStart(2, '0');
+      const endD = String(endOfMonth.getDate()).padStart(2, '0');
+
+      const res = await fetch(`http://localhost:5002/api/mealplan/monthly?start=${startYear}-${startM}-${startD}&end=${endYear}-${endM}-${endD}`, {
         headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
       });
       const data = await res.json();
@@ -123,23 +134,7 @@ function MealPlan() {
     }
   };
 
-  const addToPlan = async (recipe, mealDate, mealType) => {
-    await fetch('http://localhost:5002/api/mealplan/update', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + localStorage.getItem('token')
-      },
-      body: JSON.stringify({
-        day: null,
-        mealType,
-        recipeId: recipe.id || recipe.recipeId,
-        mealDate
-      })
-    });
-    fetchSelectedPlanData();
-    fetchMonthlyMeals();
-  };
+
 
   const handleClearMealAt = async (day, mealType, mealPlanId, mealDate) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa món này?")) return;
@@ -199,11 +194,11 @@ function MealPlan() {
   };
 
   const calculateTotalCalories = () => {
-    if (!selectedPlanData) return 0;
+    if (!selectedPlanData || !selectedPlanData.meals) return 0;
     let total = 0;
     ['breakfast', 'lunch', 'dinner', 'snack'].forEach(type => {
-      if (selectedPlanData[type]) {
-        selectedPlanData[type].forEach(r => total += (r.calories || 0));
+      if (selectedPlanData.meals[type]) {
+        selectedPlanData.meals[type].forEach(r => total += (r.calories || 0));
       }
     });
     return total;
@@ -270,7 +265,7 @@ function MealPlan() {
 
           <div className="overflow-auto flex-1 custom-scrollbar pr-2 space-y-4">
             {['breakfast', 'lunch', 'dinner', 'snack'].map(mealType => {
-              const recipes = selectedPlanData ? selectedPlanData[mealType] : [];
+              const recipes = selectedPlanData?.meals ? selectedPlanData.meals[mealType] : [];
               return (
                 <div key={mealType} className="bg-[#fcfdfa] border border-[#f0f5e6] rounded-[24px] p-4 sm:p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
@@ -344,8 +339,9 @@ function MealPlan() {
           mealType={addMealConfig.mealType}
           mealDate={addMealConfig.mealDate}
           onClose={() => setAddMealConfig(null)}
-          onConfirm={(recipe) => {
-            addToPlan(recipe, addMealConfig.mealDate, addMealConfig.mealType);
+          onConfirm={() => {
+            fetchSelectedPlanData();
+            fetchMonthlyMeals();
             setAddMealConfig(null);
           }}
         />
@@ -353,7 +349,7 @@ function MealPlan() {
 
       {selectedRecipeDetail && (
         <MealDetailModal 
-          post={selectedRecipeDetail} 
+          meal={selectedRecipeDetail} 
           onClose={() => setSelectedRecipeDetail(null)} 
           onDelete={() => {
             handleClearMealAt(
