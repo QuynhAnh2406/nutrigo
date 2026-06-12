@@ -53,7 +53,8 @@ CREATE TABLE ingredients (
     type VARCHAR(50) DEFAULT 'ingredient',
     serving_unit VARCHAR(50) DEFAULT '100g',
     category VARCHAR(50) DEFAULT 'food',
-    brand_name VARCHAR(100)
+    brand_name VARCHAR(100),
+    image_url TEXT
 );
 
 -- ==========================================

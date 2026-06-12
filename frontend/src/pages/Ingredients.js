@@ -39,9 +39,10 @@ function Ingredients({ mode = 'ingredient' }) {
     fat: '',
     fiber: '',
     type: mode,
-    serving_unit: mode === 'brand' ? '1 phần' : '100g',
+    serving_unit: mode === 'ingredient' ? '100g' : '',
     category: 'food',
-    brand_name: ''
+    brand_name: '',
+    image_url: ''
   });
 
   const fetchIngredients = async () => {
@@ -85,10 +86,11 @@ function Ingredients({ mode = 'ingredient' }) {
           carbs_per_100g: parseFloat(formData.carbs) || 0,
           fat_per_100g: parseFloat(formData.fat) || 0,
           fiber_per_100g: parseFloat(formData.fiber) || 0,
-          type: formData.type || 'ingredient',
-          serving_unit: formData.type === 'brand' ? (formData.serving_unit || '1 phần') : '100g',
-          category: formData.type === 'brand' ? (formData.category || 'food') : 'food',
-          brand_name: formData.type === 'brand' ? (formData.brand_name || '') : null
+          type: formData.type,
+          serving_unit: formData.serving_unit,
+          category: formData.category,
+          brand_name: formData.brand_name,
+          image_url: formData.image_url
         })
       });
       const data = await res.json();
@@ -105,7 +107,8 @@ function Ingredients({ mode = 'ingredient' }) {
           type: 'ingredient',
           serving_unit: '100g',
           category: 'food',
-          brand_name: ''
+          brand_name: '',
+          image_url: ''
         });
         fetchIngredients();
       } else {
@@ -275,14 +278,25 @@ function Ingredients({ mode = 'ingredient' }) {
 
       {/* Ingredients Grid */}
       {filteredIngredients.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in-50 duration-500">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 animate-in fade-in-50 duration-500">
           {filteredIngredients.map(ing => (
             <div 
                 key={ing.id} 
                 onClick={() => setSelectedDetailIng(ing)}
-                className="bg-white rounded-[22px] border border-gray-100/85 p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-[#B5E361]/50 hover:scale-[1.01] flex flex-col justify-between cursor-pointer"
+                className="bg-white rounded-[16px] border border-gray-100/85 p-4 shadow-sm transition-all duration-300 hover:shadow-md hover:border-[#B5E361]/50 hover:scale-[1.02] flex flex-col justify-start cursor-pointer"
             >
               <div>
+                {/* Image Placeholder */}
+                <div className="w-full h-28 bg-gradient-to-br from-[#EAF7D5]/40 to-white rounded-xl mb-3 flex items-center justify-center overflow-hidden border border-[#B5E361]/20 group-hover:border-[#B5E361]/50 transition-colors relative">
+                  {ing.image_url ? (
+                    <img src={ing.image_url} alt={ing.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-5xl opacity-70 filter drop-shadow-sm group-hover:scale-110 transition-transform duration-300">
+                      {ing.category === 'drink' ? '🥤' : ing.category === 'snack' ? '🍪' : (ing.type === 'brand' ? '🍔' : '🥗')}
+                    </span>
+                  )}
+                </div>
+                
                 <h4 className="font-extrabold text-[#183000] text-base leading-snug truncate mb-3" title={ing.name}>
                   {ing.name}
                 </h4>
@@ -298,6 +312,7 @@ function Ingredients({ mode = 'ingredient' }) {
                 </div>
 
                 {/* Removed macros list to simplify card, shown on click instead */}
+              </div>
 
               {/* Tag indicator on base */}
               <div className="mt-4 pt-3 border-t border-dashed border-gray-100 flex flex-wrap gap-1.5 justify-between items-center text-[9px] font-black uppercase tracking-widest">
@@ -357,6 +372,18 @@ function Ingredients({ mode = 'ingredient' }) {
                   onChange={handleInputChange}
                   className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15"
                   required
+                />
+              </div>
+
+              <div className="form-group flex flex-col gap-1">
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Đường dẫn ảnh (URL) - Tùy chọn</label>
+                <input 
+                  type="url" 
+                  name="image_url"
+                  placeholder="https://example.com/image.jpg"
+                  value={formData.image_url}
+                  onChange={handleInputChange}
+                  className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15"
                 />
               </div>
 
