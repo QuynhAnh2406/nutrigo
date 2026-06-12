@@ -1,26 +1,27 @@
+require('dotenv').config();
 const db = require('../config/db');
 
 async function runMigrations() {
-  try {
-    console.log("Running database migrations...");
-    
-    // 1. Ensure is_recipe column exists in posts
-    console.log("Checking and adding is_recipe column to posts table...");
-    await db.query(`
+    try {
+        console.log("Running database migrations...");
+
+        // 1. Ensure is_recipe column exists in posts
+        console.log("Checking and adding is_recipe column to posts table...");
+        await db.query(`
       ALTER TABLE posts 
       ADD COLUMN IF NOT EXISTS is_recipe BOOLEAN DEFAULT FALSE
     `);
 
-    // 2. Ensure meal_date column exists in meal_plans
-    console.log("Adding meal_date column to meal_plans table...");
-    await db.query(`
+        // 2. Ensure meal_date column exists in meal_plans
+        console.log("Adding meal_date column to meal_plans table...");
+        await db.query(`
       ALTER TABLE meal_plans 
       ADD COLUMN IF NOT EXISTS meal_date DATE
     `);
 
-    // 3. Populate meal_date for existing rows
-    console.log("Populating meal_date for existing rows...");
-    await db.query(`
+        // 3. Populate meal_date for existing rows
+        console.log("Populating meal_date for existing rows...");
+        await db.query(`
       UPDATE meal_plans 
       SET meal_date = CURRENT_DATE + (
         CASE day_name
@@ -37,55 +38,55 @@ async function runMigrations() {
       WHERE meal_date IS NULL
     `);
 
-    // 4. Make meal_date NOT NULL
-    console.log("Making meal_date NOT NULL...");
-    await db.query(`
+        // 4. Make meal_date NOT NULL
+        console.log("Making meal_date NOT NULL...");
+        await db.query(`
       ALTER TABLE meal_plans 
       ALTER COLUMN meal_date SET NOT NULL
     `);
 
-    // 5. Drop old constraints on meal_plans that are not based on meal_date
-    console.log("Checking and dropping old constraints on meal_plans...");
-    const conRes = await db.query(`
+        // 5. Drop old constraints on meal_plans that are not based on meal_date
+        console.log("Checking and dropping old constraints on meal_plans...");
+        const conRes = await db.query(`
       SELECT conname 
       FROM pg_constraint 
       WHERE conrelid = 'meal_plans'::regclass AND contype = 'u'
     `);
-    
-    for (let row of conRes.rows) {
-      if (row.conname.includes('day_name') || row.conname.includes('user_day_meal_post') || row.conname.includes('user_id_day_name_meal_type')) {
-        console.log(`Dropping constraint: ${row.conname}`);
-        await db.query(`ALTER TABLE meal_plans DROP CONSTRAINT IF EXISTS ${row.conname}`);
-      }
-    }
 
-    // 6. Add new unique constraint UNIQUE (user_id, meal_date, meal_type, post_id)
-    const checkDateKey = await db.query(`
+        for (let row of conRes.rows) {
+            if (row.conname.includes('day_name') || row.conname.includes('user_day_meal_post') || row.conname.includes('user_id_day_name_meal_type')) {
+                console.log(`Dropping constraint: ${row.conname}`);
+                await db.query(`ALTER TABLE meal_plans DROP CONSTRAINT IF EXISTS ${row.conname}`);
+            }
+        }
+
+        // 6. Add new unique constraint UNIQUE (user_id, meal_date, meal_type, post_id)
+        const checkDateKey = await db.query(`
       SELECT conname 
       FROM pg_constraint 
       WHERE conrelid = 'meal_plans'::regclass AND conname = 'meal_plans_user_date_meal_post_key'
     `);
 
-    if (checkDateKey.rows.length === 0) {
-      console.log("Adding unique constraint UNIQUE (user_id, meal_date, meal_type, post_id)...");
-      await db.query(`
+        if (checkDateKey.rows.length === 0) {
+            console.log("Adding unique constraint UNIQUE (user_id, meal_date, meal_type, post_id)...");
+            await db.query(`
         ALTER TABLE meal_plans 
         ADD CONSTRAINT meal_plans_user_date_meal_post_key UNIQUE (user_id, meal_date, meal_type, post_id)
       `);
-    } else {
-      console.log("Unique constraint meal_plans_user_date_meal_post_key already exists.");
-    }
+        } else {
+            console.log("Unique constraint meal_plans_user_date_meal_post_key already exists.");
+        }
 
-    // 7. Ensure fiber_per_100g column exists in ingredients
-    console.log("Checking and adding fiber_per_100g column to ingredients table...");
-    await db.query(`
+        // 7. Ensure fiber_per_100g column exists in ingredients
+        console.log("Checking and adding fiber_per_100g column to ingredients table...");
+        await db.query(`
       ALTER TABLE ingredients 
       ADD COLUMN IF NOT EXISTS fiber_per_100g NUMERIC(6,2) DEFAULT 0
     `);
 
-    // Populate fiber values for existing ingredients
-    console.log("Updating fiber values for existing ingredients...");
-    await db.query(`
+        // Populate fiber values for existing ingredients
+        console.log("Updating fiber values for existing ingredients...");
+        await db.query(`
       UPDATE ingredients SET fiber_per_100g = 1.3 WHERE name = 'Gạo tẻ' AND (fiber_per_100g IS NULL OR fiber_per_100g = 0);
       UPDATE ingredients SET fiber_per_100g = 2.6 WHERE name = 'Súp lơ xanh' AND (fiber_per_100g IS NULL OR fiber_per_100g = 0);
       UPDATE ingredients SET fiber_per_100g = 6.7 WHERE name = 'Quả bơ' AND (fiber_per_100g IS NULL OR fiber_per_100g = 0);
@@ -93,37 +94,44 @@ async function runMigrations() {
       UPDATE ingredients SET fiber_per_100g = 1.2 WHERE name = 'Xà lách' AND (fiber_per_100g IS NULL OR fiber_per_100g = 0);
     `);
 
-    // 8. Ensure type column exists in ingredients
-    console.log("Checking and adding type column to ingredients table...");
-    await db.query(`
+        // 8. Ensure type column exists in ingredients
+        console.log("Checking and adding type column to ingredients table...");
+        await db.query(`
       ALTER TABLE ingredients 
       ADD COLUMN IF NOT EXISTS type VARCHAR(50) DEFAULT 'ingredient'
     `);
 
-    // 9. Ensure serving_unit column exists in ingredients
-    console.log("Checking and adding serving_unit column to ingredients table...");
-    await db.query(`
+        // 9. Ensure serving_unit column exists in ingredients
+        console.log("Checking and adding serving_unit column to ingredients table...");
+        await db.query(`
       ALTER TABLE ingredients 
       ADD COLUMN IF NOT EXISTS serving_unit VARCHAR(50) DEFAULT '100g'
     `);
 
-    // 10. Ensure category column exists in ingredients
-    console.log("Checking and adding category column to ingredients table...");
-    await db.query(`
+        // 10. Ensure category column exists in ingredients
+        console.log("Checking and adding category column to ingredients table...");
+        await db.query(`
       ALTER TABLE ingredients 
       ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'food'
     `);
 
-    // 11. Ensure brand_name column exists in ingredients
-    console.log("Checking and adding brand_name column to ingredients table...");
-    await db.query(`
+        // 11. Ensure brand_name column exists in ingredients
+        console.log("Checking and adding brand_name column to ingredients table...");
+        await db.query(`
       ALTER TABLE ingredients 
       ADD COLUMN IF NOT EXISTS brand_name VARCHAR(100)
     `);
 
-    // Insert brand items and update types
-    console.log("Inserting brand items and updating types, categories, and brands...");
-    await db.query(`
+        // 12. Ensure phone column exists in user_health_data
+        console.log("Checking and adding phone column to user_health_data table...");
+        await db.query(`
+      ALTER TABLE user_health_data 
+      ADD COLUMN IF NOT EXISTS phone VARCHAR(30)
+    `);
+
+        // Insert brand items and update types
+        console.log("Inserting brand items and updating types, categories, and brands...");
+        await db.query(`
       UPDATE ingredients SET type = 'ingredient' WHERE type IS NULL;
       UPDATE ingredients SET serving_unit = '100g' WHERE serving_unit IS NULL;
       UPDATE ingredients SET category = 'food' WHERE category IS NULL;
@@ -161,27 +169,27 @@ async function runMigrations() {
           brand_name = EXCLUDED.brand_name;
     `);
 
-    // 12. Ensure meal_type, category, and health_level columns exist in posts table
-    console.log("Checking and adding meal_type, category, and health_level columns to posts table...");
-    await db.query(`
+        // 12. Ensure meal_type, category, and health_level columns exist in posts table
+        console.log("Checking and adding meal_type, category, and health_level columns to posts table...");
+        await db.query(`
       ALTER TABLE posts 
       ADD COLUMN IF NOT EXISTS meal_type VARCHAR(50),
       ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'food',
       ADD COLUMN IF NOT EXISTS health_level VARCHAR(50) DEFAULT 'medium'
     `);
-    
-    // Set default values for existing posts
-    await db.query(`
+
+        // Set default values for existing posts
+        await db.query(`
       UPDATE posts SET category = 'food' WHERE category IS NULL;
       UPDATE posts SET health_level = 'medium' WHERE health_level IS NULL;
       UPDATE posts SET health_level = 'excellent', meal_type = 'lunch' WHERE id = 1;
     `);
 
-    console.log("Database migrations completed successfully!");
-  } catch (err) {
-    console.error("Database migrations failed:", err);
-    throw err;
-  }
+        console.log("Database migrations completed successfully!");
+    } catch (err) {
+        console.error("Database migrations failed:", err);
+        throw err;
+    }
 }
 
 module.exports = runMigrations;
