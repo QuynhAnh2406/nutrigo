@@ -334,10 +334,25 @@ body {
 
 .main-content {
     flex: 1;
-    padding: 30px 40px;
+    width: 100%;
+    padding: 1rem;
+    background-color: rgba(249, 250, 251, 0.5);
+    min-height: 100%;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+}
+
+@media (min-width: 640px) {
+    .main-content {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .main-content {
+        padding: 2rem;
+    }
 }
 
 .header {

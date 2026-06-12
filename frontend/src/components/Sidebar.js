@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, BookOpen, Database } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, BookOpen, Database, Apple, Store } from 'lucide-react';
 
 function Sidebar({ user }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -63,13 +63,15 @@ function Sidebar({ user }) {
                     {isNutritionOpen && (
                         <div className="sub-nav-menu">
                             <div className="sub-nav-item">
-                                <NavLink to="/ingredients" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ fontSize: '0.95em', padding: '0.6rem 1rem', minHeight: 'auto', marginBottom: 0 }}>
-                                    Nguyên liệu
+                                <NavLink to="/ingredients" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ fontSize: '0.95em', padding: '0.6rem 1rem', minHeight: 'auto', marginBottom: 0, justifyContent: 'space-between' }}>
+                                    <span>Nguyên liệu</span>
+                                    <Apple size={16} className="nav-icon" />
                                 </NavLink>
                             </div>
                             <div className="sub-nav-item">
-                                <NavLink to="/brands" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ fontSize: '0.95em', padding: '0.6rem 1rem', minHeight: 'auto', marginBottom: 0 }}>
-                                    Thương hiệu
+                                <NavLink to="/brands" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ fontSize: '0.95em', padding: '0.6rem 1rem', minHeight: 'auto', marginBottom: 0, justifyContent: 'space-between' }}>
+                                    <span>Thương hiệu</span>
+                                    <Store size={16} className="nav-icon" />
                                 </NavLink>
                             </div>
                         </div>
