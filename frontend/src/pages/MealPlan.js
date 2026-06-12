@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChefHat, Flame, Trash2, Plus, Sparkles, Lightbulb, ShoppingCart, Check } from 'lucide-react';
+import { ChefHat, Flame, Trash2, Plus, Sparkles, Lightbulb, ShoppingCart, Check, Pencil } from 'lucide-react';
 import MonthlyCalendar from '../components/MonthlyCalendar';
 import AddMealModal from '../components/AddMealModal';
 import MealDetailModal from '../components/MealDetailModal';
@@ -313,6 +313,34 @@ function MealPlan() {
                               <Flame size={12} className="text-[#B5E361]" />
                               {recipe.calories || 0} kcal
                             </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRecipeClick(recipe, selectedPlanData?.day, mealType, selectedDate);
+                                }}
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+                                title="Sửa"
+                            >
+                                <Pencil size={16} />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMealToDelete({
+                                        ...recipe,
+                                        mealType: mealType,
+                                        mealDate: selectedDate,
+                                        foodName: recipe.title
+                                    });
+                                }}
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                title="Xóa"
+                            >
+                                <Trash2 size={16} />
+                            </button>
                           </div>
                         </div>
                       ))}

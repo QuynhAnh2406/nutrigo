@@ -7,6 +7,7 @@ function Ingredients({ mode = 'ingredient' }) {
   const [searchQuery, setSearchQuery] = useState('');
   const portionWeight = 100; // Fixed default portion weight
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDetailIng, setSelectedDetailIng] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // Advanced Filter State and Ref
@@ -276,7 +277,11 @@ function Ingredients({ mode = 'ingredient' }) {
       {filteredIngredients.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in-50 duration-500">
           {filteredIngredients.map(ing => (
-            <div key={ing.id} className="bg-white rounded-[22px] border border-gray-100/85 p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-[#B5E361]/50 hover:scale-[1.01] flex flex-col justify-between">
+            <div 
+                key={ing.id} 
+                onClick={() => setSelectedDetailIng(ing)}
+                className="bg-white rounded-[22px] border border-gray-100/85 p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-[#B5E361]/50 hover:scale-[1.01] flex flex-col justify-between cursor-pointer"
+            >
               <div>
                 <h4 className="font-extrabold text-[#183000] text-base leading-snug truncate mb-3" title={ing.name}>
                   {ing.name}
@@ -292,35 +297,7 @@ function Ingredients({ mode = 'ingredient' }) {
                   </span>
                 </div>
 
-                {/* Macros list */}
-                <div className="space-y-2">
-                  <span className="block text-[9px] text-gray-400 font-black uppercase tracking-wider mb-2">Thành phần dinh dưỡng ({ing.serving_unit || '100g'})</span>
-                  
-                  {/* Protein */}
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-gray-500">🥩 Đạm (Protein):</span>
-                    <span className="font-black text-[#1f3b00]">{calcVal(ing.protein_per_100g)}g</span>
-                  </div>
-
-                  {/* Carbs */}
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-gray-500">🍞 Tinh bột (Carbs):</span>
-                    <span className="font-black text-[#1f3b00]">{calcVal(ing.carbs_per_100g)}g</span>
-                  </div>
-
-                  {/* Fat */}
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-gray-500">🥑 Chất béo (Fat):</span>
-                    <span className="font-black text-[#1f3b00]">{calcVal(ing.fat_per_100g)}g</span>
-                  </div>
-
-                  {/* Fiber */}
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-gray-500">🥗 Chất xơ (Fiber):</span>
-                    <span className="font-black text-[#1f3b00]">{calcVal(ing.fiber_per_100g)}g</span>
-                  </div>
-                </div>
-              </div>
+                {/* Removed macros list to simplify card, shown on click instead */}
 
               {/* Tag indicator on base */}
               <div className="mt-4 pt-3 border-t border-dashed border-gray-100 flex flex-wrap gap-1.5 justify-between items-center text-[9px] font-black uppercase tracking-widest">
@@ -532,6 +509,78 @@ function Ingredients({ mode = 'ingredient' }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Detail Modal */}
+      {selectedDetailIng && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-sm rounded-[24px] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-300 flex flex-col">
+            <div className="flex justify-between items-start mb-5 border-b border-gray-50 pb-4">
+              <div className="flex-1 pr-4">
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  <span className={(selectedDetailIng.type || 'ingredient') === 'brand' ? 'text-purple-600 bg-purple-50 px-2 py-0.5 rounded-lg font-extrabold text-[9px] uppercase tracking-widest' : 'text-gray-400 bg-gray-50 px-2 py-0.5 rounded-lg font-extrabold text-[9px] uppercase tracking-widest'}>
+                    {(selectedDetailIng.type || 'ingredient') === 'brand' ? `🏬 ${selectedDetailIng.brand_name || 'Đồ ăn ngoài'}` : '🍏 Nguyên liệu'}
+                  </span>
+                  <span className="text-gray-500 bg-gray-100/60 px-2 py-0.5 rounded-lg font-extrabold text-[9px] uppercase tracking-widest">
+                    {selectedDetailIng.category === 'drink' ? '🥤 Đồ uống' : selectedDetailIng.category === 'snack' ? '🍪 Ăn vặt' : '🍲 Đồ ăn'}
+                  </span>
+                </div>
+                <h3 className="font-extrabold text-gray-900 text-xl leading-snug">
+                  {selectedDetailIng.name}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setSelectedDetailIng(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors shrink-0 mt-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="mb-5 bg-orange-50/30 border border-orange-100/50 rounded-2xl p-4 flex justify-between items-center text-center">
+              <div className="flex-1 border-r border-orange-100/50">
+                <span className="text-[10px] text-orange-600/70 font-black uppercase tracking-wider block mb-1">
+                  Năng lượng
+                </span>
+                <span className="text-2xl font-black text-orange-600 flex items-center justify-center gap-1">
+                  <Flame size={18} className="fill-orange-600" />
+                  {calcVal(selectedDetailIng.calories_per_100g, 100, selectedDetailIng)} <small className="text-[11px] font-bold">kcal</small>
+                </span>
+              </div>
+              <div className="flex-1">
+                <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider block mb-1">
+                  Khẩu phần
+                </span>
+                <span className="text-base font-bold text-gray-700 mt-1 block">
+                  {selectedDetailIng.serving_unit || '100g'}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <span className="block text-[10px] text-gray-400 font-black uppercase tracking-wider mb-2">Thành phần dinh dưỡng</span>
+              
+              <div className="flex justify-between items-center text-sm bg-gray-50/50 p-2.5 rounded-xl border border-gray-100/50">
+                <span className="font-bold text-gray-600 flex items-center gap-2"><span className="text-lg">🥩</span> Đạm (Protein)</span>
+                <span className="font-black text-[#1f3b00]">{calcVal(selectedDetailIng.protein_per_100g, 100, selectedDetailIng)}g</span>
+              </div>
+
+              <div className="flex justify-between items-center text-sm bg-gray-50/50 p-2.5 rounded-xl border border-gray-100/50">
+                <span className="font-bold text-gray-600 flex items-center gap-2"><span className="text-lg">🍞</span> Tinh bột (Carbs)</span>
+                <span className="font-black text-[#1f3b00]">{calcVal(selectedDetailIng.carbs_per_100g, 100, selectedDetailIng)}g</span>
+              </div>
+
+              <div className="flex justify-between items-center text-sm bg-gray-50/50 p-2.5 rounded-xl border border-gray-100/50">
+                <span className="font-bold text-gray-600 flex items-center gap-2"><span className="text-lg">🥑</span> Chất béo (Fat)</span>
+                <span className="font-black text-[#1f3b00]">{calcVal(selectedDetailIng.fat_per_100g, 100, selectedDetailIng)}g</span>
+              </div>
+
+              <div className="flex justify-between items-center text-sm bg-gray-50/50 p-2.5 rounded-xl border border-gray-100/50">
+                <span className="font-bold text-gray-600 flex items-center gap-2"><span className="text-lg">🥗</span> Chất xơ (Fiber)</span>
+                <span className="font-black text-[#1f3b00]">{calcVal(selectedDetailIng.fiber_per_100g, 100, selectedDetailIng)}g</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
