@@ -12,7 +12,7 @@ exports.getPosts = async (req, res) => {
       SELECT p.*, u.full_name as author, u.avatar_url as avatar
       FROM posts p
       LEFT JOIN users u ON p.user_id = u.id
-      WHERE p.user_id = $1
+      WHERE p.user_id = $1 AND p.is_recipe = TRUE
     `;
     const queryParams = [userId];
     let paramCount = 1;

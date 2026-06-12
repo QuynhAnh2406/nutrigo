@@ -26,6 +26,8 @@ function CreateRecipe() {
   const [showCustomTagInput, setShowCustomTagInput] = useState(false);
   const [customTag, setCustomTag] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
+  const [prepTimeValue, setPrepTimeValue] = useState('');
+  const [prepTimeUnit, setPrepTimeUnit] = useState('phút');
 
   useEffect(() => {
     const fetchDbIngredients = async () => {
@@ -192,6 +194,7 @@ function CreateRecipe() {
 
     const newRecipeData = {
       ...formData,
+      prepTime: prepTimeValue ? `${prepTimeValue} ${prepTimeUnit}` : '',
       tags: tagsArray,
       ingredients: ingredients.filter(i => i.name),
       instructions: instructions.filter(i => i),
@@ -319,14 +322,25 @@ function CreateRecipe() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="form-group flex flex-col gap-1.5">
                 <label className="text-xs font-black text-gray-705 uppercase tracking-wider pl-1 text-gray-700">Thời gian chuẩn bị</label>
-                <input
-                  type="text"
-                  name="prepTime"
-                  value={formData.prepTime}
-                  onChange={handleFormInputChange}
-                  placeholder="VD: 25 phút"
-                  className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all"
-                />
+                <div className="grid grid-cols-3 gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    value={prepTimeValue}
+                    onChange={(e) => setPrepTimeValue(e.target.value)}
+                    placeholder="Nhập số..."
+                    className="col-span-1 min-w-0 px-3 sm:px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all"
+                  />
+                  <select
+                    value={prepTimeUnit}
+                    onChange={(e) => setPrepTimeUnit(e.target.value)}
+                    className="col-span-2 w-full px-3 sm:px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-white cursor-pointer transition-all"
+                  >
+                    <option value="phút">phút</option>
+                    <option value="giờ">giờ</option>
+                    <option value="ngày">ngày</option>
+                  </select>
+                </div>
               </div>
 
               <div className="form-group flex flex-col gap-1.5">

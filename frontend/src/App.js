@@ -29,7 +29,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/meal-plan" element={<MealPlan />} />
 
-          <Route path="/ingredients" element={<Ingredients />} />
+          <Route path="/ingredients" element={<Ingredients mode="ingredient" />} />
+          <Route path="/brands" element={<Ingredients mode="brand" />} />
           <Route path="/my-recipes" element={<MyRecipes />} />
           <Route path="/my-recipes/create" element={<CreateRecipe />} />
           <Route path="/profile" element={<Profile />} />

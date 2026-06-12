@@ -16,6 +16,10 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
   const [imageUrl, setImageUrl] = useState('');
   const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [saveToMyRecipe, setSaveToMyRecipe] = useState(false);
+  
+  // New states for editing flow
+  const [editingRecipeId, setEditingRecipeId] = useState(null);
+  const [updateExistingRecipe, setUpdateExistingRecipe] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,32 +65,30 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
     return map[dayName] || dayName;
   };
 
-  const handleSelectRecipe = async (recipe) => {
-    try {
-      const res = await fetch('http://localhost:5002/api/mealplan/update', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + localStorage.getItem('token')
-        },
-        body: JSON.stringify({
-          day,
-          mealType,
-          recipeId: recipe.id,
-          mealDate
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        onConfirm();
-        onClose();
-      } else {
-        alert(data.message);
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Có lỗi xảy ra khi thêm món ăn.');
+  const handleSelectRecipe = (recipe) => {
+    // Fill the states with recipe data
+    setDishName(recipe.name);
+    setDescription(recipe.description || '');
+    setCookTime(parseInt(recipe.prep_time) || 30);
+    setImageUrl(recipe.image_url || '');
+    
+    if (recipe.ingredients) {
+      setSelectedIngredients(recipe.ingredients.map(ing => ({
+        name: ing.name,
+        weight_g: parseFloat(ing.weight_g) || 0,
+        calories_per_100g: parseFloat(ing.calories_per_100g) || 0,
+        protein_per_100g: parseFloat(ing.protein_per_100g) || 0,
+        carbs_per_100g: parseFloat(ing.carbs_per_100g) || 0,
+        fat_per_100g: parseFloat(ing.fat_per_100g) || 0,
+        showDropdown: false
+      })));
+    } else {
+      setSelectedIngredients([]);
     }
+
+    setEditingRecipeId(recipe.id);
+    setUpdateExistingRecipe(false); // Default to not updating original
+    setActiveTab('create');
   };
 
   const removeIngredient = (index) => {
@@ -175,7 +177,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
     }
 
     const recipeData = {
-      id: null,
+      id: editingRecipeId,
       name: dishName,
       description: description || 'Món ăn tự tạo từ kế hoạch tuần',
       prepTime: `${cookTime} phút`,
@@ -194,13 +196,14 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
           day,
           mealType: category, // Save to the chosen category
           recipeData,
-          saveToMyRecipe,
+          saveToMyRecipe: editingRecipeId ? false : saveToMyRecipe,
+          updateExistingRecipe,
           mealDate
         })
       });
       const data = await res.json();
       if (data.success) {
-        onConfirm();
+        onConfirm({ name: dishName, mealType: category, mealDate });
         onClose();
       } else {
         alert(data.message);
@@ -239,14 +242,36 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
           <div className="flex bg-gray-100/80 border border-gray-200/20 p-1.5 rounded-2xl w-full">
             <button 
               type="button"
-              onClick={() => setActiveTab('choose')}
+              onClick={() => {
+                setActiveTab('choose');
+                setEditingRecipeId(null);
+                setDishName('');
+                setDescription('');
+                setCookTime(30);
+                setImageUrl('');
+                setSelectedIngredients([]);
+                setSaveToMyRecipe(false);
+                setUpdateExistingRecipe(false);
+              }}
               className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all duration-300 ${activeTab === 'choose' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
             >
               Chọn công thức
             </button>
             <button 
               type="button"
-              onClick={() => setActiveTab('create')}
+              onClick={() => {
+                setActiveTab('create');
+                if (editingRecipeId) {
+                  setEditingRecipeId(null);
+                  setDishName('');
+                  setDescription('');
+                  setCookTime(30);
+                  setImageUrl('');
+                  setSelectedIngredients([]);
+                  setSaveToMyRecipe(false);
+                  setUpdateExistingRecipe(false);
+                }
+              }}
               className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all duration-300 ${activeTab === 'create' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
             >
               Tạo công thức mới
@@ -318,7 +343,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
                   <div className="max-w-xs">
                     <p className="text-sm font-bold text-gray-800">Chưa có công thức nào</p>
                     <p className="text-xs text-gray-400 font-medium mt-1 leading-relaxed">
-                      Lưu món ăn từ cộng đồng hoặc tự tạo công thức của riêng bạn để chọn ở đây.
+                      Hãy tự tạo công thức của riêng bạn ở tab bên cạnh để dễ dàng chọn ở đây.
                     </p>
                   </div>
                 </div>
@@ -542,16 +567,24 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
 
               {/* Save checkbox */}
               <label className="flex items-center gap-2.5 cursor-pointer group pt-2 select-none">
-                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${saveToMyRecipe ? 'bg-gray-900 border-gray-900' : 'border-gray-300 group-hover:border-gray-400'}`}>
-                  {saveToMyRecipe && <Check size={14} className="text-white font-black" />}
+                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${(editingRecipeId ? updateExistingRecipe : saveToMyRecipe) ? 'bg-gray-900 border-gray-900' : 'border-gray-300 group-hover:border-gray-400'}`}>
+                  {(editingRecipeId ? updateExistingRecipe : saveToMyRecipe) && <Check size={14} className="text-white font-black" />}
                   <input 
                     type="checkbox" 
                     className="hidden" 
-                    checked={saveToMyRecipe}
-                    onChange={() => setSaveToMyRecipe(!saveToMyRecipe)}
+                    checked={editingRecipeId ? updateExistingRecipe : saveToMyRecipe}
+                    onChange={() => {
+                      if (editingRecipeId) {
+                        setUpdateExistingRecipe(!updateExistingRecipe);
+                      } else {
+                        setSaveToMyRecipe(!saveToMyRecipe);
+                      }
+                    }}
                   />
                 </div>
-                <span className="text-xs font-bold text-gray-600">Lưu vào thực đơn của tôi (My Recipe)</span>
+                <span className="text-xs font-bold text-gray-600">
+                  {editingRecipeId ? "Cập nhật thay đổi vào công thức gốc" : "Lưu vào thực đơn của tôi (My Recipe)"}
+                </span>
               </label>
             </div>
           )}

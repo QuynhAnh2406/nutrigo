@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChefHat, Flame, Trash2, Plus, Sparkles, Lightbulb, ShoppingCart } from 'lucide-react';
+import { ChefHat, Flame, Trash2, Plus, Sparkles, Lightbulb, ShoppingCart, Check } from 'lucide-react';
 import MonthlyCalendar from '../components/MonthlyCalendar';
 import AddMealModal from '../components/AddMealModal';
 import MealDetailModal from '../components/MealDetailModal';
@@ -25,6 +25,7 @@ function MealPlan() {
   const [selectedRecipeDetail, setSelectedRecipeDetail] = useState(null);
   const [isClearDayModalOpen, setIsClearDayModalOpen] = useState(false);
   const [mealToDelete, setMealToDelete] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
 
   // Resizable panel logic
   const [leftWidth, setLeftWidth] = useState(40); // Percentage
@@ -345,12 +346,42 @@ function MealPlan() {
           mealType={addMealConfig.mealType}
           mealDate={addMealConfig.mealDate}
           onClose={() => setAddMealConfig(null)}
-          onConfirm={() => {
+          onConfirm={(addedMealInfo) => {
             fetchSelectedPlanData();
             fetchMonthlyMeals();
             setAddMealConfig(null);
+            
+            if (addedMealInfo) {
+              const d = new Date(addedMealInfo.mealDate);
+              const dateString = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+              const mealTypeLabel = mealTypeLabels[addedMealInfo.mealType] || addedMealInfo.mealType;
+              
+              setToastMessage({
+                name: addedMealInfo.name,
+                mealTypeLabel,
+                dateString
+              });
+              
+              setTimeout(() => {
+                setToastMessage(null);
+              }, 3000);
+            }
           }}
         />
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-[150] bg-white border border-[#B5E361]/50 shadow-xl rounded-2xl p-4 flex items-center gap-3 animate-in slide-in-from-right-8 fade-in duration-300">
+          <div className="w-8 h-8 bg-[#EAF7D5] rounded-full flex items-center justify-center shrink-0">
+            <Check size={16} className="text-[#3d6600]" strokeWidth={3} />
+          </div>
+          <p className="text-sm font-semibold text-gray-600 pr-2">
+            <span className="text-[#1f3b00] font-black uppercase tracking-wide">{toastMessage.name}</span> đã thêm vào{' '}
+            <span className="text-[#1f3b00] font-black uppercase bg-[#B5E361]/30 px-2 py-0.5 rounded-md border border-[#B5E361]/40">{toastMessage.mealTypeLabel}</span>{' '}
+            ngày <span className="text-[#1f3b00] font-black bg-[#EAF7D5] px-2 py-0.5 rounded-md border border-[#B5E361]/30">{toastMessage.dateString}</span>
+          </p>
+        </div>
       )}
 
       {selectedRecipeDetail && (

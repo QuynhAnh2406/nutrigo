@@ -374,7 +374,7 @@ exports.getUserRecipes = async (req, res) => {
 };
 
 exports.addMealWithRecipe = async (req, res) => {
-  const { day, mealType, recipeData, saveToMyRecipe, mealDate } = req.body;
+  const { day, mealType, recipeData, saveToMyRecipe, updateExistingRecipe, mealDate } = req.body;
   const userId = await getUserId(req);
 
   const client = await db.pool.connect();
@@ -383,15 +383,43 @@ exports.addMealWithRecipe = async (req, res) => {
 
     let recipeId = recipeData.id;
 
-    if (!recipeId || saveToMyRecipe) {
-      // Calculate totals and ensure they are numbers
-      const totalCals = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.calories_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
-      const totalProtein = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.protein_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
-      const totalCarbs = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.carbs_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
-      const totalFat = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.fat_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
+    // Calculate totals and ensure they are numbers
+    const totalCals = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.calories_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
+    const totalProtein = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.protein_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
+    const totalCarbs = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.carbs_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
+    const totalFat = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.fat_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
 
-      // Create new post/recipe
-      // Round calories to match INTEGER type in DB
+    if (recipeId && updateExistingRecipe) {
+      // Update existing post/recipe
+      await client.query(`
+        UPDATE posts 
+        SET food_name = $1, calories = $2, protein = $3, carbs = $4, fat = $5, description = $6, prep_time = $7, image_url = $8
+        WHERE id = $9 AND user_id = $10
+      `, [
+        recipeData.name, 
+        Math.round(totalCals), 
+        totalProtein, 
+        totalCarbs, 
+        totalFat, 
+        recipeData.description || 'Added via Meal Plan', 
+        recipeData.prepTime || '30 min',
+        recipeData.imageUrl || '',
+        recipeId,
+        userId
+      ]);
+
+      // Delete old ingredients and insert new ones
+      await client.query('DELETE FROM post_ingredients WHERE post_id = $1', [recipeId]);
+      
+      for (let ing of recipeData.ingredients) {
+        const ingCals = (Number(ing.calories_per_100g || 0) * Number(ing.weight_g || 0) / 100);
+        await client.query(`
+          INSERT INTO post_ingredients (post_id, ingredient_name, weight_g, calories)
+          VALUES ($1, $2, $3, $4)
+        `, [recipeId, ing.name, Number(ing.weight_g || 0), ingCals]);
+      }
+    } else if (!recipeId || saveToMyRecipe || (recipeId && !updateExistingRecipe)) {
+      // Create new post/recipe (or clone if recipeId exists but updateExistingRecipe is false)
       const postRes = await client.query(`
         INSERT INTO posts (user_id, food_name, calories, protein, carbs, fat, description, prep_time, image_url, is_recipe)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
@@ -406,7 +434,8 @@ exports.addMealWithRecipe = async (req, res) => {
         recipeData.description || 'Added via Meal Plan', 
         recipeData.prepTime || '30 min',
         recipeData.imageUrl || '',
-        saveToMyRecipe
+        // If it's a clone (recipeId exists but not updating), it shouldn't be saved to My Recipes
+        (recipeId && !updateExistingRecipe) ? false : saveToMyRecipe
       ]);
       
       recipeId = postRes.rows[0].id;

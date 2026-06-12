@@ -2,13 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, Plus, X, Flame, ShieldAlert, Sparkles, Scale, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
-function Ingredients() {
+function Ingredients({ mode = 'ingredient' }) {
   const [ingredients, setIngredients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const portionWeight = 100; // Fixed default portion weight
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('All');
 
   // Advanced Filter State and Ref
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
@@ -38,8 +37,8 @@ function Ingredients() {
     carbs: '',
     fat: '',
     fiber: '',
-    type: 'ingredient',
-    serving_unit: '100g',
+    type: mode,
+    serving_unit: mode === 'brand' ? '1 phần' : '100g',
     category: 'food',
     brand_name: ''
   });
@@ -122,13 +121,13 @@ function Ingredients() {
   // Filtered ingredients list
   const filteredIngredients = ingredients.filter(ing => {
     const matchSearch = ing.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchTab = activeTab === 'All' || (ing.type || 'ingredient') === activeTab;
+    const matchMode = (ing.type || 'ingredient') === mode;
     const matchCategory = selectedCategory === 'All' || (ing.category || 'food') === selectedCategory;
     
-    // If activeTab is 'ingredient', don't filter by brand since raw ingredients don't have brand_name
-    const matchBrand = activeTab === 'ingredient' || !brandSearchQuery.trim() ||
+    // If mode is 'ingredient', don't filter by brand since raw ingredients don't have brand_name
+    const matchBrand = mode === 'ingredient' || !brandSearchQuery.trim() ||
       (ing.brand_name && ing.brand_name.toLowerCase().includes(brandSearchQuery.toLowerCase()));
-    return matchSearch && matchTab && matchCategory && matchBrand;
+    return matchSearch && matchMode && matchCategory && matchBrand;
   });
 
   // Helper to calculate nutrient value based on current portion weight
@@ -141,10 +140,10 @@ function Ingredients() {
     <div className="ingredients-page main-content" style={{ overflowY: 'auto', paddingBottom: '80px' }}>
       <div className="mb-8 relative z-30">
         <PageHeader
-          title="Tra cứu dinh dưỡng"
-          subtitle="Tra cứu nhanh thông số Calo và chất dinh dưỡng của từng thực phẩm theo khối lượng phần ăn tùy chọn."
+          title={mode === 'ingredient' ? 'Nguyên liệu cơ bản' : 'Thương hiệu / Đồ ăn ngoài'}
+          subtitle={mode === 'ingredient' ? 'Tra cứu thông số dinh dưỡng của các loại nguyên liệu nấu ăn cơ bản.' : 'Tra cứu thông số dinh dưỡng của các món ăn từ các thương hiệu phổ biến.'}
           icon={Scale}
-          badge={`${ingredients.length} nguyên liệu`}
+          badge={`${filteredIngredients.length} ${mode === 'ingredient' ? 'nguyên liệu' : 'món ăn'}`}
           actions={
             <button
               className="inline-flex items-center gap-2 rounded-2xl bg-gray-900 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-white shadow-sm transition-all hover:bg-black hover:scale-105 active:scale-95"
@@ -219,8 +218,8 @@ function Ingredients() {
                       </div>
                     </div>
 
-                    {/* Row 2: Brand Text Filter (only show if activeTab is not 'ingredient') */}
-                    {activeTab !== 'ingredient' && (
+                    {/* Row 2: Brand Text Filter (only show if mode is not 'ingredient') */}
+                    {mode !== 'ingredient' && (
                       <div className="flex flex-col gap-2 pt-3 border-t border-dashed border-gray-100">
                         <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Thương hiệu / Xuất xứ</span>
                         <div className="relative">
@@ -268,30 +267,7 @@ function Ingredients() {
         </PageHeader>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="community-tabs">
-        <button 
-          className={`tab-btn ${activeTab === 'All' ? 'active' : ''}`}
-          onClick={() => setActiveTab('All')}
-        >
-          Tất cả 
-          <span className="tab-btn-badge">{ingredients.length}</span>
-        </button>
-        <button 
-          className={`tab-btn ${activeTab === 'ingredient' ? 'active' : ''}`}
-          onClick={() => setActiveTab('ingredient')}
-        >
-          Nguyên liệu cơ bản 
-          <span className="tab-btn-badge">{ingredients.filter(i => (i.type || 'ingredient') === 'ingredient').length}</span>
-        </button>
-        <button 
-          className={`tab-btn ${activeTab === 'brand' ? 'active' : ''}`}
-          onClick={() => setActiveTab('brand')}
-        >
-          Thương hiệu / Đồ ăn ngoài 
-          <span className="tab-btn-badge">{ingredients.filter(i => i.type === 'brand').length}</span>
-        </button>
-      </div>
+      {/* Navigation Tabs Removed */}
 
       {/* Control Panel: Removed weight slider */}
       <div className="mb-6"></div>
@@ -383,7 +359,7 @@ function Ingredients() {
           <div className="bg-white w-full max-w-md rounded-[24px] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-300 flex flex-col">
             <div className="flex justify-between items-center mb-5 border-b border-gray-50 pb-3">
               <h3 className="font-extrabold text-gray-900 text-base flex items-center gap-1.5">
-                <Sparkles className="h-5 w-5 text-amber-500" /> Thêm nguyên liệu mới
+                <Sparkles className="h-5 w-5 text-amber-500" /> Thêm {mode === 'ingredient' ? 'nguyên liệu' : 'món ăn'} mới
               </h3>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -407,25 +383,15 @@ function Ingredients() {
                 />
               </div>
 
-              <div className="form-group flex flex-col gap-1">
+              <div className="form-group flex flex-col gap-1 hidden">
                 <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Phân loại</label>
                 <select
                   name="type"
                   value={formData.type}
-                  onChange={(e) => {
-                    const nextType = e.target.value;
-                    setFormData({
-                      ...formData,
-                      type: nextType,
-                      serving_unit: nextType === 'ingredient' ? '100g' : '',
-                      category: 'food',
-                      brand_name: ''
-                    });
-                  }}
+                  onChange={(e) => {}}
                   className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15 bg-white cursor-pointer"
                 >
-                  <option value="ingredient">🍏 Nguyên liệu cơ bản</option>
-                  <option value="brand">🏬 Thương hiệu / Đồ ăn ngoài</option>
+                  <option value={mode}>{mode === 'ingredient' ? 'Nguyên liệu cơ bản' : 'Thương hiệu / Đồ ăn ngoài'}</option>
                 </select>
               </div>
 
@@ -443,7 +409,7 @@ function Ingredients() {
                 </select>
               </div>
 
-              {formData.type === 'brand' && (
+              {mode === 'brand' && (
                 <>
                   <div className="form-group flex flex-col gap-1">
                     <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Tên thương hiệu / Cửa hàng</label>
