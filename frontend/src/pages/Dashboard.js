@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Heart, Bookmark, ArrowRight, Sparkles, ChevronRight, Activity, TrendingUp, Calendar, Award } from 'lucide-react';
+import { X, Heart, Bookmark, ArrowRight, Sparkles, ChevronRight, Activity, TrendingUp, Calendar, Award, LayoutDashboard } from 'lucide-react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 
@@ -250,6 +250,7 @@ function Dashboard() {
       {/* Header / Date */}
       <div className="mb-8">
         <PageHeader
+          icon={LayoutDashboard}
           title={time.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           subtitle="Bắt đầu ngày mới tràn đầy năng lượng cùng Nutrigo!"
           actions={

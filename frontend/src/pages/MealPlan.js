@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChefHat, Flame, Trash2, Plus, Sparkles, Lightbulb, ShoppingCart, Check, Pencil } from 'lucide-react';
+import { CalendarDays, ChefHat, Flame, Trash2, Plus, Sparkles, Lightbulb, ShoppingCart, Check, Pencil } from 'lucide-react';
 import MonthlyCalendar from '../components/MonthlyCalendar';
 import AddMealModal from '../components/AddMealModal';
 import MealDetailModal from '../components/MealDetailModal';
@@ -214,7 +214,7 @@ function MealPlan() {
       <div className="bg-[#EAF7D5] rounded-3xl p-6 sm:p-8 mb-4 shadow-sm border border-[#B5E361]/30">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm shrink-0 mt-1">
-            <ChefHat className="text-[#8CB33D]" size={24} />
+            <CalendarDays className="text-[#8CB33D]" size={24} />
           </div>
           <div className="flex-1">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1f3b00] mb-2">Lịch ăn uống</h1>

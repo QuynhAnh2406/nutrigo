@@ -4,7 +4,7 @@ import PostCard from '../components/PostCard';
 import PostDetailModal from '../components/PostDetailModal';
 import AddToMealPlanModal from '../components/AddToMealPlanModal';
 import PageHeader from '../components/PageHeader';
-import { ChefHat, Plus, Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { BookOpen, Plus, Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
 
 function MyRecipes() {
   const navigate = useNavigate();
@@ -66,8 +66,8 @@ function MyRecipes() {
       <div className="mb-8 relative z-30">
         <PageHeader
           title="Công thức của tôi"
-          subtitle="Quản lý và tạo mới các công thức nấu ăn lành mạnh của bạn để thêm vào thực đơn tuần."
-          icon={ChefHat}
+          subtitle="Nơi lưu giữ và sáng tạo những bữa ăn tuyệt vời mang đậm phong cách cá nhân."
+          icon={BookOpen}
           badge={`${filteredRecipes.length} công thức`}
           actions={
             <button

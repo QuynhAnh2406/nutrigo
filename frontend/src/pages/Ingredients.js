@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Plus, X, Flame, ShieldAlert, Sparkles, Scale, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { Search, Plus, X, Flame, ShieldAlert, Sparkles, Database, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 function Ingredients({ mode = 'ingredient' }) {
@@ -146,7 +146,7 @@ function Ingredients({ mode = 'ingredient' }) {
         <PageHeader
           title={mode === 'ingredient' ? 'Nguyên liệu cơ bản' : 'Thương hiệu / Đồ ăn ngoài'}
           subtitle={mode === 'ingredient' ? 'Tra cứu thông số dinh dưỡng của các loại nguyên liệu nấu ăn cơ bản.' : 'Tra cứu thông số dinh dưỡng của các món ăn từ các thương hiệu phổ biến.'}
-          icon={Scale}
+          icon={Database}
           badge={`${filteredIngredients.length} ${mode === 'ingredient' ? 'nguyên liệu' : 'món ăn'}`}
           actions={
             <button
