@@ -11,27 +11,38 @@ export default function PageHeader({
   const isCompact = !subtitle && !children;
 
   return (
-    <div className="bg-[#EAF7D5] rounded-3xl p-6 sm:p-8 mb-4 shadow-sm border border-[#B5E361]/30">
-      <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+    <div className="relative overflow-hidden rounded-[2rem] p-6 sm:p-8 mb-6 border border-white/20 bg-gradient-to-r from-[#8CB33D] via-[#7ca82b] to-[#5e821b] shadow-[0_10px_40px_rgb(140,179,61,0.25)] group transition-all duration-500 hover:shadow-[0_15px_50px_rgb(140,179,61,0.35)]">
+      
+      {/* Huge background icon */}
+      {Icon && (
+        <div className="absolute -right-4 -top-8 text-white opacity-[0.04] pointer-events-none transform -rotate-12 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700">
+          <Icon size={240} strokeWidth={1.5} />
+        </div>
+      )}
+
+      {/* Glossy overlay effect */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-50 pointer-events-none"></div>
+
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-start gap-5">
         {Icon && (
-          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm shrink-0 mt-1">
-            <Icon className="text-[#8CB33D]" size={24} />
+          <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner shrink-0 mt-1 border border-white/20 group-hover:scale-110 group-hover:bg-white/20 transition-all duration-300">
+            <Icon className="text-[#B5E361]" size={26} />
           </div>
         )}
         
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-3 mb-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1f3b00]">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-sm">
               {title}
             </h1>
             {badge && (
-              <span className="rounded-full bg-white/60 px-3 py-1 text-xs font-extrabold text-[#1f3b00] ring-1 ring-[#B5E361]/50 backdrop-blur shadow-sm">
+              <span className="rounded-full bg-[#B5E361] px-3.5 py-1 text-xs font-black text-[#183000] shadow-sm uppercase tracking-wider">
                 {badge}
               </span>
             )}
           </div>
           {subtitle && (
-            <p className="text-gray-600 text-sm sm:text-base font-medium">
+            <p className="text-[#EAF7D5]/90 text-sm sm:text-base font-medium max-w-2xl leading-relaxed">
               {subtitle}
             </p>
           )}

@@ -3,6 +3,7 @@ import { CalendarDays, ChefHat, Flame, Trash2, Plus, Sparkles, Lightbulb, Shoppi
 import MonthlyCalendar from '../components/MonthlyCalendar';
 import AddMealModal from '../components/AddMealModal';
 import MealDetailModal from '../components/MealDetailModal';
+import PageHeader from '../components/PageHeader';
 
 // Helper to get week start date (Monday)
 const getWeekStart = (date) => {
@@ -211,19 +212,11 @@ function MealPlan() {
     <div className="flex-1 w-full p-4 sm:p-6 lg:p-8 bg-gray-50/50 min-h-full flex flex-col overflow-y-auto">
       
       {/* Header */}
-      <div className="bg-[#EAF7D5] rounded-3xl p-6 sm:p-8 mb-4 shadow-sm border border-[#B5E361]/30">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm shrink-0 mt-1">
-            <CalendarDays className="text-[#8CB33D]" size={24} />
-          </div>
-          <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1f3b00] mb-2">Lịch ăn uống</h1>
-            <p className="text-gray-600 text-sm sm:text-base font-medium">
-              Lên kế hoạch các bữa ăn trong tuần và tự động tạo danh sách đi chợ.
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader 
+        title="Lịch ăn uống"
+        subtitle="Lên kế hoạch các bữa ăn trong tuần và tự động tạo danh sách đi chợ."
+        icon={CalendarDays}
+      />
 
       {/* Main Content with Resizable Splitter */}
       <div id="meal-plan-container" className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden relative rounded-[28px] bg-white border border-gray-100/80 shadow-sm">

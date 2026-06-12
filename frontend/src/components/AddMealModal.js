@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Check, ChefHat, Clock, Users, Flame } from 'lucide-react';
+import { ChefHat, X, Flame, Search, Clock, Users, Plus, Check, Trash2 } from 'lucide-react';
 
 function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
   const [activeTab, setActiveTab] = useState('choose'); // 'choose' or 'create'
@@ -472,6 +472,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
                     <div key={idx} className="flex flex-col gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-[#B5E361]/20 transition-all duration-300">
                       {/* Name input with custom Dropdown */}
                       <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input 
                           type="text"
                           placeholder="Nhập tên nguyên liệu (ví dụ: Ức gà)..."
@@ -483,7 +484,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
                             ));
                           }}
                           onBlur={() => handleIngredientBlur(idx)}
-                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/25 focus:border-[#B5E361] transition-all"
+                          className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-xs text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/25 focus:border-[#B5E361] transition-all"
                         />
                         {ing.showDropdown && (
                           <div className="absolute left-0 right-0 top-full mt-1 z-50 max-h-48 overflow-y-auto bg-white border border-gray-150 rounded-xl shadow-lg">
