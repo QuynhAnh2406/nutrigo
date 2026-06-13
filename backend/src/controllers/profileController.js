@@ -24,7 +24,8 @@ exports.getMyHealth = async(req, res) => {
         uh.cooking_skill,
         uh.phone,
         TO_CHAR(uh.date_of_birth, 'YYYY-MM-DD') as date_of_birth,
-        TO_CHAR(u.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at
+        TO_CHAR(u.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at,
+        u.avatar_url
       FROM users u
       LEFT JOIN user_health_data uh ON u.id = uh.user_id
       WHERE u.id = $1`, [userId]
@@ -40,10 +41,6 @@ exports.getMyHealth = async(req, res) => {
 
 exports.upsertMyHealth = async(req, res) => {
     const userId = getUserId(req);
-    console.log('--- UPSERT ATTEMPT ---');
-    console.log('User ID:', userId);
-    console.log('Request Body:', req.body);
-
     const {
         dateOfBirth,
         gender,
@@ -55,6 +52,8 @@ exports.upsertMyHealth = async(req, res) => {
         allergies,
         cookingSkill,
         phone,
+        email,
+        avatarUrl,
     } = req.body || {};
 
     try {
@@ -110,24 +109,33 @@ exports.upsertMyHealth = async(req, res) => {
             ]
         );
 
-        // Update email in users table
-        if (req.body.email) {
+        const currentUserResult = await db.query('SELECT email, avatar_url FROM users WHERE id = $1', [userId]);
+        const currentUser = currentUserResult.rows[0] || {};
+        const updates = [];
+        const updateValues = [];
+
+        if (email && email !== currentUser.email) {
+            updates.push('email = $' + (updateValues.length + 1));
+            updateValues.push(email);
+        }
+
+        if (avatarUrl && avatarUrl !== currentUser.avatar_url) {
+            updates.push('avatar_url = $' + (updateValues.length + 1));
+            updateValues.push(avatarUrl);
+        }
+
+        if (updates.length > 0) {
             await db.query(
-                'UPDATE users SET email = $1 WHERE id = $2', [req.body.email, userId]
+                `UPDATE users SET ${updates.join(', ')} WHERE id = $${updateValues.length + 1}`, [...updateValues, userId]
             );
         }
 
-        // Update email in users table only when it changes.
-        if (req.body.email) {
-            const currentUser = await db.query('SELECT email FROM users WHERE id = $1', [userId]);
-            const currentEmail = currentUser.rows[0] ? currentUser.rows[0].email : null;
+        const responseRow = {
+            ...rows[0],
+            avatar_url: avatarUrl || currentUser.avatar_url || null
+        };
 
-            if (req.body.email !== currentEmail) {
-                await db.query('UPDATE users SET email = $1 WHERE id = $2', [req.body.email, userId]);
-            }
-        }
-
-        res.json({ success: true, data: rows[0] });
+        res.json({ success: true, data: responseRow });
     } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);

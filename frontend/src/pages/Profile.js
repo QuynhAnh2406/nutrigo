@@ -45,8 +45,10 @@ function Profile() {
   // Local form state for editing to prevent immediate global state updates
   const [formData, setFormData] = useState({
     ...healthData,
-    email: user.email
+    email: user.email,
+    avatarUrl: user.avatar
   });
+  const [avatarPreview, setAvatarPreview] = useState(user.avatar);
   const [isSaving, setIsSaving] = useState(false);
 
   // Re-sync local form if healthData or user changes (e.g. initial load)
@@ -54,10 +56,12 @@ function Profile() {
     if (activeTab === 'Edit') {
       setFormData({
         ...healthData,
-        email: user.email
+        email: user.email,
+        avatarUrl: user.avatar
       });
+      setAvatarPreview(user.avatar);
     }
-  }, [activeTab, healthData, user.email]);
+  }, [activeTab, healthData, user.email, user.avatar]);
 
   const saveHealthToDb = async () => {
     const token = localStorage.getItem('token');
@@ -78,7 +82,8 @@ function Profile() {
         allergies: formData.allergies,
         cookingSkill: formData.cookingSkill || 'Beginner',
         phone: formData.phone,
-        email: formData.email
+        email: formData.email,
+        avatarUrl: formData.avatarUrl
       })
     });
 
@@ -90,10 +95,12 @@ function Profile() {
     // Map DB -> frontend state shape
     const row = data.data || {};
 
-    // Update global user state with new email
-    if (formData.email !== user.email) {
-      setUser(prev => ({ ...prev, email: formData.email }));
-    }
+    // Update global user state with new email and avatar
+    setUser(prev => ({
+      ...prev,
+      email: formData.email,
+      avatar: row.avatar_url || prev.avatar
+    }));
 
     setHealthData((prev) => ({
       ...prev,
@@ -329,6 +336,40 @@ function Profile() {
                       placeholder="tenbancuaban@example.com" 
                       className="bg-white/80"
                     />
+                  </div>
+                  <div className="form-group">
+                    <label>Ảnh đại diện</label>
+                    <div className="space-y-3">
+                      <img
+                        src={avatarPreview || user.avatar || 'https://via.placeholder.com/96'}
+                        alt="Ảnh đại diện"
+                        className="w-24 h-24 object-cover rounded-full border border-gray-200"
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (!file) return;
+                          if (!file.type.startsWith('image/')) {
+                            alert('Vui lòng chọn một tệp ảnh hợp lệ.');
+                            return;
+                          }
+                          if (file.size > 2 * 1024 * 1024) {
+                            alert('Kích thước ảnh không quá 2MB.');
+                            return;
+                          }
+
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            setFormData((prev) => ({ ...prev, avatarUrl: reader.result }));
+                            setAvatarPreview(reader.result);
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        className="bg-white/80"
+                      />
+                    </div>
                   </div>
                   <div className="form-group">
                     <label>Số điện thoại</label>
