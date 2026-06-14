@@ -418,8 +418,11 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
                     type="number"
                     min="1"
                     className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/30 transition-all"
-                    value={cookTime}
-                    onChange={(e) => setCookTime(parseInt(e.target.value) || 0)}
+                    value={cookTime === 0 ? '' : cookTime}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCookTime(val === '' ? '' : parseInt(val) || 0);
+                    }}
                   />
                 </div>
 
@@ -430,8 +433,11 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
                     type="number"
                     min="1"
                     className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/30 transition-all"
-                    value={servings}
-                    onChange={(e) => setServings(parseInt(e.target.value) || 1)}
+                    value={servings === 0 ? '' : servings}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setServings(val === '' ? '' : parseInt(val) || 1);
+                    }}
                   />
                 </div>
               </div>

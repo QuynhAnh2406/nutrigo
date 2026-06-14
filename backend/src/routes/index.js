@@ -5,7 +5,7 @@ const authOptional = require('../middleware/authOptional');
 
 const authRoutes = require('./authRoutes');
 const ingredientRoutes = require('./ingredientRoutes');
-const postRoutes = require('./postRoutes');
+const recipeRoutes = require('./recipeRoutes');
 const mealPlanRoutes = require('./mealPlanRoutes');
 const profileRoutes = require('./profileRoutes');
 
