@@ -568,17 +568,7 @@ function Profile() {
                 {user.name} {user.isPremium && <span title="Thành viên Premium" className="text-yellow-500">👑</span>}
               </h2>
               <p className="text-gray-500 text-sm mb-6">{user.email}</p>
-              
-              <div className="flex gap-8 w-full justify-center border-t border-b border-gray-100 py-4 mb-6">
-                <div className="text-center cursor-pointer hover:text-green-600 transition-colors">
-                  <strong className="block text-xl text-gray-800">{user.followers}</strong>
-                  <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Người theo dõi</span>
-                </div>
-                <div className="text-center cursor-pointer hover:text-green-600 transition-colors">
-                  <strong className="block text-xl text-gray-800">{user.following}</strong>
-                  <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Đang theo dõi</span>
-                </div>
-              </div>
+
               
               <button className="btn-secondary w-full">Chia sẻ hồ sơ</button>
             </div>
