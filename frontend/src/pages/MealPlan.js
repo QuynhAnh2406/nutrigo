@@ -158,6 +158,7 @@ function MealPlan() {
       fetchSelectedPlanData();
       fetchMonthlyMeals();
       setMealToDelete(null);
+      setSelectedRecipeDetail(null);
     } catch (e) {
       console.error(e);
     }
@@ -411,7 +412,7 @@ function MealPlan() {
           onClose={() => setSelectedRecipeDetail(null)} 
           onDelete={() => {
             setMealToDelete(selectedRecipeDetail);
-            setSelectedRecipeDetail(null);
+            // Do NOT close the detail modal yet so user can go back to it
           }}
           onSaveSuccess={() => {
             fetchSelectedPlanData();
@@ -455,7 +456,7 @@ function MealPlan() {
 
       {/* Delete Meal Confirmation Modal */}
       {mealToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1f3b00]/40 backdrop-blur-sm transition-all duration-300">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-[#1f3b00]/40 backdrop-blur-sm transition-all duration-300">
           <div className="bg-white rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#B5E361]/30 p-8 w-[90%] max-w-md text-center transform transition-all scale-100 animate-in zoom-in-95 duration-200">
             <div className="w-20 h-20 bg-[#EAF7D5] rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
               <Trash2 className="text-[#3d6600]" size={36} strokeWidth={2.5} />

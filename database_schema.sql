@@ -30,16 +30,6 @@ CREATE TABLE user_health_data (
 );
 
 -- ==========================================
--- BẢNG FOLLOWS (Người theo dõi / Đang theo dõi)
--- ==========================================
-CREATE TABLE follows (
-    follower_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    followed_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (follower_id, followed_id)
-);
-
--- ==========================================
 -- BẢNG INGREDIENTS (Cơ sở dữ liệu dinh dưỡng)
 -- ==========================================
 CREATE TABLE ingredients (
@@ -73,7 +63,6 @@ CREATE TABLE posts (
     protein NUMERIC(6,2),
     fat NUMERIC(6,2),
     recipe_instructions TEXT, -- Dùng cho text thuần hoặc fallback
-    rating NUMERIC(3,2) DEFAULT 0,
     is_recipe BOOLEAN DEFAULT FALSE,
     meal_type VARCHAR(50),
     category VARCHAR(50) DEFAULT 'food',

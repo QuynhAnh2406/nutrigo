@@ -154,15 +154,11 @@ function MainLayout() {
         calculateMetrics();
     }, [healthData]);
 
-    return ( <
-        div className = "dashboard-container" >
-        <
-        Sidebar user = { user }
-        /> <
-        Outlet context = {
-            { menuItems, newMenuItems, recommendedItems, user, setUser, healthData, setHealthData, metrics } }
-        /> <
-        /div>
+    return (
+        <div className="dashboard-container">
+            <Sidebar user={user} />
+            <Outlet context={{ menuItems, newMenuItems, recommendedItems, user, setUser, healthData, setHealthData, metrics }} />
+        </div>
     );
 }
 
