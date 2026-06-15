@@ -3,6 +3,29 @@ import { ArrowRight, Sparkles, LayoutDashboard } from 'lucide-react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 
+const quotes = [
+  "Sức khỏe là vốn quý nhất.",
+  "Ăn uống lành mạnh hôm nay, vun đắp sức khỏe ngày mai.",
+  "Một cơ thể khỏe mạnh bắt đầu từ những lựa chọn nhỏ mỗi ngày.",
+  "Dinh dưỡng tốt là nền móng của một cuộc sống trọn vẹn.",
+  "Hãy chăm sóc cơ thể như cách bạn trân trọng chính mình.",
+  "Mỗi bữa ăn là một cơ hội để nuôi dưỡng sức khỏe.",
+  "Cơ thể bạn phản ánh những gì bạn lựa chọn mỗi ngày.",
+  "Ăn đúng cách, sống tích cực, khỏe mạnh dài lâu.",
+  "Sự cân bằng trong dinh dưỡng tạo nên sự cân bằng trong cuộc sống.",
+  "Một chế độ ăn tốt là món quà bạn dành cho tương lai.",
+  "Khỏe mạnh không phải mục tiêu, mà là một hành trình.",
+  "Thay đổi nhỏ trong bữa ăn tạo nên khác biệt lớn cho sức khỏe.",
+  "Dinh dưỡng hôm nay quyết định năng lượng ngày mai.",
+  "Một cơ thể khỏe cần được nuôi dưỡng bằng những điều tốt đẹp.",
+  "Hãy ăn để khỏe mạnh, không chỉ để no.",
+  "Mỗi lựa chọn thực phẩm là một bước tiến đến phiên bản khỏe hơn.",
+  "Sức khỏe bắt đầu từ chiếc đĩa trên bàn ăn.",
+  "Nuôi dưỡng cơ thể, nâng cao chất lượng cuộc sống.",
+  "Cân bằng dinh dưỡng là chìa khóa của sức khỏe bền vững.",
+  "Hôm nay ăn lành mạnh, ngày mai sống khỏe mạnh."
+];
+
 function Dashboard() {
   const { metrics, healthData } = useOutletContext();
   const navigate = useNavigate();
@@ -58,14 +81,12 @@ function Dashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  const quotes = [
-    "Bắt đầu ngày mới với năng lượng tích cực!",
-    "Sức khỏe là vốn quý nhất.",
-    "Ăn uống lành mạnh, sống vui khỏe mỗi ngày.",
-    "Cơ thể bạn là những gì bạn ăn.",
-    "Hôm nay là một ngày tuyệt vời để bắt đầu sống khỏe mạnh."
-  ];
-  const quote = quotes[time.getDay() % quotes.length];
+  const [quote, setQuote] = useState('');
+
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    setQuote(quotes[randomIndex]);
+  }, []);
 
   const getTodayCalories = () => {
     const todayDayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()];

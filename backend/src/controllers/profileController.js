@@ -31,7 +31,17 @@ exports.getMyHealth = async(req, res) => {
       WHERE u.id = $1`, [userId]
         );
 
-        res.json({ success: true, data: rows[0] || null });
+        const data = rows[0] || null;
+        if (data) {
+            if (data.height_cm !== null && data.height_cm !== undefined) {
+                data.height_cm = parseFloat(data.height_cm);
+            }
+            if (data.weight_kg !== null && data.weight_kg !== undefined) {
+                data.weight_kg = parseFloat(data.weight_kg);
+            }
+        }
+
+        res.json({ success: true, data });
     } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);
@@ -134,6 +144,12 @@ exports.upsertMyHealth = async(req, res) => {
             ...rows[0],
             avatar_url: avatarUrl || currentUser.avatar_url || null
         };
+        if (responseRow.height_cm !== null && responseRow.height_cm !== undefined) {
+            responseRow.height_cm = parseFloat(responseRow.height_cm);
+        }
+        if (responseRow.weight_kg !== null && responseRow.weight_kg !== undefined) {
+            responseRow.weight_kg = parseFloat(responseRow.weight_kg);
+        }
 
         res.json({ success: true, data: responseRow });
     } catch (error) {

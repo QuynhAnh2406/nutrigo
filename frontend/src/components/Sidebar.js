@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, BookOpen, Database, Apple, Store } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, BookOpen, Database, Apple, Store, Leaf } from 'lucide-react';
 
 function Sidebar({ user }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -34,9 +34,11 @@ function Sidebar({ user }) {
 
     return (
         <div className="sidebar">
-            <div className="logo" onClick={() => window.location.href = '/'} style={{ cursor: 'pointer' }}>
-                <div className="logo-icon"></div>
-                Nutrigo
+            <div className="logo" onClick={() => window.location.href = '/dashboard'} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '40px', height: '40px', backgroundColor: '#B5E361', borderRadius: '9999px', borderTopLeftRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', flexShrink: 0 }}>
+                    <Leaf size={24} style={{ color: '#111827' }} />
+                </div>
+                <span style={{ fontSize: '24px', fontWeight: '700', letterSpacing: '-0.025em', color: '#111827' }}>Nutrigo</span>
             </div>
             <ul className="nav-menu">
                 <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>

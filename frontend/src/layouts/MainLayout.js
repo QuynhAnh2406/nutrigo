@@ -72,8 +72,8 @@ function MainLayout() {
                     setHealthData({
                         dateOfBirth: row.date_of_birth ? String(row.date_of_birth).slice(0, 10) : '',
                         gender: row.gender || '',
-                        height: row.height_cm || '',
-                        weight: row.weight_kg || '',
+                        height: (row.height_cm !== null && row.height_cm !== undefined && row.height_cm !== '') ? parseFloat(row.height_cm) : '',
+                        weight: (row.weight_kg !== null && row.weight_kg !== undefined && row.weight_kg !== '') ? parseFloat(row.weight_kg) : '',
                         activityLevel: row.activity_level || '',
                         goal: row.goal || '',
                         dietaryPreference: row.dietary_preference || '',
