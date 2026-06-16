@@ -41,14 +41,7 @@ exports.getPosts = async (req, res) => {
       post.timeAgo = 'Vừa xong'; // Mock time
       post.comments = []; // Mock comments
 
-      // Get Tags
-      const tagsRes = await db.query('SELECT tag_name FROM post_tags WHERE post_id = $1', [post.id]);
-      post.tags = tagsRes.rows.map(t => t.tag_name);
-
-      // Filter by tag if needed
-      if (filter && filter !== 'All' && !post.tags.includes(filter)) {
-         post.hidden = true;
-      }
+      // Filter logic removed since tags are removed
 
       // Get Ingredients
       const ingRes = await db.query(`
@@ -110,9 +103,7 @@ exports.getPostById = async (req, res) => {
     post.timeAgo = 'Vừa xong'; // Mock time
     post.comments = []; // Mock comments
 
-    // Get Tags
-    const tagsRes = await db.query('SELECT tag_name FROM post_tags WHERE post_id = $1', [post.id]);
-    post.tags = tagsRes.rows.map(t => t.tag_name);
+    // Tags logic removed
 
     // Get Ingredients
     const ingRes = await db.query(`
@@ -140,7 +131,7 @@ exports.getPostById = async (req, res) => {
 
 
 exports.createPost = async (req, res) => {
-  const { foodName, description, image, prepTime, difficulty, tags, ingredients, instructions, isRecipe, mealType, category, healthLevel } = req.body;
+  const { foodName, description, image, prepTime, difficulty, ingredients, instructions, isRecipe, mealType, category, healthLevel } = req.body;
   const userId = getUserId(req);
 
   if (!foodName || !ingredients || !instructions) {
@@ -178,12 +169,7 @@ exports.createPost = async (req, res) => {
 
     const postId = postRes.rows[0].id;
 
-    // 2. Insert tags
-    if (tags && Array.isArray(tags)) {
-      for (let tag of tags) {
-        await client.query('INSERT INTO post_tags (post_id, tag_name) VALUES ($1, $2)', [postId, tag.trim()]);
-      }
-    }
+    // 2. Tags insertion removed
 
     // 3. Insert ingredients
     if (ingredients && Array.isArray(ingredients)) {
@@ -214,7 +200,7 @@ exports.createPost = async (req, res) => {
       calories: postRes.rows[0].calories,
       prepTime: postRes.rows[0].prep_time,
       difficulty: postRes.rows[0].difficulty,
-      tags: tags || [],
+
       macros: { carbs: 30, protein: 20, fat: 10 },
       ingredients: ingredients || [],
       instructions: instructions || [],
@@ -238,7 +224,7 @@ exports.createPost = async (req, res) => {
 
 exports.updatePost = async (req, res) => {
   const postId = req.params.id;
-  const { foodName, description, image, prepTime, difficulty, tags, ingredients, instructions, category, healthLevel } = req.body;
+  const { foodName, description, image, prepTime, difficulty, ingredients, instructions, category, healthLevel } = req.body;
   const userId = getUserId(req);
 
   if (!foodName || !ingredients || !instructions) {
@@ -273,13 +259,7 @@ exports.updatePost = async (req, res) => {
       postId
     ]);
 
-    // 2. Delete and re-insert tags
-    await client.query('DELETE FROM post_tags WHERE post_id = $1', [postId]);
-    if (tags && Array.isArray(tags)) {
-      for (let tag of tags) {
-        await client.query('INSERT INTO post_tags (post_id, tag_name) VALUES ($1, $2)', [postId, tag.trim()]);
-      }
-    }
+    // 2. Delete tags logic removed
 
     // 3. Delete and re-insert ingredients
     await client.query('DELETE FROM post_ingredients WHERE post_id = $1', [postId]);

@@ -11,8 +11,7 @@ function CreatePost() {
     description: '',
     image: '',
     prepTime: '',
-    difficulty: 'Easy',
-    tags: ''
+    difficulty: 'Easy'
   });
 
   const [ingredients, setIngredients] = useState([{ name: '', amount: '', calories: '' }]);
@@ -42,14 +41,13 @@ function CreatePost() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(t => t);
+
     
     // Calculate total calories preview
     const totalCal = ingredients.reduce((sum, ing) => sum + (Number(ing.calories) || 0), 0);
 
     const newPostData = {
       ...formData,
-      tags: tagsArray,
       ingredients: ingredients.filter(i => i.name),
       instructions: instructions.filter(i => i),
       calories: totalCal
@@ -126,10 +124,6 @@ function CreatePost() {
             </div>
           </div>
 
-          <div className="form-group mb-8">
-            <label className="font-bold text-gray-800">Nhãn (phân cách bằng dấu phẩy)</label>
-            <input type="text" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="Ít Calo, Chay, Keto..." className="w-full p-3 rounded-xl border border-gray-200" />
-          </div>
 
           <div className="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-100">
             <h3 className="font-bold text-gray-800 mb-4">Nguyên liệu</h3>
@@ -175,7 +169,7 @@ function CreatePost() {
             <div className="text-green-700 text-sm leading-relaxed space-y-3">
               <p>Chúng tôi rất mong đợi những món ăn của bạn! Để công thức nổi bật hơn, hãy tải lên những bức ảnh rõ nét nhé.</p>
               <p>Ngoài ra, hãy kiểm tra lại định lượng nguyên liệu. Nhiều thành viên sẽ sử dụng công thức này để theo dõi dinh dưỡng hằng ngày, do đó tính chính xác rất quan trọng.</p>
-              <p>Cuối cùng, hãy giữ cho các bước đơn giản và đừng quên thêm các thẻ nhãn để mọi người dễ dàng tìm thấy món ăn của bạn.</p>
+              <p>Cuối cùng, hãy giữ cho các bước đơn giản để mọi người dễ dàng tìm thấy và thực hiện món ăn của bạn.</p>
               <p className="font-medium pt-2">Chúc bạn nấu ăn vui vẻ!</p>
             </div>
           </div>

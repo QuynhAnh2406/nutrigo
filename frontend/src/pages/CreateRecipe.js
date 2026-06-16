@@ -14,7 +14,6 @@ function CreateRecipe() {
     image: '',
     prepTime: '',
     difficulty: 'Easy',
-    tags: '',
     mealType: 'all',
     category: 'food',
     healthLevel: 'medium'
@@ -23,8 +22,6 @@ function CreateRecipe() {
   const [ingredients, setIngredients] = useState([{ name: '', amount: '', calories: '', selectedIng: null, showDropdown: false }]);
   const [instructions, setInstructions] = useState(['']);
   const [dbIngredients, setDbIngredients] = useState([]);
-  const [showCustomTagInput, setShowCustomTagInput] = useState(false);
-  const [customTag, setCustomTag] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
   const [prepTimeValue, setPrepTimeValue] = useState('');
   const [prepTimeUnit, setPrepTimeUnit] = useState('phút');
@@ -189,13 +186,11 @@ function CreateRecipe() {
     if (!formData.foodName.trim()) return;
 
     setLoading(true);
-    const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(t => t);
     const totalCal = ingredients.reduce((sum, ing) => sum + (Number(ing.calories) || 0), 0);
 
     const newRecipeData = {
       ...formData,
       prepTime: prepTimeValue ? `${prepTimeValue} ${prepTimeUnit}` : '',
-      tags: tagsArray,
       ingredients: ingredients.filter(i => i.name),
       instructions: instructions.filter(i => i),
       calories: totalCal,
@@ -358,89 +353,6 @@ function CreateRecipe() {
               </div>
             </div>
 
-            <div className="form-group flex flex-col gap-1.5">
-              <label className="text-xs font-black text-gray-705 uppercase tracking-wider pl-1 text-gray-700">Nhãn dán nổi bật</label>
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                {(() => {
-                  const defaultTags = ['Ít Calo', 'Giàu Đạm', 'Ăn Chay', 'Keto', 'Eat Clean', 'Không Gluten', 'Low Carb', 'Tăng Cơ', 'Healthy'];
-                  const currentTags = formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : [];
-                  const customTagsInForm = currentTags.filter(t => !defaultTags.includes(t));
-                  const allTagsToDisplay = [...defaultTags, ...customTagsInForm];
-
-                  return (
-                    <>
-                      {allTagsToDisplay.map(tag => {
-                        const isActive = currentTags.includes(tag);
-                        return (
-                          <button
-                            key={tag}
-                            type="button"
-                            onClick={() => {
-                              let newTags;
-                              if (isActive) {
-                                newTags = currentTags.filter(t => t !== tag);
-                              } else {
-                                newTags = [...currentTags, tag];
-                              }
-                              setFormData({ ...formData, tags: newTags.join(', ') });
-                            }}
-                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 border-2 active:scale-95 ${
-                              isActive 
-                                ? 'bg-[#B5E361] border-[#B5E361] text-[#1f3b00] shadow-sm shadow-[#B5E361]/20' 
-                                : 'bg-white border-gray-150 text-gray-500 hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50'
-                            }`}
-                          >
-                            {tag}
-                          </button>
-                        );
-                      })}
-                      
-                      {!showCustomTagInput ? (
-                        <button
-                          type="button"
-                          onClick={() => setShowCustomTagInput(true)}
-                          className="px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 border-2 border-dashed border-gray-300 bg-transparent text-gray-500 hover:border-gray-400 hover:text-gray-700 hover:bg-gray-50 active:scale-95"
-                        >
-                          + Khác
-                        </button>
-                      ) : (
-                        <input
-                          type="text"
-                          value={customTag}
-                          onChange={(e) => setCustomTag(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ',') {
-                              e.preventDefault();
-                              const val = customTag.trim();
-                              if (val && !currentTags.includes(val)) {
-                                setFormData({ ...formData, tags: [...currentTags, val].join(', ') });
-                              }
-                              setCustomTag('');
-                              setShowCustomTagInput(false);
-                            } else if (e.key === 'Escape') {
-                              setCustomTag('');
-                              setShowCustomTagInput(false);
-                            }
-                          }}
-                          onBlur={() => {
-                            const val = customTag.trim();
-                            if (val && !currentTags.includes(val)) {
-                              setFormData({ ...formData, tags: [...currentTags, val].join(', ') });
-                            }
-                            setCustomTag('');
-                            setShowCustomTagInput(false);
-                          }}
-                          placeholder="Nhập nhãn..."
-                          className="px-3 py-1.5 rounded-xl outline-none text-xs font-bold bg-white w-28 transition-all"
-                          style={{ border: '2px solid #B5E361', boxShadow: '0 0 0 4px rgba(181, 227, 97, 0.2)' }}
-                          autoFocus
-                        />
-                      )}
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
 
             {/* Advanced Recipe Fields Grid */}
             <div className="grid grid-cols-1 gap-6 pt-2">

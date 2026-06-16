@@ -19,11 +19,6 @@ function PostCard({ post, onOpenDetail, onAddToPlan }) {
         <h3 className="post-title">{post.foodName}</h3>
         <p className="post-desc">{post.description}</p>
         
-        <div className="post-tags">
-          {post.tags.map((tag, idx) => (
-            <span key={idx} className="tag">{tag}</span>
-          ))}
-        </div>
 
         <div className="post-stats">
           <span>🔥 {post.calories} kcal</span>

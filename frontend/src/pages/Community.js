@@ -18,7 +18,7 @@ function Community() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedHealthLevel, setSelectedHealthLevel] = useState('All');
   const [selectedRating, setSelectedRating] = useState('All');
-  const [selectedTag, setSelectedTag] = useState('All');
+
   const [selectedCalories, setSelectedCalories] = useState('All');
   const popoverContainerRef = React.useRef(null);
   const [selectedPost, setSelectedPost] = useState(null);
@@ -126,7 +126,7 @@ function Community() {
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 <span className="hidden sm:inline">Bộ lọc nâng cao</span>
-                {(selectedMealType !== 'All' || selectedCategory !== 'All' || selectedHealthLevel !== 'All' || selectedRating !== 'All' || selectedTag !== 'All' || selectedCalories !== 'All') && (
+                {(selectedMealType !== 'All' || selectedCategory !== 'All' || selectedHealthLevel !== 'All' || selectedRating !== 'All' || selectedCalories !== 'All') && (
                   <span className="w-2 h-2 rounded-full bg-red-500"></span>
                 )}
               </button>
@@ -297,29 +297,6 @@ function Community() {
                       </div>
                     </div>
 
-                    {/* Row 5: Tags Filter */}
-                    <div className="flex flex-col gap-2 pt-3 border-t border-dashed border-gray-100">
-                      <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Nhãn dán nổi bật</span>
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedTag('All')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${selectedTag === 'All' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
-                        >
-                          Tất cả
-                        </button>
-                        {['Ít calo', 'Giàu đạm', 'Ít Carb', 'Ăn chay', 'Keto', 'Dưới 15 phút', 'Dưới 30 phút'].map(tag => (
-                          <button
-                            key={tag}
-                            type="button"
-                            onClick={() => setSelectedTag(tag)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${selectedTag === tag ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
-                          >
-                            {tag}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
 
                     {/* Row 6: Calories Filter */}
                     <div className="flex flex-col gap-2 pt-3 border-t border-dashed border-gray-100">
@@ -364,7 +341,7 @@ function Community() {
                     </div>
 
                     {/* Row 7: Action Reset Button */}
-                    {(selectedMealType !== 'All' || selectedCategory !== 'All' || selectedHealthLevel !== 'All' || selectedRating !== 'All' || selectedTag !== 'All' || selectedCalories !== 'All') && (
+                    {(selectedMealType !== 'All' || selectedCategory !== 'All' || selectedHealthLevel !== 'All' || selectedRating !== 'All' || selectedCalories !== 'All') && (
                       <div className="flex justify-end pt-3 border-t border-dashed border-gray-100">
                         <button
                           type="button"
@@ -373,7 +350,7 @@ function Community() {
                             setSelectedCategory('All');
                             setSelectedHealthLevel('All');
                             setSelectedRating('All');
-                            setSelectedTag('All');
+
                             setSelectedCalories('All');
                           }}
                           className="flex items-center gap-1 text-xs text-red-500 font-bold hover:text-red-700 transition-colors"
@@ -412,7 +389,7 @@ function Community() {
             const matchCategory = selectedCategory === 'All' || r.category === selectedCategory;
             const matchHealthLevel = selectedHealthLevel === 'All' || r.healthLevel === selectedHealthLevel;
             const matchRating = selectedRating === 'All' || parseFloat(r.rating || 0) >= parseFloat(selectedRating);
-            const matchTag = selectedTag === 'All' || (r.tags && r.tags.includes(selectedTag));
+
             
             const matchCalories = (() => {
               if (selectedCalories === 'All') return true;
@@ -424,7 +401,7 @@ function Community() {
               return true;
             })();
 
-            return matchMealType && matchCategory && matchHealthLevel && matchRating && matchTag && matchCalories;
+            return matchMealType && matchCategory && matchHealthLevel && matchRating && matchCalories;
           });
           
           return filteredPosts.length > 0 ? (

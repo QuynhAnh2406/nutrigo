@@ -71,14 +71,7 @@ CREATE TABLE posts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ==========================================
--- BẢNG POST_TAGS (Các tag của công thức như Low Calorie, Keto...)
--- ==========================================
-CREATE TABLE post_tags (
-    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
-    tag_name VARCHAR(50),
-    PRIMARY KEY (post_id, tag_name)
-);
+
 
 -- ==========================================
 -- BẢNG POST_INGREDIENTS (Nguyên liệu chi tiết cho từng công thức)

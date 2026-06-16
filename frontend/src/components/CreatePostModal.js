@@ -6,8 +6,7 @@ function CreatePostModal({ onClose, onSubmit }) {
     description: '',
     image: '',
     prepTime: '',
-    difficulty: 'Easy',
-    tags: ''
+    difficulty: 'Easy'
   });
 
   const [ingredients, setIngredients] = useState([{ name: '', amount: '', calories: '' }]);
@@ -37,14 +36,13 @@ function CreatePostModal({ onClose, onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(t => t);
+
     
     // Calculate total calories preview
     const totalCal = ingredients.reduce((sum, ing) => sum + (Number(ing.calories) || 0), 0);
 
     const newPostData = {
       ...formData,
-      tags: tagsArray,
       ingredients: ingredients.filter(i => i.name),
       instructions: instructions.filter(i => i),
       calories: totalCal
@@ -94,10 +92,6 @@ function CreatePostModal({ onClose, onSubmit }) {
             </div>
           </div>
 
-          <div className="form-group">
-            <label>Nhãn (phân cách bằng dấu phẩy)</label>
-            <input type="text" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="Ít Calo, Chay, Keto..." />
-          </div>
 
           <div className="form-section">
             <h3>Nguyên liệu</h3>

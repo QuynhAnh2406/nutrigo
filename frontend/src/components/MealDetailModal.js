@@ -9,7 +9,7 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess }) {
     image: meal.image || '',
     prepTime: meal.prepTime || '',
     difficulty: meal.difficulty || 'Medium',
-    tags: meal.tags ? meal.tags.join(', ') : '',
+
     category: meal.category || 'food',
     healthLevel: meal.healthLevel || 'medium'
   });
@@ -51,11 +51,8 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(t => t);
-    
     const updatedPostData = {
       ...formData,
-      tags: tagsArray,
       ingredients: ingredients.filter(i => i.name),
       instructions: instructions.filter(i => i)
     };
