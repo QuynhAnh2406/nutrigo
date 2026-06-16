@@ -295,7 +295,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
 
   return (
     <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex justify-between items-start">
           <div className="flex items-center gap-3">
@@ -357,9 +357,9 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto flex-1">
+        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
           {activeTab === 'choose' ? (
-            <div className="space-y-4 max-h-[50vh] pr-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[50vh] pr-1">
               {userRecipes.length > 0 ? (
                 userRecipes.map(recipe => (
                   <div 
@@ -440,7 +440,9 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
               )}
             </div>
           ) : (
-            <div className="space-y-5 pr-1">
+            <div className="flex flex-col md:flex-row gap-8 pr-1">
+              {/* Left Column: Image & Basic Info */}
+              <div className="flex-1 space-y-5 md:max-w-[320px] shrink-0">
               {/* Image Upload Banner */}
               <div className="relative w-full rounded-2xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 hover:border-[#B5E361]/50 transition-colors group">
                 <label className="cursor-pointer flex flex-col items-center justify-center w-full min-h-[160px] text-gray-400 hover:text-[#3d6600]">
@@ -548,7 +550,10 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                   </select>
                 </div>
               </div>
+              </div>
 
+              {/* Right Column: Ingredients & Options */}
+              <div className="flex-[1.5] flex flex-col space-y-6">
               {/* Ingredients Builder */}
               <div className="space-y-4 pt-2">
                 <div className="flex justify-between items-center">
@@ -683,6 +688,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                   {editingRecipeId ? "Cập nhật thay đổi vào công thức gốc" : "Lưu vào thực đơn của tôi (My Recipe)"}
                 </span>
               </label>
+              </div>
             </div>
           )}
         </div>
