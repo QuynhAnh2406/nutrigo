@@ -397,19 +397,32 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                         )}
                       </div>
 
-                      <div className="flex items-center gap-4 text-[11px] font-black text-gray-400 mt-3 pt-3 border-t border-gray-50">
-                        <span className="flex items-center gap-1 text-orange-600">
-                          <Flame size={12} />
-                          {recipe.calories} kcal
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} />
-                          {recipe.prep_time || '15 phút'}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Users size={12} />
-                          1 phần ăn
-                        </span>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 pt-3 border-t border-gray-50 text-[11px] font-black">
+                        <div className="flex items-center gap-3">
+                          <span className="flex items-center gap-1 text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100">
+                            <Flame size={12} />
+                            {recipe.calories} kcal
+                          </span>
+                          <span className="flex items-center gap-1 text-blue-600">
+                            P: {recipe.protein || 0}g
+                          </span>
+                          <span className="flex items-center gap-1 text-yellow-600">
+                            C: {recipe.carbs || 0}g
+                          </span>
+                          <span className="flex items-center gap-1 text-red-500">
+                            F: {recipe.fat || 0}g
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <Clock size={12} />
+                            {recipe.prep_time || '15 phút'}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users size={12} />
+                            1 phần ăn
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>

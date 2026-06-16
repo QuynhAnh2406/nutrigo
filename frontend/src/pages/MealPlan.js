@@ -369,19 +369,31 @@ function MealPlan() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 relative z-10">
                       <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
                         <span className="text-[#8CB33D] text-[10px] font-black uppercase tracking-widest mb-1.5">Calories</span>
-                        <span className="text-3xl font-black text-[#2a4500]">{macros.calories} <span className="text-sm font-bold text-gray-400">kcal</span></span>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-black text-[#2a4500]">{macros.calories}</span>
+                          <span className="text-sm font-bold text-gray-400">kcal</span>
+                        </div>
                       </div>
                       <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
                         <span className="text-blue-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Protein</span>
-                        <span className="text-3xl font-black text-blue-700">{macros.protein} <span className="text-sm font-bold text-gray-400">g</span></span>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-black text-blue-700">{macros.protein}</span>
+                          <span className="text-sm font-bold text-gray-400">g</span>
+                        </div>
                       </div>
                       <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
                         <span className="text-orange-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Carbs</span>
-                        <span className="text-3xl font-black text-orange-600">{macros.carbs} <span className="text-sm font-bold text-gray-400">g</span></span>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-black text-orange-600">{macros.carbs}</span>
+                          <span className="text-sm font-bold text-gray-400">g</span>
+                        </div>
                       </div>
                       <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
                         <span className="text-red-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Fat</span>
-                        <span className="text-3xl font-black text-red-600">{macros.fat} <span className="text-sm font-bold text-gray-400">g</span></span>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-black text-red-600">{macros.fat}</span>
+                          <span className="text-sm font-bold text-gray-400">g</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -436,11 +448,40 @@ function MealPlan() {
                               )}
                             </div>
                             
-                            <div className="flex-1 flex flex-col justify-center min-w-0 pr-16">
-                              <h5 className="font-extrabold text-base sm:text-lg text-[#1f3b00] line-clamp-2 group-hover:text-[#4a7a00] transition-colors leading-snug mb-2">{recipe.title}</h5>
-                              <div className="flex items-center gap-1.5 text-sm sm:text-base font-black text-gray-500">
-                                <Flame size={16} className="text-[#B5E361]" />
-                                {recipe.calories || 0} <span className="text-[11px] uppercase font-bold text-gray-400">kcal</span>
+                            <div className="flex-1 flex flex-col justify-between min-w-0 pr-1 py-0.5">
+                              <h5 className="font-extrabold text-lg text-gray-900 line-clamp-2 group-hover:text-[#659A1D] transition-colors tracking-tight leading-snug pr-12">
+                                {recipe.title}
+                              </h5>
+                              
+                              <div className="flex items-end justify-between mt-3">
+                                {/* Left Side: Macros */}
+                                <div className="flex items-center gap-4">
+                                  <div className="flex flex-col">
+                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Protein</span>
+                                    <span className="text-xs sm:text-sm font-extrabold text-gray-700">{recipe.protein || 0}g</span>
+                                  </div>
+                                  <div className="w-px h-6 bg-gray-200"></div>
+                                  <div className="flex flex-col">
+                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Carbs</span>
+                                    <span className="text-xs sm:text-sm font-extrabold text-gray-700">{recipe.carbs || 0}g</span>
+                                  </div>
+                                  <div className="w-px h-6 bg-gray-200"></div>
+                                  <div className="flex flex-col">
+                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Fat</span>
+                                    <span className="text-xs sm:text-sm font-extrabold text-gray-700">{recipe.fat || 0}g</span>
+                                  </div>
+                                </div>
+
+                                {/* Right Side: Calories */}
+                                <div className="shrink-0 pl-2 sm:pl-3">
+                                  <div className="flex items-center gap-1.5 bg-gradient-to-r from-[#f8fdf2] to-[#EAF7D5] border border-[#B5E361]/30 rounded-xl px-3 py-2 shadow-sm group-hover:shadow group-hover:border-[#B5E361]/60 hover:scale-105 transition-all">
+                                    <Flame size={14} className="text-[#8CB33D]" />
+                                    <div className="flex items-baseline gap-1">
+                                      <span className="font-black text-lg sm:text-xl text-[#3d6600] leading-none tracking-tight">{recipe.calories || 0}</span>
+                                      <span className="text-[10px] sm:text-[11px] font-extrabold text-[#659A1D] uppercase tracking-wider opacity-90">Kcal</span>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
 

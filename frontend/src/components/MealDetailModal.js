@@ -86,7 +86,7 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess }) {
 
   return (
     <div className="modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all p-4 animate-in fade-in duration-200" onClick={onClose}>
-      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden relative animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-5xl flex flex-col max-h-[90vh] overflow-hidden relative animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
         
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex justify-between items-start shrink-0">
@@ -105,187 +105,196 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess }) {
         </div>
 
         {/* Content */}
-        <form className="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-5" onSubmit={handleSave}>
-          
-          {/* Image Upload Banner */}
-          <div className={`relative w-full rounded-2xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 transition-colors group ${!isEditing ? 'opacity-70' : 'hover:border-[#B5E361]/50'}`}>
-            <label className={`${!isEditing ? 'cursor-default' : 'cursor-pointer'} flex flex-col items-center justify-center w-full min-h-[160px] text-gray-400 ${!isEditing ? '' : 'hover:text-[#3d6600]'}`}>
-              {formData.image ? (
-                <img src={formData.image} alt="Preview" className="w-full h-48 object-cover" />
-              ) : (
-                <div className="flex flex-col items-center gap-2 py-8">
-                  <ChefHat size={32} />
-                  <span className="text-sm font-bold">{isEditing ? 'Tải ảnh lên từ máy' : 'Chưa có hình ảnh'}</span>
-                  {isEditing && <span className="text-xs text-gray-400 font-medium">Nhấn vào đây để chọn ảnh</span>}
-                </div>
-              )}
-              {formData.image && isEditing && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-white font-bold bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm">Thay đổi ảnh</span>
-                </div>
-              )}
-              <input 
-                type="file" 
-                disabled={!isEditing}
-                accept="image/*" 
-                className="hidden" 
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setFormData({ ...formData, image: reader.result });
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }} 
-              />
-            </label>
-          </div>
-
-          {/* Dish Name */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Tên món ăn *</label>
-            <input 
-              type="text" name="foodName" value={formData.foodName} onChange={handleInputChange} 
-              disabled={!isEditing}
-              className={inputClassName("w-full border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold transition-all placeholder:text-gray-300")} 
-              placeholder="Ví dụ: Salad Ức Gà, Bún Chả..." required 
-            />
-          </div>
-
-          {/* Description */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Mô tả</label>
-            <textarea 
-              name="description" value={formData.description} onChange={handleInputChange} rows="2" 
-              disabled={!isEditing}
-              className={inputClassName("w-full border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-semibold transition-all placeholder:text-gray-300 resize-none")} 
-              placeholder="Nhập mô tả ngắn gọn về món ăn này..." 
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {/* Prep Time */}
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Thời gian nấu</label>
-              <input 
-                type="text" name="prepTime" value={formData.prepTime} onChange={handleInputChange} 
-                disabled={!isEditing}
-                className={inputClassName("w-full border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold transition-all placeholder:text-gray-300")}
-                placeholder="Ví dụ: 30 phút"
-              />
-            </div>
-            {/* Difficulty */}
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Độ khó</label>
-              <select 
-                name="difficulty" value={formData.difficulty} onChange={handleInputChange} 
-                disabled={!isEditing}
-                className={inputClassName("w-full border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold transition-all" + (isEditing ? " cursor-pointer" : ""))}
-              >
-                <option value="Easy">Dễ</option>
-                <option value="Medium">Trung bình</option>
-                <option value="Hard">Khó</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Ingredients */}
-          <div className="space-y-4 pt-2">
-            <div className="flex justify-between items-center">
-              <label className="text-[11px] font-black text-gray-800 uppercase tracking-wider pl-1">Nguyên liệu</label>
-              {isEditing && (
-                <button 
-                  type="button" onClick={addIngredient}
-                  className="bg-[#B5E361] hover:bg-[#98d15a] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-                >
-                  + THÊM NGUYÊN LIỆU
-                </button>
-              )}
-            </div>
+        <form className="p-6 overflow-y-auto flex-1 custom-scrollbar" onSubmit={handleSave}>
+          <div className="flex flex-col md:flex-row gap-8">
             
-            <div className="space-y-3">
-              {ingredients.map((ing, index) => (
-                <div key={index} className="flex flex-col sm:flex-row gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-[#B5E361]/20 transition-all duration-300">
-                  <div className="flex-1">
-                    <input 
-                      type="text" value={ing.name || ''} onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} 
-                      disabled={!isEditing}
-                      className={whiteInputClassName("w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 font-bold transition-all")} 
-                      placeholder="Tên nguyên liệu" required 
-                    />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input 
-                      type="text" value={ing.amount || ''} onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)} 
-                      disabled={!isEditing}
-                      className={whiteInputClassName("w-20 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 font-bold transition-all")} 
-                      placeholder="Lượng" 
-                    />
-                    <input 
-                      type="number" value={ing.calories || ''} onChange={(e) => handleIngredientChange(index, 'calories', e.target.value)} 
-                      disabled={!isEditing}
-                      className={whiteInputClassName("w-20 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 font-bold transition-all")} 
-                      placeholder="Kcal" 
-                    />
-                    {isEditing && (
-                      <button type="button" onClick={() => removeIngredient(index)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-white rounded-lg transition-all">
-                        <Trash2 size={16} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {ingredients.length === 0 && (
-                <div className="text-center py-6 border-2 border-dashed border-gray-100 rounded-2xl text-gray-400 font-bold text-xs">
-                  Chưa có nguyên liệu nào được thêm
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Instructions */}
-          <div className="space-y-4 pt-2">
-            <div className="flex justify-between items-center">
-              <label className="text-[11px] font-black text-gray-800 uppercase tracking-wider pl-1">Cách làm</label>
-              {isEditing && (
-                <button 
-                  type="button" onClick={addInstruction}
-                  className="bg-[#B5E361] hover:bg-[#98d15a] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-                >
-                  + THÊM BƯỚC LÀM
-                </button>
-              )}
-            </div>
-            
-            <div className="space-y-3">
-              {instructions.map((inst, index) => (
-                <div key={index} className="flex gap-3 items-start p-3 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-[#B5E361]/20 transition-all duration-300">
-                  <div className="w-6 h-6 mt-1 shrink-0 bg-[#EAF7D5] text-[#3d6600] rounded-full flex items-center justify-center font-black text-xs">
-                    {index + 1}
-                  </div>
-                  <textarea 
-                    value={inst || ''} onChange={(e) => handleInstructionChange(index, e.target.value)} rows="2" 
+            {/* Left Column: Image & Basic Info */}
+            <div className="flex-1 space-y-6 md:max-w-[320px] shrink-0">
+              {/* Image Upload Banner */}
+              <div className={`relative w-full rounded-2xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 transition-colors group ${!isEditing ? 'opacity-70' : 'hover:border-[#B5E361]/50'}`}>
+                <label className={`${!isEditing ? 'cursor-default' : 'cursor-pointer'} flex flex-col items-center justify-center w-full min-h-[200px] text-gray-400 ${!isEditing ? '' : 'hover:text-[#3d6600]'}`}>
+                  {formData.image ? (
+                    <img src={formData.image} alt="Preview" className="w-full h-full min-h-[200px] object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 py-8">
+                      <ChefHat size={36} />
+                      <span className="text-sm font-bold">{isEditing ? 'Tải ảnh lên từ máy' : 'Chưa có hình ảnh'}</span>
+                      {isEditing && <span className="text-xs text-gray-400 font-medium">Nhấn vào đây để chọn ảnh</span>}
+                    </div>
+                  )}
+                  {formData.image && isEditing && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-white font-bold bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm">Thay đổi ảnh</span>
+                    </div>
+                  )}
+                  <input 
+                    type="file" 
                     disabled={!isEditing}
-                    className={whiteInputClassName("flex-1 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 font-bold transition-all resize-none")} 
-                    placeholder="Mô tả bước làm..." required 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({ ...formData, image: reader.result });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }} 
                   />
+                </label>
+              </div>
+
+              {/* Dish Name */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Tên món ăn *</label>
+                <input 
+                  type="text" name="foodName" value={formData.foodName} onChange={handleInputChange} 
+                  disabled={!isEditing}
+                  className={inputClassName("w-full border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold transition-all placeholder:text-gray-300")} 
+                  placeholder="Ví dụ: Salad Ức Gà, Bún Chả..." required 
+                />
+              </div>
+
+              {/* Description */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Mô tả</label>
+                <textarea 
+                  name="description" value={formData.description} onChange={handleInputChange} rows="3" 
+                  disabled={!isEditing}
+                  className={inputClassName("w-full border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-semibold transition-all placeholder:text-gray-300 resize-none")} 
+                  placeholder="Nhập mô tả ngắn gọn về món ăn này..." 
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Prep Time */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Thời gian nấu</label>
+                  <input 
+                    type="text" name="prepTime" value={formData.prepTime} onChange={handleInputChange} 
+                    disabled={!isEditing}
+                    className={inputClassName("w-full border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold transition-all placeholder:text-gray-300")}
+                    placeholder="Ví dụ: 30 phút"
+                  />
+                </div>
+                {/* Difficulty */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Độ khó</label>
+                  <select 
+                    name="difficulty" value={formData.difficulty} onChange={handleInputChange} 
+                    disabled={!isEditing}
+                    className={inputClassName("w-full border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold transition-all" + (isEditing ? " cursor-pointer" : ""))}
+                  >
+                    <option value="Easy">Dễ</option>
+                    <option value="Medium">Trung bình</option>
+                    <option value="Hard">Khó</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Ingredients & Instructions */}
+            <div className="flex-[1.5] flex flex-col space-y-6">
+              
+              {/* Ingredients */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                  <label className="text-xs font-black text-gray-800 uppercase tracking-widest px-2">Nguyên liệu</label>
                   {isEditing && (
-                    <button type="button" onClick={() => removeInstruction(index)} className="mt-1 p-1.5 text-gray-300 hover:text-red-500 hover:bg-white rounded-lg transition-all shrink-0">
-                      <Trash2 size={16} />
+                    <button 
+                      type="button" onClick={addIngredient}
+                      className="bg-white hover:bg-[#B5E361] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95 border border-gray-200 hover:border-[#B5E361]"
+                    >
+                      + THÊM NGUYÊN LIỆU
                     </button>
                   )}
                 </div>
-              ))}
-              {instructions.length === 0 && (
-                <div className="text-center py-6 border-2 border-dashed border-gray-100 rounded-2xl text-gray-400 font-bold text-xs">
-                  Chưa có cách làm nào được thêm
+                
+                <div className="space-y-3 px-1">
+                  {ingredients.map((ing, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row gap-3 p-3 bg-white rounded-2xl border border-gray-100 group hover:border-[#B5E361]/40 hover:shadow-md transition-all duration-300">
+                      <div className="flex-1">
+                        <input 
+                          type="text" value={ing.name || ''} onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} 
+                          disabled={!isEditing}
+                          className={whiteInputClassName("w-full border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-gray-900 font-bold transition-all")} 
+                          placeholder="Tên nguyên liệu" required 
+                        />
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="text" value={ing.amount || ''} onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)} 
+                          disabled={!isEditing}
+                          className={whiteInputClassName("w-24 border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-gray-900 font-bold transition-all")} 
+                          placeholder="Lượng" 
+                        />
+                        <input 
+                          type="number" value={ing.calories || ''} onChange={(e) => handleIngredientChange(index, 'calories', e.target.value)} 
+                          disabled={!isEditing}
+                          className={whiteInputClassName("w-24 border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-gray-900 font-bold transition-all text-orange-600")} 
+                          placeholder="Kcal" 
+                        />
+                        {isEditing && (
+                          <button type="button" onClick={() => removeIngredient(index)} className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                            <Trash2 size={18} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {ingredients.length === 0 && (
+                    <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-3xl text-gray-400 font-bold text-xs bg-gray-50/50">
+                      Chưa có nguyên liệu nào được thêm
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Instructions */}
+              <div className="space-y-4 pt-4 border-t border-gray-100">
+                <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                  <label className="text-xs font-black text-gray-800 uppercase tracking-widest px-2">Cách làm</label>
+                  {isEditing && (
+                    <button 
+                      type="button" onClick={addInstruction}
+                      className="bg-white hover:bg-[#B5E361] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95 border border-gray-200 hover:border-[#B5E361]"
+                    >
+                      + THÊM BƯỚC LÀM
+                    </button>
+                  )}
+                </div>
+                
+                <div className="space-y-3 px-1">
+                  {instructions.map((inst, index) => (
+                    <div key={index} className="flex gap-4 items-start p-3 bg-white rounded-2xl border border-gray-100 group hover:border-[#B5E361]/40 hover:shadow-md transition-all duration-300">
+                      <div className="w-8 h-8 mt-0.5 shrink-0 bg-gradient-to-br from-[#EAF7D5] to-[#f4fbe7] border border-[#B5E361]/30 text-[#3d6600] rounded-full flex items-center justify-center font-black text-xs shadow-sm">
+                        {index + 1}
+                      </div>
+                      <textarea 
+                        value={inst || ''} onChange={(e) => handleInstructionChange(index, e.target.value)} rows="2" 
+                        disabled={!isEditing}
+                        className={whiteInputClassName("flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-xs text-gray-900 font-bold transition-all resize-none")} 
+                        placeholder="Mô tả bước làm..." required 
+                      />
+                      {isEditing && (
+                        <button type="button" onClick={() => removeInstruction(index)} className="mt-1 p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shrink-0">
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {instructions.length === 0 && (
+                    <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-3xl text-gray-400 font-bold text-xs bg-gray-50/50">
+                      Chưa có cách làm nào được thêm
+                    </div>
+                  )}
+                </div>
+              </div>
+
             </div>
           </div>
-
         </form>
 
         {/* Footer */}
