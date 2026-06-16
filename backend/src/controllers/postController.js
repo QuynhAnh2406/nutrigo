@@ -78,15 +78,15 @@ exports.getPostById = async (req, res) => {
   try {
     let baseQuery = `
       SELECT p.*, u.full_name as author, u.avatar_url as avatar,
-      (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) as likes,
-      EXISTS(SELECT 1 FROM post_likes pl WHERE pl.post_id = p.id AND pl.user_id = $1) as "isLiked",
-      EXISTS(SELECT 1 FROM post_favorites pf WHERE pf.post_id = p.id AND pf.user_id = $1) as "isSaved"
+      0 as likes,
+      false as "isLiked",
+      false as "isSaved"
       FROM posts p
       LEFT JOIN users u ON p.user_id = u.id
-      WHERE p.id = $2
+      WHERE p.id = $1
     `;
     
-    const { rows: posts } = await db.query(baseQuery, [userId, postId]);
+    const { rows: posts } = await db.query(baseQuery, [postId]);
     
     if (posts.length === 0) {
       return res.status(404).json({ success: false, message: 'Post not found' });

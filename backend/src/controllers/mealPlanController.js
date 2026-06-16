@@ -341,14 +341,8 @@ exports.getUserRecipes = async (req, res) => {
       ORDER BY created_at DESC
     `, [userId]);
 
-    // 2. Fetch favorited recipes
-    const { rows: favRecipes } = await db.query(`
-      SELECT p.id, p.food_name as name, p.calories, p.carbs, p.protein, p.fat, p.description, p.image_url, p.prep_time, 'favorite' as source
-      FROM post_favorites pf
-      JOIN posts p ON pf.post_id = p.id
-      WHERE pf.user_id = $1
-      ORDER BY pf.created_at DESC
-    `, [userId]);
+    // 2. Fetch favorited recipes (table missing)
+    const favRecipes = [];
 
     // 3. Merge and deduplicate
     const combined = [...ownRecipes];

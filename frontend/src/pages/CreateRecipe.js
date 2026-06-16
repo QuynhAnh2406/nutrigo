@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowLeft, ChefHat, Trash2, X } from 'lucide-react';
+import { Sparkles, ArrowLeft, ChefHat, Trash2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 function CreateRecipe() {

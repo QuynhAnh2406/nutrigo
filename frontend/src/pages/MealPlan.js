@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { CalendarDays, ChefHat, Flame, Trash2, Plus, Sparkles, Lightbulb, ShoppingCart, Check, Pencil, ChevronRight, ArrowLeft, Coffee, Utensils, Cookie, UtensilsCrossed } from 'lucide-react';
+import { CalendarDays, ChefHat, Flame, Trash2, Plus, Sparkles, Check, Pencil, ArrowLeft, Coffee, Utensils, Cookie, UtensilsCrossed } from 'lucide-react';
 import MonthlyCalendar from '../components/MonthlyCalendar';
 import AddMealModal from '../components/AddMealModal';
 import MealDetailModal from '../components/MealDetailModal';
@@ -45,9 +45,12 @@ function MealPlan() {
           mealType,
           mealDate
         });
+      } else {
+        alert("Không thể tải chi tiết món ăn (Server Error): " + (data.message || "Unknown error"));
       }
     } catch (e) {
       console.error("Failed to fetch recipe detail", e);
+      alert("Lỗi kết nối hoặc lỗi bất ngờ: " + e.message);
     }
   };
 
@@ -416,60 +419,66 @@ function MealPlan() {
                   const recipes = selectedPlanData?.meals ? selectedPlanData.meals[activeSession] : [];
                   if (recipes && recipes.length > 0) {
                     return (
-                      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mt-2">
+                      <div className="flex flex-col gap-3 mt-2">
                         {recipes.map((recipe, idx) => (
                           <div 
                             key={idx} 
                             onClick={() => handleRecipeClick(recipe, selectedPlanData?.day, activeSession, selectedDate)}
-                            className="flex flex-col bg-white border border-gray-100 p-3 rounded-[20px] hover:border-[#B5E361]/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden"
+                            className="flex flex-row bg-gradient-to-r from-white to-[#f8fdf2] border border-[#d5ecaf] p-3 rounded-[20px] shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:border-[#a3d14f] hover:shadow-[0_8px_30px_rgb(181,227,97,0.2)] hover:-translate-y-1 transition-all duration-300 cursor-pointer group relative overflow-hidden"
                           >
-                            <div className="relative w-full aspect-square sm:aspect-video mb-3 rounded-[16px] overflow-hidden shadow-sm">
+                            <div className="relative w-32 h-24 sm:w-40 sm:h-28 rounded-[16px] overflow-hidden shadow-sm shrink-0 mr-4">
                               {recipe.image_url ? (
                                 <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-[#EAF7D5] to-[#f4fce8] flex items-center justify-center">
+                                <div className="w-full h-full bg-gradient-to-br from-[#EAF7D5] to-[#e4f6cb] flex items-center justify-center">
                                   <ChefHat size={32} className="text-[#8CB33D] group-hover:scale-110 transition-transform duration-300" />
                                 </div>
                               )}
-                              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm p-1 rounded-full shadow-sm">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRecipeClick(recipe, selectedPlanData?.day, activeSession, selectedDate);
-                                    }}
-                                    className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
-                                    title="Sửa"
-                                >
-                                    <Pencil size={14} />
-                                </button>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setMealToDelete({
-                                            ...recipe,
-                                            mealType: activeSession,
-                                            mealDate: selectedDate,
-                                            foodName: recipe.title
-                                        });
-                                    }}
-                                    className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                    title="Xóa"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
-                              </div>
                             </div>
                             
-                            <div className="flex-1 flex flex-col min-w-0">
-                              <h5 className="font-extrabold text-sm sm:text-[15px] text-[#1f3b00] line-clamp-2 group-hover:text-[#4a7a00] transition-colors leading-snug mb-auto pb-2">{recipe.title}</h5>
-                              <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-50">
-                                <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-gray-500">
-                                  <Flame size={14} className="text-[#B5E361]" />
-                                  {recipe.calories || 0} <span className="text-[10px] uppercase font-bold text-gray-400">kcal</span>
-                                </div>
+                            <div className="flex-1 flex flex-col justify-center min-w-0 pr-16">
+                              <h5 className="font-extrabold text-base sm:text-lg text-[#1f3b00] line-clamp-2 group-hover:text-[#4a7a00] transition-colors leading-snug mb-2">{recipe.title}</h5>
+                              <div className="flex items-center gap-1.5 text-sm sm:text-base font-black text-gray-500">
+                                <Flame size={16} className="text-[#B5E361]" />
+                                {recipe.calories || 0} <span className="text-[11px] uppercase font-bold text-gray-400">kcal</span>
                               </div>
                             </div>
 
+                            <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm">
+                              <button
+                                  onClick={(e) => {
+                                      e.stopPropagation();
+                                      const d = new Date(selectedDate);
+                                      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                                      setAddMealConfig({ 
+                                          day: selectedPlanData?.day || ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()], 
+                                          mealType: activeSession, 
+                                          mealDate: d.toISOString().split('T')[0],
+                                          editRecipe: recipe,
+                                          replaceMealId: recipe.id || recipe.recipeId
+                                      });
+                                  }}
+                                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+                                  title="Sửa"
+                              >
+                                  <Pencil size={16} />
+                              </button>
+                              <button
+                                  onClick={(e) => {
+                                      e.stopPropagation();
+                                      setMealToDelete({
+                                          ...recipe,
+                                          mealType: activeSession,
+                                          mealDate: selectedDate,
+                                          foodName: recipe.title
+                                      });
+                                  }}
+                                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                  title="Xóa"
+                              >
+                                  <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -491,8 +500,23 @@ function MealPlan() {
           day={addMealConfig.day}
           mealType={addMealConfig.mealType}
           mealDate={addMealConfig.mealDate}
+          initialRecipe={addMealConfig.editRecipe}
           onClose={() => setAddMealConfig(null)}
-          onConfirm={(addedMealInfo) => {
+          onConfirm={async (addedMealInfo) => {
+            if (addMealConfig.replaceMealId) {
+              try {
+                await fetch('http://localhost:5002/api/mealplan/clear-meal', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') },
+                  body: JSON.stringify({
+                    action: 'delete_meal',
+                    recipeId: addMealConfig.replaceMealId,
+                    mealDate: addMealConfig.mealDate,
+                    dayName: addMealConfig.day
+                  })
+                });
+              } catch (e) { console.error(e); }
+            }
             fetchSelectedPlanData();
             fetchMonthlyMeals();
             setAddMealConfig(null);
@@ -536,7 +560,7 @@ function MealPlan() {
           onClose={() => setSelectedRecipeDetail(null)} 
           onDelete={() => {
             setMealToDelete(selectedRecipeDetail);
-            // Do NOT close the detail modal yet so user can go back to it
+            setSelectedRecipeDetail(null); // Close the detail modal
           }}
           onSaveSuccess={() => {
             fetchSelectedPlanData();
@@ -591,7 +615,10 @@ function MealPlan() {
             </p>
             <div className="flex gap-4 justify-center">
               <button 
-                onClick={() => setMealToDelete(null)}
+                onClick={() => {
+                  setSelectedRecipeDetail(mealToDelete);
+                  setMealToDelete(null);
+                }}
                 className="flex-1 px-6 py-3.5 rounded-2xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700 transition-colors"
               >
                 Trở lại

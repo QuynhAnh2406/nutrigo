@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChefHat, X, Flame, Search, Clock, Users, Plus, Check, Trash2 } from 'lucide-react';
 
-function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
+function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialRecipe }) {
   const [activeTab, setActiveTab] = useState('choose'); // 'choose' or 'create'
   const [userRecipes, setUserRecipes] = useState([]);
   const [allIngredients, setAllIngredients] = useState([]);
@@ -31,8 +31,26 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
         const recipesData = await recipesRes.json();
         const ingsData = await ingsRes.json();
 
-        if (recipesData.success) setUserRecipes(recipesData.data);
-        if (ingsData.success) setAllIngredients(ingsData.data);
+        if (recipesData.success && ingsData.success) {
+          const dbRecipes = recipesData.data;
+          const dbIngredients = ingsData.data;
+          
+          const brandItems = dbIngredients.filter(ing => ing.type === 'brand' || ing.brand_name);
+          const brandRecipes = brandItems.map(brand => ({
+            id: 'brand_' + brand.id,
+            name: brand.name,
+            description: `Thương hiệu: ${brand.brand_name || 'Khác'} - Khẩu phần: ${brand.serving_unit || '100g'}`,
+            calories: brand.calories_per_100g,
+            prep_time: 'Liền tay',
+            image_url: brand.image_url || '',
+            source: 'brand',
+            isBrand: true,
+            brandData: brand
+          }));
+          
+          setUserRecipes([...dbRecipes, ...brandRecipes]);
+          setAllIngredients(dbIngredients);
+        }
       } catch (err) {
         console.error('Error fetching modal data:', err);
       } finally {
@@ -66,30 +84,88 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
   };
 
   const handleSelectRecipe = (recipe) => {
+    if (recipe.isBrand) {
+      setDishName(recipe.name);
+      setDescription(recipe.description);
+      setCookTime(5); // Liền tay = 5 phút
+      setImageUrl(recipe.image_url);
+      setSelectedIngredients([{
+        name: recipe.name,
+        weight_g: 100, // Or whatever equivalent representing 1 serving
+        calories_per_100g: parseFloat(recipe.brandData.calories_per_100g || 0),
+        protein_per_100g: parseFloat(recipe.brandData.protein_per_100g || 0),
+        carbs_per_100g: parseFloat(recipe.brandData.carbs_per_100g || 0),
+        fat_per_100g: parseFloat(recipe.brandData.fat_per_100g || 0),
+        showDropdown: false
+      }]);
+      setEditingRecipeId(null);
+      setUpdateExistingRecipe(false);
+      setActiveTab('create');
+      return;
+    }
+
     // Fill the states with recipe data
-    setDishName(recipe.name);
+    setDishName(recipe.name || recipe.title || recipe.foodName || recipe.food_name || '');
     setDescription(recipe.description || '');
-    setCookTime(parseInt(recipe.prep_time) || 30);
-    setImageUrl(recipe.image_url || '');
+    setCookTime(parseInt(recipe.prep_time || recipe.prepTime) || 30);
+    setImageUrl(recipe.image_url || recipe.image || '');
     
     if (recipe.ingredients) {
-      setSelectedIngredients(recipe.ingredients.map(ing => ({
-        name: ing.name,
-        weight_g: parseFloat(ing.weight_g) || 0,
-        calories_per_100g: parseFloat(ing.calories_per_100g) || 0,
-        protein_per_100g: parseFloat(ing.protein_per_100g) || 0,
-        carbs_per_100g: parseFloat(ing.carbs_per_100g) || 0,
-        fat_per_100g: parseFloat(ing.fat_per_100g) || 0,
-        showDropdown: false
-      })));
+      setSelectedIngredients(recipe.ingredients.map(ing => {
+        if (typeof ing === 'string') {
+          return {
+            name: ing,
+            weight_g: 0,
+            calories_per_100g: 0,
+            protein_per_100g: 0,
+            carbs_per_100g: 0,
+            fat_per_100g: 0,
+            showDropdown: false
+          };
+        }
+        return {
+          name: ing.name,
+          weight_g: parseFloat(ing.weight_g || ing.weight || ing.amount) || 0,
+          calories_per_100g: parseFloat(ing.calories_per_100g) || 0,
+          protein_per_100g: parseFloat(ing.protein_per_100g) || 0,
+          carbs_per_100g: parseFloat(ing.carbs_per_100g) || 0,
+          fat_per_100g: parseFloat(ing.fat_per_100g) || 0,
+          showDropdown: false
+        };
+      }));
     } else {
       setSelectedIngredients([]);
     }
 
-    setEditingRecipeId(recipe.id);
+    setEditingRecipeId(recipe.id || recipe.recipeId);
     setUpdateExistingRecipe(false); // Default to not updating original
     setActiveTab('create');
   };
+
+  useEffect(() => {
+    if (initialRecipe && !isLoading) {
+      const fetchFullRecipe = async () => {
+        try {
+          const res = await fetch(`http://localhost:5002/api/posts/${initialRecipe.id || initialRecipe.recipeId}`, {
+            headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+          });
+          const data = await res.json();
+          if (data.success) {
+            handleSelectRecipe(data.data);
+          } else {
+            handleSelectRecipe(initialRecipe);
+          }
+        } catch (e) {
+          console.error("Failed to fetch full recipe", e);
+          handleSelectRecipe(initialRecipe);
+        }
+        // Ensure this happens after handleSelectRecipe so it doesn't get overwritten
+        setUpdateExistingRecipe(true);
+        setActiveTab('create');
+      };
+      fetchFullRecipe();
+    }
+  }, [initialRecipe, isLoading]);
 
   const removeIngredient = (index) => {
     setSelectedIngredients(selectedIngredients.filter((_, i) => i !== index));
@@ -146,8 +222,9 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate }) {
   };
 
   const filterIngredients = (query) => {
-    if (!query) return allIngredients.slice(0, 10);
-    return allIngredients
+    const baseList = allIngredients.filter(ing => (!ing.type || ing.type === 'ingredient') && !ing.brand_name);
+    if (!query) return baseList.slice(0, 10);
+    return baseList
       .filter(ing => ing.name.toLowerCase().includes(query.toLowerCase()))
       .slice(0, 10);
   };
