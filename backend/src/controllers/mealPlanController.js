@@ -54,7 +54,7 @@ exports.getWeeklyPlan = async (req, res) => {
     // Fetch user's meal plan for the specific week dates
     const { rows: planRows } = await db.query(`
       SELECT mp.id as meal_plan_id, TO_CHAR(mp.meal_date, 'YYYY-MM-DD') as meal_date_str, mp.meal_type, 
-             p.id as recipe_id, p.food_name, p.calories, p.image_url
+             p.id as recipe_id, p.food_name, p.calories, p.image_url, p.protein, p.carbs, p.fat
       FROM meal_plans mp
       JOIN posts p ON mp.post_id = p.id
       WHERE mp.user_id = $1 AND mp.meal_date >= $2 AND mp.meal_date <= $3
@@ -69,6 +69,9 @@ exports.getWeeklyPlan = async (req, res) => {
           id: row.recipe_id,
           title: row.food_name,
           calories: row.calories,
+          protein: row.protein,
+          carbs: row.carbs,
+          fat: row.fat,
           image_url: row.image_url,
           ingredients: [] // Will be populated next
         });

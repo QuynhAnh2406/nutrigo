@@ -33,14 +33,18 @@ function Sidebar({ user }) {
     };
 
     return (
-        <div className="sidebar">
-            <div className="logo" onClick={() => window.location.href = '/dashboard'} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="sidebar" style={{ position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', inset: 0, opacity: 0.4, pointerEvents: 'none', zIndex: 0 }}>
+                <img src="/sidebar-bg.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => e.target.style.display = 'none'} />
+            </div>
+
+            <div className="logo" onClick={() => window.location.href = '/dashboard'} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', zIndex: 1 }}>
                 <div style={{ width: '40px', height: '40px', backgroundColor: '#B5E361', borderRadius: '9999px', borderTopLeftRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', flexShrink: 0 }}>
                     <Leaf size={24} style={{ color: '#111827' }} />
                 </div>
-                <span style={{ fontSize: '24px', fontWeight: '700', letterSpacing: '-0.025em', color: '#111827' }}>Nutrigo</span>
+                <span style={{ fontSize: '24px', fontWeight: '700', letterSpacing: '-0.025em', color: '#ffffff' }}>Nutrigo</span>
             </div>
-            <ul className="nav-menu">
+            <ul className="nav-menu" style={{ position: 'relative', zIndex: 1 }}>
                 <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <LayoutDashboard className="nav-icon" size={20} /> Trang chủ
                 </NavLink>

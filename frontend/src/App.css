@@ -1,6 +1,6 @@
 :root {
     --bg-color: #ffffff;
-    --sidebar-bg: #98d15a;
+    --sidebar-bg: #0f172a;
     --text-dark: #191a1e;
     --text-gray: #828796;
     --primary-green: #a7e965;
@@ -76,20 +76,21 @@ body {
     border-radius: 12px;
     margin-bottom: 8px;
     cursor: pointer;
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.7);
     font-weight: 500;
     transition: all 0.2s ease;
     gap: 15px;
 }
 
-.nav-item.active {
-    background-color: var(--primary-green);
-    color: var(--text-dark);
+.nav-item.active, .nav-item.active-group {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    box-shadow: none;
 }
 
 .nav-item:hover:not(.active) {
-    background-color: var(--bg-color);
-    color: var(--text-dark);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
 }
 
 .nav-icon {
@@ -117,8 +118,8 @@ body {
     bottom: 50%;
     left: 0;
     width: 12px;
-    border-left: 1.5px solid #c0c0c0;
-    border-bottom: 1.5px solid #c0c0c0;
+    border-left: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.2);
     border-bottom-left-radius: 8px;
 }
 
@@ -128,7 +129,7 @@ body {
     top: 0;
     bottom: 0;
     left: 0;
-    border-left: 1.5px solid #c0c0c0;
+    border-left: 1.5px solid rgba(255, 255, 255, 0.2);
 }
 
 .promo-card {
@@ -176,18 +177,18 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
     padding: 10px 12px;
     border-radius: 14px;
     cursor: pointer;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.2s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .user-profile-block:hover {
-    background-color: #f9f9f9;
-    border-color: #ddd;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .user-avatar {
@@ -206,12 +207,12 @@ body {
 .user-name {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: #ffffff;
 }
 
 .user-email {
     font-size: 11px;
-    color: var(--text-gray);
+    color: rgba(255, 255, 255, 0.6);
     line-height: 1.2;
 }
 
@@ -243,6 +244,7 @@ body {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1791,21 +1793,26 @@ body {
     .no-print {
         display: none !important;
     }
+
     .sidebar,
     .header {
         display: none !important;
     }
+
     .dashboard-container {
         height: auto;
         overflow: visible;
     }
+
     .main-content {
         padding: 0;
     }
+
     .calendar-grid {
         background: transparent;
         padding: 0;
     }
+
     .droppable-cell {
         border: 1px solid #ddd;
     }
@@ -2337,6 +2344,7 @@ input:checked+.slider:before {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -2566,6 +2574,7 @@ input:checked+.slider:before {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
