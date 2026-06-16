@@ -8,8 +8,6 @@ export default function PageHeader({
   actions,
   children,
 }) {
-  const isCompact = !subtitle && !children;
-
   return (
     <div className="relative rounded-[2rem] mb-6 shadow-[0_10px_40px_rgb(140,179,61,0.25)] group transition-all duration-500 hover:shadow-[0_15px_50px_rgb(140,179,61,0.35)]">
       

@@ -202,7 +202,6 @@ export default function MonthlyCalendar({
           const dateStr = toDateStr(day.date);
           const isSelected = dateStr === selectedStr;
           const isToday = dateStr === todayStr;
-          const hasMeals = daysWithMeals.includes(dateStr);
 
           // Default styles
           let baseClasses = "w-full aspect-[4/3] rounded-2xl flex items-center justify-center font-extrabold text-[15px] transition-all cursor-pointer border-2 ";
