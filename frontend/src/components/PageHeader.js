@@ -11,19 +11,22 @@ export default function PageHeader({
   const isCompact = !subtitle && !children;
 
   return (
-    <div className="relative overflow-hidden rounded-[2rem] p-6 sm:p-8 mb-6 border border-white/20 bg-gradient-to-r from-[#8CB33D] via-[#7ca82b] to-[#5e821b] shadow-[0_10px_40px_rgb(140,179,61,0.25)] group transition-all duration-500 hover:shadow-[0_15px_50px_rgb(140,179,61,0.35)]">
+    <div className="relative rounded-[2rem] mb-6 shadow-[0_10px_40px_rgb(140,179,61,0.25)] group transition-all duration-500 hover:shadow-[0_15px_50px_rgb(140,179,61,0.35)]">
       
-      {/* Huge background icon */}
-      {Icon && (
-        <div className="absolute -right-4 -top-8 text-white opacity-[0.04] pointer-events-none transform -rotate-12 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700">
-          <Icon size={240} strokeWidth={1.5} />
-        </div>
-      )}
+      {/* Background container with overflow-hidden */}
+      <div className="absolute inset-0 overflow-hidden rounded-[2rem] border border-white/20 bg-gradient-to-r from-[#8CB33D] via-[#7ca82b] to-[#5e821b]">
+        {/* Huge background icon */}
+        {Icon && (
+          <div className="absolute -right-4 -top-8 text-white opacity-[0.04] pointer-events-none transform -rotate-12 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700">
+            <Icon size={240} strokeWidth={1.5} />
+          </div>
+        )}
 
-      {/* Glossy overlay effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-50 pointer-events-none"></div>
+        {/* Glossy overlay effect */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-50 pointer-events-none"></div>
+      </div>
 
-      <div className="relative z-10 flex flex-col sm:flex-row sm:items-start gap-5">
+      <div className="relative z-10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-start gap-5">
         {Icon && (
           <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner shrink-0 mt-1 border border-white/20 group-hover:scale-110 group-hover:bg-white/20 transition-all duration-300">
             <Icon className="text-[#B5E361]" size={26} />

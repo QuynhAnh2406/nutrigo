@@ -265,7 +265,7 @@ function MealPlan() {
       <div id="meal-plan-container" className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden relative rounded-[28px] bg-white border border-gray-100/80 shadow-sm">
         
         {/* Left Side: Calendar */}
-        <div style={{ width: `calc(${leftWidth}%)` }} className="hidden lg:flex shrink-0 h-full overflow-hidden">
+        <div style={{ width: `calc(${leftWidth}%)` }} className="hidden lg:flex shrink-0 h-full relative z-20">
           <MonthlyCalendar
             currentMonth={currentMonth}
             onMonthChange={setCurrentMonth}
