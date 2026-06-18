@@ -2,7 +2,7 @@
 
 -- 1. Create a test user if not exists
 INSERT INTO users (email, password_hash, full_name, is_premium)
-VALUES ('testnutrigo@gmail.com', '$2b$10$K7Z2/k5V5.5/XmY/z.W7I.P6u6q6f6f6f6f6f6f6f6f6f6f6f', 'Test Nutrigo', true)
+VALUES ('testnutrigo@gmail.com', '$2b$10$URvrmU.wzcv.TMeEhQatDeBuQMBlJO/ssTWhDWFZG55CGeMPVPWMe', 'Test Nutrigo', true)
 ON CONFLICT (email) DO NOTHING;
 
 -- 2. Insert sample ingredients (Bao gồm cả fiber_per_100g)

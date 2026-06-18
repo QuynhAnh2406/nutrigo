@@ -154,10 +154,141 @@ function MainLayout() {
         calculateMetrics();
     }, [healthData]);
 
+    // MEAL TIME REMINDER POPUP LOGIC
+    const [reminder, setReminder] = useState({ show: false, mealType: null, message: '' });
+
+    const checkMealTime = () => {
+        // Check for test query parameter first
+        const urlParams = new URLSearchParams(window.location.search);
+        const testMeal = urlParams.get('testMeal');
+        
+        if (testMeal) {
+            if (testMeal === 'breakfast') {
+                return {
+                    show: true,
+                    mealType: 'breakfast',
+                    message: '🌅 (Chế độ Test) Đến giờ ăn sáng rồi! Hãy bắt đầu ngày mới với một bữa sáng đầy đủ dinh dưỡng bạn nhé.'
+                };
+            } else if (testMeal === 'lunch') {
+                return {
+                    show: true,
+                    mealType: 'lunch',
+                    message: '☀️ (Chế độ Test) Đến giờ ăn trưa rồi! Nghỉ tay một chút và bổ sung năng lượng cho buổi chiều nào.'
+                };
+            } else if (testMeal === 'dinner') {
+                return {
+                    show: true,
+                    mealType: 'dinner',
+                    message: '🌌 (Chế độ Test) Đến giờ ăn tối rồi! Hãy thưởng thức một bữa tối ấm áp và thư giãn sau ngày làm việc.'
+                };
+            }
+        }
+
+        const now = new Date();
+        const currentHour = now.getHours();
+        const todayStr = now.toDateString();
+
+        let mealType = null;
+        let message = '';
+
+        if (currentHour === 6) {
+            mealType = 'breakfast';
+            message = '🌅 Đến giờ ăn sáng rồi! Hãy bắt đầu ngày mới với một bữa sáng đầy đủ dinh dưỡng bạn nhé.';
+        } else if (currentHour === 11) {
+            mealType = 'lunch';
+            message = '☀️ Đến giờ ăn trưa rồi! Nghỉ tay một chút và bổ sung năng lượng cho buổi chiều nào.';
+        } else if (currentHour === 18) {
+            mealType = 'dinner';
+            message = '🌌 Đến giờ ăn tối rồi! Hãy thưởng thức một bữa tối ấm áp và thư giãn sau ngày làm việc.';
+        }
+
+        if (mealType) {
+            // Check if we already dismissed this meal today
+            const dismissed = localStorage.getItem('lastDismissedMeal');
+            if (dismissed) {
+                const parsed = JSON.parse(dismissed);
+                if (parsed.type === mealType && parsed.date === todayStr) {
+                    return { show: false, mealType: null, message: '' };
+                }
+            }
+            return { show: true, mealType, message };
+        }
+
+        return { show: false, mealType: null, message: '' };
+    };
+
+    useEffect(() => {
+        // Initial check on mount
+        const initialCheck = checkMealTime();
+        if (initialCheck.show) {
+            setReminder(initialCheck);
+        }
+
+        // Set interval to check every 15 seconds for real-time responsiveness
+        const timer = setInterval(() => {
+            const check = checkMealTime();
+            if (check.show) {
+                setReminder(check);
+            }
+        }, 15000);
+
+        return () => clearInterval(timer);
+    }, [window.location.search]); // Depend on search parameters to trigger immediately on test URL
+
+    const handleCloseReminder = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('testMeal')) {
+            urlParams.delete('testMeal');
+            const newRelativePathQuery = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+            window.history.replaceState(null, '', newRelativePathQuery);
+        } else {
+            const now = new Date();
+            const todayStr = now.toDateString();
+            localStorage.setItem('lastDismissedMeal', JSON.stringify({
+                type: reminder.mealType,
+                date: todayStr
+            }));
+        }
+        setReminder({ show: false, mealType: null, message: '' });
+    };
+
     return (
-        <div className="dashboard-container">
+        <div className="dashboard-container relative">
             <Sidebar user={user} />
             <Outlet context={{ menuItems, newMenuItems, recommendedItems, user, setUser, healthData, setHealthData, metrics }} />
+
+            {/* FULL SCREEN MEAL TIME REMINDER OVERLAY */}
+            {reminder.show && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md transition-opacity duration-300">
+                    <div className="relative w-11/12 max-w-md overflow-hidden rounded-[2.5rem] bg-white p-8 text-center shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+                        {/* Decorative background blur shapes */}
+                        <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-[#B5E361]/30 blur-2xl"></div>
+                        <div className="absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-[#4facfe]/20 blur-2xl"></div>
+
+                        <div className="relative z-10 flex flex-col items-center">
+                            {/* Animated icon based on meal type */}
+                            <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-[#B5E361] to-[#8CB33D] text-5xl shadow-lg shadow-green-200 animate-bounce">
+                                {reminder.mealType === 'breakfast' ? '🍳' : reminder.mealType === 'lunch' ? '🍱' : '🥩'}
+                            </div>
+
+                            <h3 className="mb-3 text-2xl font-black text-gray-900">
+                                {reminder.mealType === 'breakfast' ? 'Bữa Sáng Dinh Dưỡng!' : reminder.mealType === 'lunch' ? 'Bữa Trưa Năng Lượng!' : 'Bữa Tối Ấm Áp!'}
+                            </h3>
+
+                            <p className="mb-8 text-gray-600 leading-relaxed font-medium">
+                                {reminder.message}
+                            </p>
+
+                            <button
+                                onClick={handleCloseReminder}
+                                className="w-full rounded-2xl bg-gray-900 py-4 text-base font-black text-white shadow-xl hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                                Tôi đã hiểu, đi ăn thôi! 😋
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

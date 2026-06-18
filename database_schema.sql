@@ -26,6 +26,7 @@ CREATE TABLE user_health_data (
     dietary_preference VARCHAR(255),
     allergies TEXT,
     cooking_skill VARCHAR(50),
+    phone VARCHAR(30),
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
