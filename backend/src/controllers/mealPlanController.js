@@ -418,8 +418,8 @@ exports.addMealWithRecipe = async (req, res) => {
     } else if (!recipeId || saveToMyRecipe || (recipeId && !updateExistingRecipe)) {
       // Create new post/recipe (or clone if recipeId exists but updateExistingRecipe is false)
       const postRes = await client.query(`
-        INSERT INTO posts (user_id, food_name, calories, protein, carbs, fat, description, prep_time, image_url, is_recipe)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        INSERT INTO posts (user_id, food_name, calories, protein, carbs, fat, description, prep_time, image_url, is_recipe, meal_type, category)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING id
       `, [
         userId, 
@@ -431,8 +431,10 @@ exports.addMealWithRecipe = async (req, res) => {
         recipeData.description || 'Added via Meal Plan', 
         recipeData.prepTime || '30 min',
         recipeData.imageUrl || '',
-        // If it's a clone (recipeId exists but not updating), it shouldn't be saved to My Recipes
-        (recipeId && !updateExistingRecipe) ? false : saveToMyRecipe
+        // Nếu là clone (chọn món nhưng không chọn cập nhật bản gốc) thì is_recipe = false. Ngược lại dùng saveToMyRecipe
+        (recipeId && !updateExistingRecipe) ? false : (saveToMyRecipe === true || saveToMyRecipe === 'true'),
+        mealType || null,
+        'food'
       ]);
       
       recipeId = postRes.rows[0].id;

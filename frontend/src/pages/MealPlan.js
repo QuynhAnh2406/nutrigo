@@ -661,12 +661,11 @@ function MealPlan() {
             <div className="flex gap-4 justify-center">
               <button 
                 onClick={() => {
-                  setSelectedRecipeDetail(mealToDelete);
                   setMealToDelete(null);
                 }}
                 className="flex-1 px-6 py-3.5 rounded-2xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700 transition-colors"
               >
-                Trở lại
+                Hủy bỏ
               </button>
               <button 
                 onClick={confirmDeleteMeal}
