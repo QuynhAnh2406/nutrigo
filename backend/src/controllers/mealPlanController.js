@@ -390,8 +390,8 @@ exports.addMealWithRecipe = async (req, res) => {
       // Update existing post/recipe
       await client.query(`
         UPDATE posts 
-        SET food_name = $1, calories = $2, protein = $3, carbs = $4, fat = $5, description = $6, prep_time = $7, image_url = $8
-        WHERE id = $9 AND user_id = $10
+        SET food_name = $1, calories = $2, protein = $3, carbs = $4, fat = $5, description = $6, prep_time = $7, image_url = $8, category = $9
+        WHERE id = $10 AND user_id = $11
       `, [
         recipeData.name, 
         Math.round(totalCals), 
@@ -401,6 +401,7 @@ exports.addMealWithRecipe = async (req, res) => {
         recipeData.description || 'Added via Meal Plan', 
         recipeData.prepTime || '30 min',
         recipeData.imageUrl || '',
+        recipeData.category || 'food',
         recipeId,
         userId
       ]);
@@ -414,6 +415,17 @@ exports.addMealWithRecipe = async (req, res) => {
           INSERT INTO post_ingredients (post_id, ingredient_name, weight_g, calories)
           VALUES ($1, $2, $3, $4)
         `, [recipeId, ing.name, Number(ing.weight_g || 0), ingCals]);
+      }
+
+      // Delete old instructions and insert new ones
+      await client.query('DELETE FROM post_instructions WHERE post_id = $1', [recipeId]);
+      if (recipeData.instructions && Array.isArray(recipeData.instructions)) {
+        for (let i = 0; i < recipeData.instructions.length; i++) {
+          await client.query(`
+            INSERT INTO post_instructions (post_id, step_number, instruction)
+            VALUES ($1, $2, $3)
+          `, [recipeId, i + 1, recipeData.instructions[i]]);
+        }
       }
     } else if (!recipeId || saveToMyRecipe || (recipeId && !updateExistingRecipe)) {
       // Create new post/recipe (or clone if recipeId exists but updateExistingRecipe is false)
@@ -434,7 +446,7 @@ exports.addMealWithRecipe = async (req, res) => {
         // Nếu là clone (chọn món nhưng không chọn cập nhật bản gốc) thì is_recipe = false. Ngược lại dùng saveToMyRecipe
         (recipeId && !updateExistingRecipe) ? false : (saveToMyRecipe === true || saveToMyRecipe === 'true'),
         mealType || null,
-        'food'
+        recipeData.category || 'food'
       ]);
       
       recipeId = postRes.rows[0].id;
@@ -446,6 +458,16 @@ exports.addMealWithRecipe = async (req, res) => {
           INSERT INTO post_ingredients (post_id, ingredient_name, weight_g, calories)
           VALUES ($1, $2, $3, $4)
         `, [recipeId, ing.name, Number(ing.weight_g || 0), ingCals]);
+      }
+
+      // Insert instructions
+      if (recipeData.instructions && Array.isArray(recipeData.instructions)) {
+        for (let i = 0; i < recipeData.instructions.length; i++) {
+          await client.query(`
+            INSERT INTO post_instructions (post_id, step_number, instruction)
+            VALUES ($1, $2, $3)
+          `, [recipeId, i + 1, recipeData.instructions[i]]);
+        }
       }
     }
 

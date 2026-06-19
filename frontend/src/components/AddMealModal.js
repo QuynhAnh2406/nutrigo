@@ -12,9 +12,11 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
   const [description, setDescription] = useState('');
   const [cookTime, setCookTime] = useState(30);
   const [servings, setServings] = useState(1);
-  const [category, setCategory] = useState(mealType);
+  const [category, setCategory] = useState(mealType || 'breakfast');
+  const [dishCategory, setDishCategory] = useState('food');
   const [imageUrl, setImageUrl] = useState('');
   const [selectedIngredients, setSelectedIngredients] = useState([]);
+  const [instructions, setInstructions] = useState(['']);
   const [saveToMyRecipe, setSaveToMyRecipe] = useState(true);
   
   // New states for editing flow
@@ -137,6 +139,12 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
       setSelectedIngredients([]);
     }
 
+    if (recipe.instructions && Array.isArray(recipe.instructions) && recipe.instructions.length > 0) {
+      setInstructions(recipe.instructions);
+    } else {
+      setInstructions(['']);
+    }
+
     setEditingRecipeId(recipe.id || recipe.recipeId);
     setUpdateExistingRecipe(false); // Default to not updating original
     setActiveTab('create');
@@ -229,6 +237,14 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
       .slice(0, 10);
   };
 
+  const addInstructionRow = () => setInstructions([...instructions, '']);
+  const removeInstructionRow = (index) => setInstructions(instructions.filter((_, i) => i !== index));
+  const handleInstructionChange = (index, value) => {
+    const newInsts = [...instructions];
+    newInsts[index] = value;
+    setInstructions(newInsts);
+  };
+
   const calculateTotals = () => {
     return selectedIngredients.reduce((totals, ing) => {
       const factor = (ing.weight_g || 0) / 100;
@@ -259,7 +275,9 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
       description: description || 'Món ăn tự tạo từ kế hoạch tuần',
       prepTime: `${cookTime} phút`,
       imageUrl: imageUrl,
-      ingredients: selectedIngredients
+      ingredients: selectedIngredients,
+      instructions: instructions.filter(i => i.trim()),
+      category: dishCategory
     };
 
     try {
@@ -272,7 +290,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
         body: JSON.stringify({
           day,
           mealType: category, // Save to the chosen category
-          recipeData,
+          recipeData: recipeData,
           saveToMyRecipe: editingRecipeId ? false : saveToMyRecipe,
           updateExistingRecipe,
           mealDate
@@ -295,7 +313,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
 
   return (
     <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col h-[95vh] md:h-[90vh] max-h-[850px] animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex justify-between items-start">
           <div className="flex items-center gap-3">
@@ -357,7 +375,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar min-h-[600px]">
+        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
           {activeTab === 'choose' ? (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 pr-1">
               {userRecipes.length > 0 ? (
@@ -403,7 +421,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                        {/* Tags */}
                        <div className="flex gap-2">
                           <span className="bg-[#c5e87a] text-[#3d6600] px-3 py-1.5 rounded-xl text-xs font-extrabold capitalize shadow-sm">
-                            {recipe.meal_type || recipe.category || 'Món ăn'}
+                            {{'food': 'Món ăn', 'drink': 'Đồ uống', 'snack': 'Ăn vặt', 'breakfast': 'Bữa sáng', 'lunch': 'Bữa trưa', 'dinner': 'Bữa tối'}[recipe.meal_type] || {'food': 'Món ăn', 'drink': 'Đồ uống', 'snack': 'Ăn vặt', 'breakfast': 'Bữa sáng', 'lunch': 'Bữa trưa', 'dinner': 'Bữa tối'}[recipe.category] || recipe.meal_type || recipe.category || 'Món ăn'}
                           </span>
                        </div>
                     </div>
@@ -447,7 +465,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
           ) : (
             <div className="flex flex-col md:flex-row gap-8 pr-1">
               {/* Left Column: Image & Basic Info */}
-              <div className="flex-1 space-y-5 md:max-w-[320px] shrink-0">
+              <div className="flex-1 space-y-5 shrink-0 w-full md:w-[45%]">
               {/* Image Upload Banner */}
               <div className="relative w-full rounded-2xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 hover:border-[#B5E361]/50 transition-colors group">
                 <label className="cursor-pointer flex flex-col items-center justify-center w-full min-h-[160px] text-gray-400 hover:text-[#3d6600]">
@@ -539,26 +557,43 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {/* Category Dropdown */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Bữa ăn (Phân loại)</label>
-                  <select 
-                    className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/30 transition-all cursor-pointer"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                  >
-                    <option value="breakfast">Bữa sáng</option>
-                    <option value="lunch">Bữa trưa</option>
-                    <option value="dinner">Bữa tối</option>
-                    <option value="snack">Bữa phụ</option>
-                  </select>
-                </div>
-              </div>
+
+
               </div>
 
               {/* Right Column: Ingredients & Options */}
-              <div className="flex-[1.5] flex flex-col space-y-6">
+              <div className="flex-1 flex flex-col space-y-6">
+                {/* Meal & Dish Category (Moved to Right Column) */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Category Dropdown */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Bữa ăn (Phân loại)</label>
+                    <select 
+                      className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/30 transition-all cursor-pointer"
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                    >
+                      <option value="breakfast">Bữa sáng</option>
+                      <option value="lunch">Bữa trưa</option>
+                      <option value="dinner">Bữa tối</option>
+                      <option value="snack">Bữa phụ</option>
+                    </select>
+                  </div>
+                  {/* Dish Category Dropdown */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Loại món</label>
+                    <select 
+                      className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/30 transition-all cursor-pointer"
+                      value={dishCategory}
+                      onChange={(e) => setDishCategory(e.target.value)}
+                    >
+                      <option value="food">Món ăn</option>
+                      <option value="drink">Đồ uống</option>
+                      <option value="snack">Ăn vặt</option>
+                    </select>
+                  </div>
+                </div>
+
               {/* Ingredients Builder */}
               <div className="space-y-4 pt-2">
                 <div className="flex justify-between items-center">
@@ -670,6 +705,48 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                     </div>
                   )}
                 </div>
+
+              {/* Recipe Instructions (Các bước chế biến) */}
+              <div className="mt-8 space-y-4 pt-2 border-t border-gray-100 pr-1">
+                <div className="flex justify-between items-center">
+                  <label className="text-[11px] font-black text-gray-800 uppercase tracking-wider pl-1">Các bước chế biến</label>
+                  <button 
+                    type="button"
+                    onClick={addInstructionRow}
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                  >
+                    <Plus size={14} />
+                    THÊM BƯỚC
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {instructions.map((step, idx) => (
+                    <div key={idx} className="flex gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-[#B5E361]/20 transition-all duration-300">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-white text-gray-400 flex items-center justify-center font-black text-sm border border-gray-100 shadow-sm">
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                        <textarea
+                          value={step}
+                          onChange={(e) => handleInstructionChange(idx, e.target.value)}
+                          placeholder={`Mô tả chi tiết bước ${idx + 1}...`}
+                          rows="2"
+                          className="w-full bg-transparent border-none p-0 text-sm font-semibold text-gray-900 focus:ring-0 placeholder:text-gray-300 resize-none"
+                        />
+                        <button 
+                          type="button"
+                          onClick={() => removeInstructionRow(idx)}
+                          disabled={instructions.length <= 1}
+                          className="self-end sm:self-center p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all disabled:opacity-30 disabled:hover:bg-transparent shrink-0"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
               </div>
 
               {/* Save checkbox */}

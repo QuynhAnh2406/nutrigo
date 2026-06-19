@@ -19,8 +19,16 @@ function PostCard({ post, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
     };
   }, [showMenu]);
 
-  // Try to determine meal category or use generic
-  const mealCategory = post.meal_type || post.category || 'Món ăn';
+  // Translate category mapping
+  const categoryMap = {
+    'food': 'Món ăn',
+    'drink': 'Đồ uống',
+    'snack': 'Ăn vặt',
+    'breakfast': 'Bữa sáng',
+    'lunch': 'Bữa trưa',
+    'dinner': 'Bữa tối'
+  };
+  const mealCategory = categoryMap[post.meal_type] || categoryMap[post.category] || post.meal_type || post.category || 'Món ăn';
 
 
   return (
