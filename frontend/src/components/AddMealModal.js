@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChefHat, X, Flame, Search, Clock, Users, Plus, Check, Trash2 } from 'lucide-react';
+import { ChefHat, X, Flame, Search, Plus, Check, Trash2, Wheat, Fish, Droplet } from 'lucide-react';
 
 function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialRecipe }) {
   const [activeTab, setActiveTab] = useState('choose'); // 'choose' or 'create'
@@ -357,73 +357,78 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar min-h-[600px]">
           {activeTab === 'choose' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[50vh] pr-1">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 pr-1">
               {userRecipes.length > 0 ? (
                 userRecipes.map(recipe => (
                   <div 
                     key={recipe.id}
                     onClick={() => handleSelectRecipe(recipe)}
-                    className="group bg-white rounded-3xl border border-gray-100 overflow-hidden hover:border-[#B5E361] hover:shadow-md cursor-pointer transition-all duration-300 flex flex-col"
+                    className="relative bg-[#faf7f2] rounded-[28px] p-4 sm:p-5 flex flex-col gap-4 border border-[#f0ebe1] hover:shadow-[0_10px_30px_rgb(0,0,0,0.05)] transition-all duration-300 cursor-pointer group"
                   >
-                    {/* Recipe Image or Fallback */}
-                    <div className="h-36 w-full bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] flex items-center justify-center text-gray-400 relative">
-                      {recipe.image_url ? (
-                        <img src={recipe.image_url} alt={recipe.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="flex flex-col items-center gap-2">
-                          <ChefHat size={28} className="text-[#B5E361]" />
-                          <span className="text-[9px] font-black tracking-widest text-[#8CB33D] uppercase">NUTRIGO RECIPE</span>
-                        </div>
-                      )}
-                      {/* Source Badge */}
-                      <span className={`absolute top-3 right-3 text-[9px] font-black uppercase px-2.5 py-1 rounded-full shadow-sm ${recipe.source === 'my_recipe' ? 'bg-gray-900 text-white' : 'bg-[#B5E361] text-[#1f3b00]'}`}>
-                        {recipe.source === 'my_recipe' ? 'Thực đơn của tôi' : 'Yêu thích'}
-                      </span>
-                    </div>
-
-                    {/* Details */}
-                    <div className="p-4 flex flex-col justify-between flex-1">
-                      <div>
-                        <div className="flex justify-between items-start gap-2">
-                          <h4 className="font-extrabold text-gray-800 text-sm group-hover:text-green-700 transition-colors">{recipe.name}</h4>
-                          <span className="text-[10px] font-black text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-100 shrink-0 capitalize">
-                            {recipe.prep_time || 'Chưa rõ'}
-                          </span>
-                        </div>
-                        {recipe.description && (
-                          <p className="text-xs text-gray-400 font-medium line-clamp-2 mt-1">{recipe.description}</p>
+                    {/* Top Section: Image + Title + Button */}
+                    <div className="flex gap-4 sm:gap-5 items-stretch relative z-10">
+                      {/* Image Container */}
+                      <div className="w-[120px] h-[90px] sm:w-[150px] sm:h-[110px] shrink-0 rounded-[20px] overflow-hidden bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] shadow-sm">
+                        {recipe.image_url ? (
+                          <img src={recipe.image_url} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center gap-1.5">
+                             <ChefHat size={28} className="text-[#8CB33D]" />
+                             <span className="text-[9px] font-black tracking-widest text-[#8CB33D] uppercase">Nutrigo</span>
+                          </div>
                         )}
                       </div>
-
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 pt-3 border-t border-gray-50 text-[11px] font-black">
-                        <div className="flex items-center gap-3">
-                          <span className="flex items-center gap-1 text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100">
-                            <Flame size={12} />
-                            {recipe.calories} kcal
-                          </span>
-                          <span className="flex items-center gap-1 text-blue-600">
-                            P: {recipe.protein || 0}g
-                          </span>
-                          <span className="flex items-center gap-1 text-yellow-600">
-                            C: {recipe.carbs || 0}g
-                          </span>
-                          <span className="flex items-center gap-1 text-red-500">
-                            F: {recipe.fat || 0}g
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <Clock size={12} />
-                            {recipe.prep_time || '15 phút'}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users size={12} />
-                            1 phần ăn
-                          </span>
-                        </div>
+                      
+                      {/* Title Container */}
+                      <div className="flex-1 flex flex-col py-1 pr-2">
+                         <h3 className="text-base sm:text-[18px] font-extrabold text-[#2d3748] leading-tight line-clamp-2">
+                           {recipe.name}
+                         </h3>
+                         <button 
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             handleSelectRecipe(recipe);
+                           }}
+                           className="mt-auto bg-[#c5e87a] hover:bg-[#b8de6b] text-[#3d6600] font-black text-xs sm:text-sm py-2 px-4 rounded-[14px] transition-colors self-start shadow-sm"
+                         >
+                           Chọn món này
+                         </button>
                       </div>
+                    </div>
+
+                    {/* Middle Section: Tags & Score */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 px-1 mt-1">
+                       {/* Tags */}
+                       <div className="flex gap-2">
+                          <span className="bg-[#c5e87a] text-[#3d6600] px-3 py-1.5 rounded-xl text-xs font-extrabold capitalize shadow-sm">
+                            {recipe.meal_type || recipe.category || 'Món ăn'}
+                          </span>
+                       </div>
+                    </div>
+
+                    {/* Bottom Section: Macros */}
+                    <div className="bg-white rounded-[16px] py-3 px-3 sm:px-5 flex justify-between items-center text-gray-500 text-xs sm:text-[13px] font-bold shadow-sm mt-1">
+                       <div className="flex items-center gap-1.5 text-gray-700">
+                         <Flame size={15} strokeWidth={2.5} className="text-gray-400" /> 
+                         {recipe.calories || 0} <span className="text-[11px] font-medium text-gray-400">kcal</span>
+                       </div>
+                       <div className="w-px h-5 bg-gray-100"></div>
+                       <div className="flex items-center gap-1.5 text-gray-700">
+                         <Wheat size={15} strokeWidth={2.5} className="text-gray-400" /> 
+                         {recipe.carbs || 0}g <span className="text-[11px] font-medium text-gray-400">C</span>
+                       </div>
+                       <div className="w-px h-5 bg-gray-100"></div>
+                       <div className="flex items-center gap-1.5 text-gray-700">
+                         <Fish size={15} strokeWidth={2.5} className="text-gray-400" /> 
+                         {recipe.protein || 0}g <span className="text-[11px] font-medium text-gray-400">P</span>
+                       </div>
+                       <div className="w-px h-5 bg-gray-100"></div>
+                       <div className="flex items-center gap-1.5 text-gray-700">
+                         <Droplet size={15} strokeWidth={2.5} className="text-gray-400" /> 
+                         {recipe.fat || 0}g <span className="text-[11px] font-medium text-gray-400">F</span>
+                       </div>
                     </div>
                   </div>
                 ))
