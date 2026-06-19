@@ -332,7 +332,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
               }}
               className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all duration-300 ${activeTab === 'choose' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
             >
-              Chọn công thức
+              Chọn món ăn
             </button>
             <button 
               type="button"
