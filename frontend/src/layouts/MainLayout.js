@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 
 function MainLayout() {
+    const location = useLocation();
     // Shared state that was previously in App.js
     const [menuItems] = useState([
         { name: 'Oatmeal & Berries', type: 'Breakfast', calories: 350, carbs: 45, protein: 12, fats: 8 },
@@ -233,7 +234,7 @@ function MainLayout() {
         }, 15000);
 
         return () => clearInterval(timer);
-    }, [window.location.search]); // Depend on search parameters to trigger immediately on test URL
+    }, [location.search]); // Depend on search parameters to trigger immediately on test URL
 
     const handleCloseReminder = () => {
         const urlParams = new URLSearchParams(window.location.search);

@@ -48,7 +48,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
             brandData: brand
           }));
           
-          setUserRecipes(dbRecipes);
+          setUserRecipes([...dbRecipes, ...brandRecipes]);
           setAllIngredients(dbIngredients);
         }
       } catch (err) {

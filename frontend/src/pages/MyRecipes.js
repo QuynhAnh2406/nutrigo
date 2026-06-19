@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import PostCard from '../components/PostCard';
 import MealDetailModal from '../components/MealDetailModal';
 import AddToMealPlanModal from '../components/AddToMealPlanModal';
@@ -8,10 +8,10 @@ import { BookOpen, Plus, Search, SlidersHorizontal, RotateCcw, Trash2 } from 'lu
 
 function MyRecipes() {
   const navigate = useNavigate();
-  const { user } = useOutletContext();
+
   const [recipes, setRecipes] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('All'); // 'All', 'created', 'saved'
+
   const [selectedPost, setSelectedPost] = useState(null);
   const [postToAddPlan, setPostToAddPlan] = useState(null);
   const [recipeToEdit, setRecipeToEdit] = useState(null);
