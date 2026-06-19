@@ -268,7 +268,7 @@ function Profile() {
       case 'Edit':
         return (
           <div className="profile-tab-content edit-profile animate-in space-y-8">
-            <div className="bg-gradient-to-br from-[#4facfe] to-[#00f2fe] p-8 rounded-[2.5rem] mb-8 shadow-xl shadow-blue-100 relative overflow-hidden group border-none">
+            <div className="bg-gradient-to-br from-[#B5E361] to-[#8CB33D] p-8 rounded-[2.5rem] mb-8 shadow-xl shadow-green-100 relative overflow-hidden group border-none">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-125"></div>
               <h4 className="font-black text-white mb-2 flex items-center gap-3 relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">📝</div>
@@ -299,13 +299,13 @@ function Profile() {
               {/* Basic Info Section */}
               <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl">
                 <h4 className="font-bold mb-6 text-gray-800 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-blue-500 rounded-full"></span>
+                  <span className="w-2 h-6 bg-green-500 rounded-full"></span>
                   Thông tin cơ bản
                 </h4>
                 <div className="form-grid">
                   <div className="form-group">
                     <label>Ngày sinh</label>
-                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleFormChange} className="bg-white/80 border-gray-100 focus:ring-2 focus:ring-blue-400 transition-all" />
+                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleFormChange} className="bg-white/80 border-gray-100 focus:ring-2 focus:ring-green-400 transition-all" />
                   </div>
                   <div className="form-group opacity-60">
                     <label>Tuổi</label>

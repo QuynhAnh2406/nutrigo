@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import PostCard from '../components/PostCard';
-import PostDetailModal from '../components/PostDetailModal';
+import MealDetailModal from '../components/MealDetailModal';
 import AddToMealPlanModal from '../components/AddToMealPlanModal';
 import PageHeader from '../components/PageHeader';
-import { BookOpen, Plus, Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { BookOpen, Plus, Search, SlidersHorizontal, RotateCcw, Trash2 } from 'lucide-react';
 
 function MyRecipes() {
   const navigate = useNavigate();
@@ -14,6 +14,30 @@ function MyRecipes() {
   const [activeTab, setActiveTab] = useState('All'); // 'All', 'created', 'saved'
   const [selectedPost, setSelectedPost] = useState(null);
   const [postToAddPlan, setPostToAddPlan] = useState(null);
+  const [recipeToEdit, setRecipeToEdit] = useState(null);
+  const [recipeToDelete, setRecipeToDelete] = useState(null);
+
+  const confirmDeleteRecipe = async () => {
+    if (!recipeToDelete) return;
+    try {
+      const res = await fetch(`http://localhost:5002/api/posts/${recipeToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRecipes(recipes.filter(r => r.id !== recipeToDelete.id));
+        setRecipeToDelete(null);
+      } else {
+        alert(data.message || 'Xóa thất bại');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Lỗi kết nối server');
+    }
+  };
 
   // Advanced Filter State
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
@@ -37,7 +61,11 @@ function MyRecipes() {
 
   const fetchRecipes = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:5002/api/posts?tab=My Recipes&search=${searchQuery}`);
+      const res = await fetch(`http://localhost:5002/api/posts?tab=My Recipes&search=${searchQuery}`, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        }
+      });
       const data = await res.json();
       if (data.success && data.data) {
         setRecipes(data.data);
@@ -236,6 +264,8 @@ function MyRecipes() {
                 post={recipe}
                 onOpenDetail={(p) => setSelectedPost(p)}
                 onAddToPlan={(p) => setPostToAddPlan(p)}
+                onEdit={(p) => setRecipeToEdit(p)}
+                onDelete={(p) => setRecipeToDelete(p)}
               />
             ))}
           </div>
@@ -256,12 +286,64 @@ function MyRecipes() {
         )}
       </div>
 
-      {/* Detail and Add to Plan Modals */}
+      {/* Detail, Edit and Add to Plan Modals */}
       {selectedPost && (
-        <PostDetailModal
-          post={selectedPost}
+        <MealDetailModal
+          meal={selectedPost}
           onClose={() => setSelectedPost(null)}
+          onDelete={() => {
+            setRecipeToDelete(selectedPost);
+            setSelectedPost(null);
+          }}
+          onSaveSuccess={() => {
+            fetchRecipes();
+            setSelectedPost(null);
+          }}
         />
+      )}
+
+      {recipeToEdit && (
+        <MealDetailModal
+          meal={recipeToEdit}
+          initialIsEditing={true}
+          onClose={() => setRecipeToEdit(null)}
+          onDelete={() => {
+            setRecipeToDelete(recipeToEdit);
+            setRecipeToEdit(null);
+          }}
+          onSaveSuccess={() => {
+            fetchRecipes();
+            setRecipeToEdit(null);
+          }}
+        />
+      )}
+
+      {recipeToDelete && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-[#1f3b00]/40 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-white rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#B5E361]/30 p-8 w-[90%] max-w-md text-center transform transition-all scale-100 animate-in zoom-in-95 duration-200">
+            <div className="w-20 h-20 bg-[#EAF7D5] rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <Trash2 className="text-[#3d6600]" size={36} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-2xl font-black text-[#1f3b00] mb-3 uppercase tracking-wide">Xóa công thức?</h3>
+            <p className="text-gray-600 mb-8 font-medium leading-relaxed">
+              Bạn có chắc chắn muốn xóa công thức <span className="font-extrabold text-[#3d6600]">{recipeToDelete.foodName || recipeToDelete.name}</span> không? Hành động này không thể hoàn tác.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button 
+                onClick={() => setRecipeToDelete(null)}
+                className="flex-1 px-6 py-3.5 rounded-2xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+              >
+                Trở lại
+              </button>
+              <button 
+                onClick={confirmDeleteRecipe}
+                className="flex-1 px-6 py-3.5 rounded-2xl font-black text-[#1f3b00] bg-[#B5E361] hover:bg-[#a3d14f] shadow-lg shadow-[#B5E361]/30 transition-all hover:-translate-y-0.5 active:translate-y-0"
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {postToAddPlan && (

@@ -153,14 +153,14 @@ exports.createPost = async (req, res) => {
 
     // 1. Insert post
     const postRes = await client.query(`
-      INSERT INTO posts (user_id, food_name, description, image_url, prep_time, difficulty, calories, carbs, protein, fat, rating, is_recipe, meal_type, category, health_level)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *
+      INSERT INTO posts (user_id, food_name, description, image_url, prep_time, difficulty, calories, carbs, protein, fat, is_recipe, meal_type, category, health_level)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *
     `, [
       userId, foodName, description, 
       image || 'https://images.unsplash.com/photo-1498837167922-41cfa6f500ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       prepTime || 'Unknown', difficulty || 'Medium', 
-      totalCal > 0 ? totalCal : 300, 
-      30, 20, 10, 0, // Mock macros
+      Math.round(totalCal) > 0 ? Math.round(totalCal) : 300, 
+      30, 20, 10, // Mock macros
       isRecipe !== undefined ? isRecipe : true,
       mealType || null,
       category || 'food',
@@ -253,7 +253,7 @@ exports.updatePost = async (req, res) => {
       foodName, description, 
       image || 'https://images.unsplash.com/photo-1498837167922-41cfa6f500ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       prepTime || 'Unknown', difficulty || 'Medium', 
-      totalCal > 0 ? totalCal : 300, 
+      Math.round(totalCal) > 0 ? Math.round(totalCal) : 300, 
       category || 'food',
       healthLevel || 'medium',
       postId
@@ -287,6 +287,28 @@ exports.updatePost = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error during post update' });
   } finally {
     client.release();
+  }
+};
+
+exports.deletePost = async (req, res) => {
+  const postId = req.params.id;
+  const userId = getUserId(req);
+
+  try {
+    const checkRes = await db.query('SELECT * FROM posts WHERE id = $1', [postId]);
+    if (checkRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Công thức không tồn tại' });
+    }
+
+    if (checkRes.rows[0].user_id !== userId) {
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền xoá công thức này' });
+    }
+
+    await db.query('DELETE FROM posts WHERE id = $1', [postId]);
+    res.status(200).json({ success: true, message: 'Xoá công thức thành công' });
+  } catch (error) {
+    console.error("DELETE POST ERROR:", error);
+    res.status(500).json({ success: false, message: 'Lỗi server khi xoá công thức' });
   }
 };
 

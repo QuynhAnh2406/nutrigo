@@ -15,7 +15,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
   const [category, setCategory] = useState(mealType);
   const [imageUrl, setImageUrl] = useState('');
   const [selectedIngredients, setSelectedIngredients] = useState([]);
-  const [saveToMyRecipe, setSaveToMyRecipe] = useState(false);
+  const [saveToMyRecipe, setSaveToMyRecipe] = useState(true);
   
   // New states for editing flow
   const [editingRecipeId, setEditingRecipeId] = useState(null);
@@ -48,7 +48,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
             brandData: brand
           }));
           
-          setUserRecipes([...dbRecipes, ...brandRecipes]);
+          setUserRecipes(dbRecipes);
           setAllIngredients(dbIngredients);
         }
       } catch (err) {
@@ -327,7 +327,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                 setCookTime(30);
                 setImageUrl('');
                 setSelectedIngredients([]);
-                setSaveToMyRecipe(false);
+                setSaveToMyRecipe(true);
                 setUpdateExistingRecipe(false);
               }}
               className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all duration-300 ${activeTab === 'choose' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
@@ -338,6 +338,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
               type="button"
               onClick={() => {
                 setActiveTab('create');
+                setSaveToMyRecipe(true);
                 if (editingRecipeId) {
                   setEditingRecipeId(null);
                   setDishName('');
@@ -345,7 +346,6 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                   setCookTime(30);
                   setImageUrl('');
                   setSelectedIngredients([]);
-                  setSaveToMyRecipe(false);
                   setUpdateExistingRecipe(false);
                 }
               }}

@@ -68,15 +68,12 @@ SELECT setval('ingredients_id_seq', (SELECT MAX(id) FROM ingredients));
 -- 4. TẠO CÁC MÓN ĂN / CÔNG THỨC (Với Calo và Macros tổng hợp thực tế)
 INSERT INTO posts (id, user_id, food_name, description, image_url, prep_time, difficulty, calories, carbs, protein, fat, is_recipe, meal_type, category, health_level)
 VALUES
-(1, 1, 'Phở Bò Chín', 'Món ăn truyền thống thơm ngon, nước dùng ngọt thanh từ xương ống bò, thịt bò chín mềm.', 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=500', '45 phút', 'Medium', 450, 58.00, 28.00, 12.00, true, 'breakfast', 'food', 'medium'),
+(1, 1, 'Phở Bò Chín', 'Món ăn truyền thống thơm ngon, nước dùng ngọt thanh từ xương ống bò, thịt bò chín mềm.', '/images/pho_bo_chin.png', '45 phút', 'Medium', 450, 58.00, 28.00, 12.00, true, 'breakfast', 'food', 'medium'),
 (2, 1, 'Salad Ức Gà Sốt Oliu', 'Salad ức gà áp chảo thơm lừng cùng rau củ giòn mát, thích hợp cho người ăn kiêng giảm mỡ.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500', '15 phút', 'Easy', 350, 12.00, 32.00, 18.00, true, 'lunch', 'food', 'excellent'),
 (3, 1, 'Cháo Yến Mạch Ức Gà', 'Món cháo ấm nóng tốt cho dạ dày, giàu chất xơ từ yến mạch và protein dồi dào từ ức gà.', 'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=500', '20 phút', 'Easy', 320, 35.00, 25.00, 6.00, true, 'breakfast', 'food', 'excellent'),
 (4, 1, 'Cá Hồi Áp Chảo Măng Tây', 'Cá hồi áp chảo thơm ngon giàu Omega-3, ăn kèm măng tây xào tỏi giòn ngọt.', 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=500', '25 phút', 'Medium', 420, 10.00, 35.00, 26.00, true, 'dinner', 'food', 'excellent'),
-(5, 1, 'Đậu Phụ Nhồi Thịt Sốt Cà Chua', 'Món ăn gia đình truyền thống, đậu phụ mềm béo nhồi thịt nạc heo sốt cà chua đậm vị.', 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500', '30 phút', 'Easy', 280, 15.00, 18.00, 16.00, true, 'lunch', 'food', 'medium'),
-(6, 1, 'Tôm Rim Ăn Kèm Cơm Gạo Lứt', 'Tôm sú ngọt thịt rim nhạt, dùng kèm cơm gạo lứt dẻo bùi tốt cho sức khỏe.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74?w=500', '25 phút', 'Easy', 390, 45.00, 30.00, 8.00, true, 'lunch', 'food', 'excellent'),
-(7, 2, 'Súp Bí Đỏ Thịt Bằm', 'Súp bí đỏ ngọt bùi béo ngậy từ sữa tươi, kết hợp với thịt heo băm bổ dưỡng.', 'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=500', '30 phút', 'Easy', 180, 22.00, 10.00, 5.00, true, 'dinner', 'food', 'excellent'),
-(8, 2, 'Sữa Chua Hạt Chia Trái Cây', 'Bữa ăn phụ mát lạnh giải nhiệt, cung cấp chất xơ và lợi khuẩn tốt cho tiêu hóa.', 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=500', '5 phút', 'Easy', 150, 20.00, 6.00, 5.00, true, 'snack', 'food', 'excellent'),
-(9, 2, 'Sinh Tố Bơ Chuối Yến Mạch', 'Thức uống sánh mịn thơm béo từ bơ tươi, chuối ngọt và yến mạch cung cấp năng lượng tức thì.', 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=500', '10 phút', 'Easy', 260, 35.00, 8.00, 10.00, true, 'snack', 'food', 'excellent');
+(5, 1, 'Đậu Phụ Nhồi Thịt Sốt Cà Chua', 'Món ăn gia đình truyền thống, đậu phụ mềm béo nhồi thịt nạc heo sốt cà chua đậm vị.', '/images/dau_phu_nhoi_thit.png', '30 phút', 'Easy', 280, 15.00, 18.00, 16.00, true, 'lunch', 'food', 'medium'),
+(6, 1, 'Tôm Rim Ăn Kèm Cơm Gạo Lứt', 'Tôm sú ngọt thịt rim nhạt, dùng kèm cơm gạo lứt dẻo bùi tốt cho sức khỏe.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74?w=500', '25 phút', 'Easy', 390, 45.00, 30.00, 8.00, true, 'lunch', 'food', 'excellent');
 
 SELECT setval('posts_id_seq', (SELECT MAX(id) FROM posts));
 
@@ -113,23 +110,7 @@ VALUES
 -- Tôm Rim Ăn Kèm Cơm Gạo Lứt (ID = 6)
 (6, 10, 'Tôm sú', '120g', 120.00, 118.80),
 (6, 2, 'Gạo lứt', '70g', 70.00, 241.50),
-(6, 21, 'Dầu oliu', '3g', 3.00, 26.52),
-
--- Súp Bí Đỏ Thịt Bằm (ID = 7)
-(7, 19, 'Bí đỏ', '200g', 200.00, 52.00),
-(7, 8, 'Thịt lợn nạc', '50g', 50.00, 69.50),
-(7, 24, 'Sữa tươi không đường', '100g', 100.00, 62.00),
-
--- Sữa Chua Hạt Chia Trái Cây (ID = 8)
-(8, 23, 'Sữa chua không đường', '100g', 100.00, 61.00),
-(8, 13, 'Hạt chia', '10g', 10.00, 48.60),
-(8, 26, 'Quả chuối', '50g', 50.00, 44.50),
-
--- Sinh Tố Bơ Chuối Yến Mạch (ID = 9)
-(9, 25, 'Quả bơ', '50g', 50.00, 80.00),
-(9, 26, 'Quả chuối', '50g', 50.00, 44.50),
-(9, 4, 'Yến mạch', '20g', 20.00, 77.80),
-(9, 24, 'Sữa tươi không đường', '100g', 100.00, 62.00);
+(6, 21, 'Dầu oliu', '3g', 3.00, 26.52);
 
 -- 6. CÁC BƯỚC HƯỚNG DẪN NẤU ĂN
 INSERT INTO post_instruction_steps (post_id, step_number, instruction)
@@ -168,25 +149,7 @@ VALUES
 (6, 1, 'Vo gạo lứt và nấu cơm dẻo trong nồi cơm điện.'),
 (6, 2, 'Tôm lột vỏ, rút chỉ lưng, ướp chút nước mắm nhạt và tỏi băm.'),
 (6, 3, 'Rim tôm trên chảo nóng với 3g dầu oliu đến khi tôm săn lại và chín đỏ.'),
-(6, 4, 'Xới cơm gạo lứt ra đĩa, xếp tôm rim lên trên, ăn kèm dưa leo hoặc rau luộc.'),
-
--- Súp Bí Đỏ Thịt Bằm
-(7, 1, 'Bí đỏ gọt vỏ, cắt miếng nhỏ, hấp hoặc luộc chín mềm rồi nghiền nhuyễn.'),
-(7, 2, 'Xào thơm thịt heo bằm với hành khô phi thơm.'),
-(7, 3, 'Cho bí đỏ nghiền và sữa tươi không đường vào nồi đun nhỏ lửa, khuấy đều.'),
-(7, 4, 'Thêm thịt bằm vào đun sôi nhẹ, nêm chút muối cho vừa ăn rồi tắt bếp.'),
-
--- Sữa Chua Hạt Chia Trái Cây
-(8, 1, 'Cho sữa chua không đường ra ly hoặc bát lớn.'),
-(8, 2, 'Trộn đều hạt chia vào sữa chua và để khoảng 5 phút cho nở.'),
-(8, 3, 'Chuối cắt lát nhỏ, xếp lên bề mặt sữa chua.'),
-(8, 4, 'Trộn đều và thưởng thức ngay món ăn xế mát lạnh.'),
-
--- Sinh Tố Bơ Chuối Yến Mạch
-(9, 1, 'Cắt đôi quả bơ, lấy phần thịt bơ cắt nhỏ.'),
-(9, 2, 'Lột vỏ chuối, cắt khoanh nhỏ.'),
-(9, 3, 'Cho bơ, chuối, yến mạch và sữa tươi không đường vào máy xay sinh tố.'),
-(9, 4, 'Xay mịn trong 1-2 phút, rót ra ly và thưởng thức lạnh.');
+(6, 4, 'Xới cơm gạo lứt ra đĩa, xếp tôm rim lên trên, ăn kèm dưa leo hoặc rau luộc.');
 
 -- 7. NGUYÊN LIỆU CÓ SẴN TRONG TỦ LẠNH CỦA NGƯỜI DÙNG (USER FRIDGE)
 INSERT INTO user_fridge (user_id, ingredient_name)

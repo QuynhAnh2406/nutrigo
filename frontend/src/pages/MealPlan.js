@@ -35,7 +35,11 @@ function MealPlan() {
 
   const handleRecipeClick = async (recipe, day, mealType, mealDate) => {
     try {
-      const res = await fetch(`http://localhost:5002/api/posts/${recipe.recipeId || recipe.id}`);
+      const res = await fetch(`http://localhost:5002/api/posts/${recipe.recipeId || recipe.id}`, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        }
+      });
       const data = await res.json();
       if (data.success) {
         setSelectedRecipeDetail({ 

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ChefHat, Edit2, Trash2, X, Check } from 'lucide-react';
 
-function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess }) {
-  const [isEditing, setIsEditing] = useState(false);
+function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess, initialIsEditing = false }) {
+  const [isEditing, setIsEditing] = useState(initialIsEditing);
   const [formData, setFormData] = useState({
     foodName: meal.foodName || '',
     description: meal.description || '',
@@ -60,7 +60,10 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess }) {
     try {
       const res = await fetch(`http://localhost:5002/api/posts/${meal.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        },
         body: JSON.stringify(updatedPostData)
       });
       const data = await res.json();
