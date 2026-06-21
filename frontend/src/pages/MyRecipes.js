@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PostCard from '../components/PostCard';
+import RecipeCard from '../components/RecipeCard';
 import MealDetailModal from '../components/MealDetailModal';
 import AddToMealPlanModal from '../components/AddToMealPlanModal';
 import PageHeader from '../components/PageHeader';
@@ -20,7 +20,7 @@ function MyRecipes() {
   const confirmDeleteRecipe = async () => {
     if (!recipeToDelete) return;
     try {
-      const res = await fetch(`http://localhost:5002/api/posts/${recipeToDelete.id}`, {
+      const res = await fetch(`http://localhost:5002/api/recipes/${recipeToDelete.id}`, {
         method: 'DELETE',
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token')
@@ -61,7 +61,7 @@ function MyRecipes() {
 
   const fetchRecipes = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:5002/api/posts?tab=My Recipes&search=${searchQuery}`, {
+      const res = await fetch(`http://localhost:5002/api/recipes?tab=My Recipes&search=${searchQuery}`, {
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token')
         }
@@ -91,7 +91,7 @@ function MyRecipes() {
 
   return (
     <div className="my-recipes-page main-content" style={{ overflowY: 'auto', paddingBottom: '80px' }}>
-      <div className="mb-8 relative z-30">
+      <div className="mb-2 relative z-30">
         <PageHeader
           title="Công thức của tôi"
           subtitle="Nơi lưu giữ và sáng tạo những bữa ăn tuyệt vời mang đậm phong cách cá nhân."
@@ -255,11 +255,11 @@ function MyRecipes() {
 
 
       {/* Recipe Grid */}
-      <div className="feed-container mt-6">
+      <div className="feed-container mt-2">
         {filteredRecipes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in-50 duration-500">
             {filteredRecipes.map(recipe => (
-              <PostCard
+              <RecipeCard
                 key={recipe.id}
                 post={recipe}
                 onOpenDetail={(p) => setSelectedPost(p)}

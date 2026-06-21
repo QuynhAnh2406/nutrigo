@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Plus, X, Flame, ShieldAlert, Sparkles, Database, Scale, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { Search, Plus, X, Flame, Sparkles, Scale, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 function Ingredients({ mode = 'ingredient' }) {
@@ -118,14 +118,19 @@ function Ingredients({ mode = 'ingredient' }) {
     }
   };
 
+  const removeAccents = (str) => {
+    if (!str) return '';
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+  };
+
   const filteredIngredients = ingredients.filter((ing) => {
-    const matchSearch = ing.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = removeAccents(ing.name?.toLowerCase() || '').includes(removeAccents(searchQuery.toLowerCase()));
     const matchMode = (ing.type || 'ingredient') === mode;
     const matchCategory = selectedCategory === 'All' || (ing.category || 'food') === selectedCategory;
     const matchBrand =
       mode === 'ingredient' ||
       !brandSearchQuery.trim() ||
-      (ing.brand_name && ing.brand_name.toLowerCase().includes(brandSearchQuery.toLowerCase()));
+      (ing.brand_name && removeAccents(ing.brand_name.toLowerCase()).includes(removeAccents(brandSearchQuery.toLowerCase())));
 
     return matchSearch && matchMode && matchCategory && matchBrand;
   });

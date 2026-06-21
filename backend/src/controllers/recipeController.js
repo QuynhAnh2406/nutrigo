@@ -3,16 +3,16 @@ const db = require('../config/db');
 // Giả định user ID = 1 nếu không có middleware xác thực
 const getUserId = (req) => req.user ? req.user.id : 1;
 
-exports.getPosts = async (req, res) => {
+exports.getRecipes = async (req, res) => {
   const { search, filter, tab } = req.query;
   const userId = getUserId(req);
   
   try {
     let baseQuery = `
-      SELECT p.*, u.full_name as author, u.avatar_url as avatar
-      FROM posts p
-      LEFT JOIN users u ON p.user_id = u.id
-      WHERE p.user_id = $1 AND p.is_recipe = TRUE
+      SELECT r.*, u.full_name as author, u.avatar_url as avatar
+      FROM recipes r
+      LEFT JOIN users u ON r.user_id = u.id
+      WHERE r.user_id = $1 AND r.is_recipe = TRUE
     `;
     const queryParams = [userId];
     let paramCount = 1;
@@ -20,49 +20,42 @@ exports.getPosts = async (req, res) => {
     // Search filtering
     if (search) {
       paramCount++;
-      baseQuery += ` AND (p.food_name ILIKE $${paramCount} OR p.description ILIKE $${paramCount})`;
+      baseQuery += ` AND (r.food_name ILIKE $${paramCount} OR r.description ILIKE $${paramCount})`;
       queryParams.push(`%${search}%`);
     }
 
     // Execute base query
-    const { rows: posts } = await db.query(baseQuery + ' ORDER BY p.created_at DESC', queryParams);
+    const { rows: recipes } = await db.query(baseQuery + ' ORDER BY r.created_at DESC', queryParams);
 
-    // Fetch tags and ingredients for each post
-    // This can be optimized with JSON_AGG in SQL, but doing it in JS for clarity and compatibility
-    for (let post of posts) {
-      // Map columns to match frontend expectations
-      post.foodName = post.food_name;
-      post.image = post.image_url;
-      post.prepTime = post.prep_time;
-      post.macros = { carbs: post.carbs, protein: post.protein, fat: post.fat };
-      post.mealType = post.meal_type;
-      post.category = post.category || 'food';
-      post.healthLevel = post.health_level || 'medium';
-      post.timeAgo = 'Vừa xong'; // Mock time
-      post.comments = []; // Mock comments
+    for (let recipe of recipes) {
+      recipe.foodName = recipe.food_name;
+      recipe.image = recipe.image_url;
+      recipe.prepTime = recipe.prep_time;
+      recipe.macros = { carbs: recipe.carbs, protein: recipe.protein, fat: recipe.fat };
+      recipe.mealType = recipe.meal_type;
+      recipe.category = recipe.category || 'food';
+      recipe.healthLevel = recipe.health_level || 'medium';
+      recipe.timeAgo = 'Vừa xong';
+      recipe.comments = [];
 
-      // Filter logic removed since tags are removed
-
-      // Get Ingredients
       const ingRes = await db.query(`
         SELECT pi.ingredient_name as name, pi.amount, pi.calories, pi.weight_g,
                i.calories_per_100g, i.protein_per_100g, i.carbs_per_100g, i.fat_per_100g, i.fiber_per_100g
-        FROM post_ingredients pi
+        FROM recipe_ingredients pi
         LEFT JOIN ingredients i ON pi.ingredient_name = i.name
-        WHERE pi.post_id = $1
-      `, [post.id]);
-      post.ingredients = ingRes.rows;
+        WHERE pi.recipe_id = $1
+      `, [recipe.id]);
+      recipe.ingredients = ingRes.rows;
 
-      // Get Instructions
-      const instRes = await db.query('SELECT instruction FROM post_instruction_steps WHERE post_id = $1 ORDER BY step_number ASC', [post.id]);
-      post.instructions = instRes.rows.map(r => r.instruction);
+      const instRes = await db.query('SELECT instruction FROM recipe_instruction_steps WHERE recipe_id = $1 ORDER BY step_number ASC', [recipe.id]);
+      recipe.instructions = instRes.rows.map(r => r.instruction);
     }
 
-    const finalPosts = posts.filter(p => !p.hidden);
+    const finalRecipes = recipes.filter(r => !r.hidden);
 
     res.status(200).json({
       success: true,
-      data: finalPosts
+      data: finalRecipes
     });
 
   } catch (error) {
@@ -71,37 +64,37 @@ exports.getPosts = async (req, res) => {
   }
 };
 
-exports.getPostById = async (req, res) => {
+exports.getRecipeById = async (req, res) => {
   const userId = getUserId(req);
-  const postId = req.params.id;
+  const recipeId = req.params.id;
   
   try {
     let baseQuery = `
       SELECT p.*, u.full_name as author, u.avatar_url as avatar,
-      (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) as likes,
-      EXISTS(SELECT 1 FROM post_likes pl WHERE pl.post_id = p.id AND pl.user_id = $1) as "isLiked",
-      EXISTS(SELECT 1 FROM post_favorites pf WHERE pf.post_id = p.id AND pf.user_id = $1) as "isSaved"
-      FROM posts p
+      (SELECT COUNT(*) FROM recipe_likes pl WHERE pl.recipe_id = p.id) as likes,
+      EXISTS(SELECT 1 FROM recipe_likes pl WHERE pl.recipe_id = p.id AND pl.user_id = $1) as "isLiked",
+      EXISTS(SELECT 1 FROM recipe_favorites pf WHERE pf.recipe_id = p.id AND pf.user_id = $1) as "isSaved"
+      FROM recipes p
       LEFT JOIN users u ON p.user_id = u.id
       WHERE p.id = $2
     `;
     
-    const { rows: posts } = await db.query(baseQuery, [userId, postId]);
+    const { rows: recipes } = await db.query(baseQuery, [userId, recipeId]);
     
-    if (posts.length === 0) {
-      return res.status(404).json({ success: false, message: 'Post not found' });
+    if (recipes.length === 0) {
+      return res.status(404).json({ success: false, message: 'Recipe not found' });
     }
 
-    let post = posts[0];
-    post.foodName = post.food_name;
-    post.image = post.image_url;
-    post.prepTime = post.prep_time;
-    post.macros = { carbs: post.carbs, protein: post.protein, fat: post.fat };
-    post.mealType = post.meal_type;
-    post.category = post.category || 'food';
-    post.healthLevel = post.health_level || 'medium';
-    post.timeAgo = 'Vừa xong'; // Mock time
-    post.comments = []; // Mock comments
+    let recipe = recipes[0];
+    recipe.foodName = recipe.food_name;
+    recipe.image = recipe.image_url;
+    recipe.prepTime = recipe.prep_time;
+    recipe.macros = { carbs: recipe.carbs, protein: recipe.protein, fat: recipe.fat };
+    recipe.mealType = recipe.meal_type;
+    recipe.category = recipe.category || 'food';
+    recipe.healthLevel = recipe.health_level || 'medium';
+    recipe.timeAgo = 'Vừa xong'; // Mock time
+    recipe.comments = []; // Mock comments
 
     // Tags logic removed
 
@@ -109,19 +102,19 @@ exports.getPostById = async (req, res) => {
     const ingRes = await db.query(`
       SELECT pi.ingredient_name as name, pi.amount, pi.calories, pi.weight_g,
              i.calories_per_100g, i.protein_per_100g, i.carbs_per_100g, i.fat_per_100g, i.fiber_per_100g
-      FROM post_ingredients pi
+      FROM recipe_ingredients pi
       LEFT JOIN ingredients i ON pi.ingredient_name = i.name
-      WHERE pi.post_id = $1
-    `, [post.id]);
-    post.ingredients = ingRes.rows;
+      WHERE pi.recipe_id = $1
+    `, [recipe.id]);
+    recipe.ingredients = ingRes.rows;
 
     // Get Instructions
-    const instRes = await db.query('SELECT instruction FROM post_instruction_steps WHERE post_id = $1 ORDER BY step_number ASC', [post.id]);
-    post.instructions = instRes.rows.map(r => r.instruction);
+    const instRes = await db.query('SELECT instruction FROM recipe_instruction_steps WHERE recipe_id = $1 ORDER BY step_number ASC', [recipe.id]);
+    recipe.instructions = instRes.rows.map(r => r.instruction);
 
     res.status(200).json({
       success: true,
-      data: post
+      data: recipe
     });
   } catch (error) {
     console.error(error);
@@ -130,7 +123,7 @@ exports.getPostById = async (req, res) => {
 };
 
 
-exports.createPost = async (req, res) => {
+exports.createRecipe = async (req, res) => {
   const { foodName, description, image, prepTime, difficulty, ingredients, instructions, isRecipe, mealType, category, healthLevel } = req.body;
   const userId = getUserId(req);
 
@@ -151,9 +144,9 @@ exports.createPost = async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    // 1. Insert post
-    const postRes = await client.query(`
-      INSERT INTO posts (user_id, food_name, description, image_url, prep_time, difficulty, calories, carbs, protein, fat, is_recipe, meal_type, category, health_level)
+    // 1. Insert recipe
+    const recipeRes = await client.query(`
+      INSERT INTO recipes (user_id, food_name, description, image_url, prep_time, difficulty, calories, carbs, protein, fat, is_recipe, meal_type, category, health_level)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *
     `, [
       userId, foodName, description, 
@@ -167,39 +160,39 @@ exports.createPost = async (req, res) => {
       healthLevel || 'medium'
     ]);
 
-    const postId = postRes.rows[0].id;
+    const recipeId = recipeRes.rows[0].id;
 
     // 2. Tags insertion removed
 
     // 3. Insert ingredients
     if (ingredients && Array.isArray(ingredients)) {
       for (let ing of ingredients) {
-        await client.query('INSERT INTO post_ingredients (post_id, ingredient_name, amount, calories) VALUES ($1, $2, $3, $4)', 
-          [postId, ing.name, ing.amount, ing.calories || 0]);
+        await client.query('INSERT INTO recipe_ingredients (recipe_id, ingredient_name, amount, calories) VALUES ($1, $2, $3, $4)', 
+          [recipeId, ing.name, ing.amount, ing.calories || 0]);
       }
     }
 
     // 4. Insert instructions
     if (instructions && Array.isArray(instructions)) {
       for (let i = 0; i < instructions.length; i++) {
-        await client.query('INSERT INTO post_instruction_steps (post_id, step_number, instruction) VALUES ($1, $2, $3)', 
-          [postId, i + 1, instructions[i]]);
+        await client.query('INSERT INTO recipe_instruction_steps (recipe_id, step_number, instruction) VALUES ($1, $2, $3)', 
+          [recipeId, i + 1, instructions[i]]);
       }
     }
 
     await client.query('COMMIT');
 
     // Return mock-like response so frontend doesn't break
-    const newPost = {
-      id: postId,
+    const newRecipe = {
+      id: recipeId,
       author: '@current_user',
       avatar: 'https://ui-avatars.com/api/?name=Current+User&background=random',
       foodName,
       description,
-      image: postRes.rows[0].image_url,
-      calories: postRes.rows[0].calories,
-      prepTime: postRes.rows[0].prep_time,
-      difficulty: postRes.rows[0].difficulty,
+      image: recipeRes.rows[0].image_url,
+      calories: recipeRes.rows[0].calories,
+      prepTime: recipeRes.rows[0].prep_time,
+      difficulty: recipeRes.rows[0].difficulty,
 
       macros: { carbs: 30, protein: 20, fat: 10 },
       ingredients: ingredients || [],
@@ -212,18 +205,18 @@ exports.createPost = async (req, res) => {
       comments: []
     };
 
-    res.status(201).json({ success: true, data: newPost });
+    res.status(201).json({ success: true, data: newRecipe });
   } catch (error) {
     await client.query('ROLLBACK');
     console.error(error);
-    res.status(500).json({ success: false, message: 'Server error during post creation' });
+    res.status(500).json({ success: false, message: 'Server error during Recipe creation' });
   } finally {
     client.release();
   }
 };
 
-exports.updatePost = async (req, res) => {
-  const postId = req.params.id;
+exports.updateRecipe = async (req, res) => {
+  const recipeId = req.params.id;
   const { foodName, description, image, prepTime, difficulty, ingredients, instructions, category, healthLevel } = req.body;
   const userId = getUserId(req);
 
@@ -244,9 +237,9 @@ exports.updatePost = async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    // 1. Update post basic info
+    // 1. Update Recipe basic info
     await client.query(`
-      UPDATE posts 
+      UPDATE recipes 
       SET food_name = $1, description = $2, image_url = $3, prep_time = $4, difficulty = $5, calories = $6, category = $7, health_level = $8
       WHERE id = $9
     `, [
@@ -256,26 +249,26 @@ exports.updatePost = async (req, res) => {
       Math.round(totalCal) > 0 ? Math.round(totalCal) : 300, 
       category || 'food',
       healthLevel || 'medium',
-      postId
+      recipeId
     ]);
 
     // 2. Delete tags logic removed
 
     // 3. Delete and re-insert ingredients
-    await client.query('DELETE FROM post_ingredients WHERE post_id = $1', [postId]);
+    await client.query('DELETE FROM recipe_ingredients WHERE recipe_id = $1', [recipeId]);
     if (ingredients && Array.isArray(ingredients)) {
       for (let ing of ingredients) {
-        await client.query('INSERT INTO post_ingredients (post_id, ingredient_name, amount, calories) VALUES ($1, $2, $3, $4)', 
-          [postId, ing.name, ing.amount, ing.calories || 0]);
+        await client.query('INSERT INTO recipe_ingredients (recipe_id, ingredient_name, amount, calories) VALUES ($1, $2, $3, $4)', 
+          [recipeId, ing.name, ing.amount, ing.calories || 0]);
       }
     }
 
     // 4. Delete and re-insert instructions
-    await client.query('DELETE FROM post_instruction_steps WHERE post_id = $1', [postId]);
+    await client.query('DELETE FROM recipe_instruction_steps WHERE recipe_id = $1', [recipeId]);
     if (instructions && Array.isArray(instructions)) {
       for (let i = 0; i < instructions.length; i++) {
-        await client.query('INSERT INTO post_instruction_steps (post_id, step_number, instruction) VALUES ($1, $2, $3)', 
-          [postId, i + 1, instructions[i]]);
+        await client.query('INSERT INTO recipe_instruction_steps (recipe_id, step_number, instruction) VALUES ($1, $2, $3)', 
+          [recipeId, i + 1, instructions[i]]);
       }
     }
 
@@ -284,7 +277,39 @@ exports.updatePost = async (req, res) => {
   } catch (error) {
     await client.query('ROLLBACK');
     console.error(error);
-    res.status(500).json({ success: false, message: 'Server error during post update' });
+    res.status(500).json({ success: false, message: 'Server error during Recipe update' });
+  } finally {
+    client.release();
+  }
+};
+
+exports.deleteRecipe = async (req, res) => {
+  const recipeId = req.params.id;
+  const userId = getUserId(req);
+
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const checkRes = await client.query('SELECT user_id FROM recipes WHERE id = $1', [recipeId]);
+    if (checkRes.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ success: false, message: 'Recipe not found' });
+    }
+    
+    if (checkRes.rows[0].user_id !== userId) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
+    }
+
+    await client.query('DELETE FROM recipes WHERE id = $1', [recipeId]);
+
+    await client.query('COMMIT');
+    res.status(200).json({ success: true, message: 'Recipe deleted' });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
   } finally {
     client.release();
   }

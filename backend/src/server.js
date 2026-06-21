@@ -13,15 +13,7 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Setup database migrations
-const runMigrations = require('./database_schema/migrate');
-(async() => {
-    try {
-        await runMigrations();
-    } catch (err) {
-        console.error("Server startup migrations failed:", err);
-    }
-})();
+
 
 // Setup routes
 app.use('/api', routes);

@@ -9,41 +9,47 @@ export default function PageHeader({
   children,
 }) {
   return (
-    <div className="relative rounded-[2rem] mb-6 shadow-[0_10px_40px_rgb(140,179,61,0.25)] group transition-all duration-500 hover:shadow-[0_15px_50px_rgb(140,179,61,0.35)]">
+    <div className="relative rounded-[2rem] mb-6 shadow-[0_8px_30px_rgb(181,227,97,0.3)] group transition-all duration-500 hover:shadow-[0_15px_40px_rgb(181,227,97,0.45)]">
       
       {/* Background container with overflow-hidden */}
-      <div className="absolute inset-0 overflow-hidden rounded-[2rem] border border-white/20 bg-gradient-to-r from-[#8CB33D] via-[#7ca82b] to-[#5e821b]">
+      <div className="absolute inset-0 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#cde983] via-[#b5e361] to-[#98d13a] border border-white/50">
+        
+        {/* Glow effects - using white orbs for a fresh glossy look */}
+        <div className="absolute -top-24 -right-24 w-72 h-72 bg-white opacity-40 blur-[80px] rounded-full pointer-events-none group-hover:opacity-60 transition-opacity duration-700"></div>
+        <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-white opacity-30 blur-[80px] rounded-full pointer-events-none group-hover:opacity-50 transition-opacity duration-700"></div>
+
         {/* Huge background icon */}
         {Icon && (
-          <div className="absolute -right-4 -top-8 text-white opacity-[0.04] pointer-events-none transform -rotate-12 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700">
+          <div className="absolute -right-4 -top-8 text-[#1f3b00] opacity-[0.04] pointer-events-none transform -rotate-12 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-1000 ease-out">
             <Icon size={240} strokeWidth={1.5} />
           </div>
         )}
 
         {/* Glossy overlay effect */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-50 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent opacity-60 pointer-events-none mix-blend-overlay"></div>
       </div>
 
       <div className="relative z-10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-start gap-5">
         {Icon && (
-          <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner shrink-0 mt-1 border border-white/20 group-hover:scale-110 group-hover:bg-white/20 transition-all duration-300">
-            <Icon className="text-[#B5E361]" size={26} />
+          <div className="w-14 h-14 bg-white/40 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-[0_4px_15px_rgba(0,0,0,0.05)] shrink-0 mt-1 border border-white/60 group-hover:scale-110 group-hover:bg-white/60 transition-all duration-500 ease-out relative">
+            <div className="absolute inset-0 bg-white blur-[10px] opacity-30 rounded-2xl group-hover:opacity-60 transition-opacity duration-500"></div>
+            <Icon className="text-[#1f3b00] relative z-10" size={26} strokeWidth={2.5} />
           </div>
         )}
         
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-3 mb-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-sm">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#112308] tracking-tight drop-shadow-[0_2px_2px_rgba(255,255,255,0.4)]">
               {title}
             </h1>
             {badge && (
-              <span className="rounded-full bg-[#B5E361] px-3.5 py-1 text-xs font-black text-[#183000] shadow-sm uppercase tracking-wider">
+              <span className="rounded-full bg-white/70 backdrop-blur-sm px-3.5 py-1 text-xs font-black text-[#1f3b00] shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-white uppercase tracking-wider">
                 {badge}
               </span>
             )}
           </div>
           {subtitle && (
-            <p className="text-[#EAF7D5]/90 text-sm sm:text-base font-medium max-w-2xl leading-relaxed">
+            <p className="text-[#2d5214] text-sm sm:text-base font-bold max-w-2xl leading-relaxed mt-1 drop-shadow-[0_1px_1px_rgba(255,255,255,0.3)]">
               {subtitle}
             </p>
           )}

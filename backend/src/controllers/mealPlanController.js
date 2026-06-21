@@ -54,9 +54,9 @@ exports.getWeeklyPlan = async (req, res) => {
     // Fetch user's meal plan for the specific week dates
     const { rows: planRows } = await db.query(`
       SELECT mp.id as meal_plan_id, TO_CHAR(mp.meal_date, 'YYYY-MM-DD') as meal_date_str, mp.meal_type, 
-             p.id as recipe_id, p.food_name, p.calories, p.image_url, p.protein, p.carbs, p.fat
+             r.id as recipe_id, r.food_name, r.calories, r.image_url, r.protein, r.carbs, r.fat
       FROM meal_plans mp
-      JOIN posts p ON mp.post_id = p.id
+      JOIN recipes r ON mp.recipe_id = r.id
       WHERE mp.user_id = $1 AND mp.meal_date >= $2 AND mp.meal_date <= $3
     `, [userId, weekDates[0], weekDates[6]]);
 
@@ -84,8 +84,8 @@ exports.getWeeklyPlan = async (req, res) => {
         for (let meal of dayPlan.meals[type]) {
           const { rows: ingredients } = await db.query(`
             SELECT pi.ingredient_name as name
-            FROM post_ingredients pi
-            WHERE pi.post_id = $1
+            FROM recipe_ingredients pi
+            WHERE pi.recipe_id = $1
           `, [meal.id]);
           meal.ingredients = ingredients.map(i => i.name);
         }
@@ -158,9 +158,9 @@ exports.updatePlan = async (req, res) => {
 
       // Insert new plan item on a specific calendar date
       await db.query(`
-        INSERT INTO meal_plans (user_id, day_name, meal_type, post_id, meal_date)
+        INSERT INTO meal_plans (user_id, day_name, meal_type, recipe_id, meal_date)
         VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (user_id, meal_date, meal_type, post_id) 
+        ON CONFLICT (user_id, meal_date, meal_type, recipe_id) 
         DO NOTHING
       `, [userId, dayName, mealType, recipeId, mealDate]);
     } else if (mealDate) {
@@ -214,16 +214,16 @@ exports.suggestMeals = async (req, res) => {
   }
 
   try {
-    const { rows: posts } = await db.query('SELECT id, food_name as name, calories, prep_time as "prepTime" FROM posts');
+    const { rows: recipes } = await db.query('SELECT id, food_name as name, calories, prep_time as "prepTime" FROM recipes');
     
     const suggestions = [];
 
-    for (let post of posts) {
-      const ingRes = await db.query('SELECT ingredient_name FROM post_ingredients WHERE post_id = $1', [post.id]);
+    for (let recipe of recipes) {
+      const ingRes = await db.query('SELECT ingredient_name FROM recipe_ingredients WHERE recipe_id = $1', [recipe.id]);
       const recipeIngs = ingRes.rows.map(r => r.ingredient_name);
       
       const totalNeeded = recipeIngs.length;
-      if (totalNeeded === 0) continue; // Skip posts with no ingredients
+      if (totalNeeded === 0) continue; // Skip recipes with no ingredients
 
       let matchCount = 0;
       const userIngsLower = userIngredients.map(i => i.toLowerCase().trim());
@@ -244,7 +244,7 @@ exports.suggestMeals = async (req, res) => {
       else matchStatus = `Missing ${missingCount} ingredients`;
 
       suggestions.push({
-        ...post,
+        ...recipe,
         ingredients: recipeIngs,
         matchPercentage,
         missingCount,
@@ -263,7 +263,7 @@ exports.suggestMeals = async (req, res) => {
 
 exports.getRecipes = async (req, res) => {
   try {
-    const { rows } = await db.query('SELECT id, food_name as name, calories FROM posts LIMIT 20');
+    const { rows } = await db.query('SELECT id, food_name as name, calories FROM recipes LIMIT 20');
     res.json({ success: true, data: rows });
   } catch (error) {
     console.error(error);
@@ -276,8 +276,8 @@ exports.autoFillWeek = async (req, res) => {
   const { weekStart } = req.query;
 
   try {
-    const { rows: posts } = await db.query('SELECT id FROM posts LIMIT 50');
-    if (posts.length === 0) {
+    const { rows: recipes } = await db.query('SELECT id FROM recipes LIMIT 50');
+    if (recipes.length === 0) {
       return res.status(400).json({ success: false, message: 'No recipes available to autofill' });
     }
 
@@ -305,11 +305,11 @@ exports.autoFillWeek = async (req, res) => {
         // Check if empty on that date
         const check = await db.query('SELECT 1 FROM meal_plans WHERE user_id = $1 AND meal_date = $2 AND meal_type = $3', [userId, date, type]);
         if (check.rows.length === 0) {
-          const randomPostId = posts[Math.floor(Math.random() * posts.length)].id;
+          const randomRecipeId = recipes[Math.floor(Math.random() * recipes.length)].id;
           await db.query(`
-            INSERT INTO meal_plans (user_id, day_name, meal_type, post_id, meal_date)
+            INSERT INTO meal_plans (user_id, day_name, meal_type, recipe_id, meal_date)
             VALUES ($1, $2, $3, $4, $5)
-          `, [userId, day, type, randomPostId, date]);
+          `, [userId, day, type, randomRecipeId, date]);
         }
       }
     }
@@ -335,8 +335,8 @@ exports.getUserRecipes = async (req, res) => {
   try {
     // 1. Fetch own recipes
     const { rows: ownRecipes } = await db.query(`
-      SELECT id, food_name as name, calories, carbs, protein, fat, description, image_url, prep_time, 'my_recipe' as source
-      FROM posts 
+      SELECT id, food_name as name, calories, carbs, protein, fat, description, image_url, prep_time, category, meal_type, 'my_recipe' as source
+      FROM recipes 
       WHERE user_id = $1 AND is_recipe = TRUE
       ORDER BY created_at DESC
     `, [userId]);
@@ -353,14 +353,14 @@ exports.getUserRecipes = async (req, res) => {
     });
 
     // 4. Fetch ingredients for each recipe
-    for (let post of combined) {
+    for (let recipe of combined) {
       const { rows: ingredients } = await db.query(`
         SELECT pi.ingredient_name as name, pi.weight_g, i.calories_per_100g, i.protein_per_100g, i.carbs_per_100g, i.fat_per_100g
-        FROM post_ingredients pi
+        FROM recipe_ingredients pi
         LEFT JOIN ingredients i ON pi.ingredient_name = i.name
-        WHERE pi.post_id = $1
-      `, [post.id]);
-      post.ingredients = ingredients;
+        WHERE pi.recipe_id = $1
+      `, [recipe.id]);
+      recipe.ingredients = ingredients;
     }
 
     res.json({ success: true, data: combined });
@@ -387,9 +387,9 @@ exports.addMealWithRecipe = async (req, res) => {
     const totalFat = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.fat_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
 
     if (recipeId && updateExistingRecipe) {
-      // Update existing post/recipe
+      // Update existing recipe
       await client.query(`
-        UPDATE posts 
+        UPDATE recipes 
         SET food_name = $1, calories = $2, protein = $3, carbs = $4, fat = $5, description = $6, prep_time = $7, image_url = $8, category = $9
         WHERE id = $10 AND user_id = $11
       `, [
@@ -407,30 +407,30 @@ exports.addMealWithRecipe = async (req, res) => {
       ]);
 
       // Delete old ingredients and insert new ones
-      await client.query('DELETE FROM post_ingredients WHERE post_id = $1', [recipeId]);
+      await client.query('DELETE FROM recipe_ingredients WHERE recipe_id = $1', [recipeId]);
       
       for (let ing of recipeData.ingredients) {
         const ingCals = (Number(ing.calories_per_100g || 0) * Number(ing.weight_g || 0) / 100);
         await client.query(`
-          INSERT INTO post_ingredients (post_id, ingredient_name, weight_g, calories)
+          INSERT INTO recipe_ingredients (recipe_id, ingredient_name, weight_g, calories)
           VALUES ($1, $2, $3, $4)
         `, [recipeId, ing.name, Number(ing.weight_g || 0), ingCals]);
       }
 
       // Delete old instructions and insert new ones
-      await client.query('DELETE FROM post_instructions WHERE post_id = $1', [recipeId]);
+      await client.query('DELETE FROM recipe_instruction_steps WHERE recipe_id = $1', [recipeId]);
       if (recipeData.instructions && Array.isArray(recipeData.instructions)) {
         for (let i = 0; i < recipeData.instructions.length; i++) {
           await client.query(`
-            INSERT INTO post_instructions (post_id, step_number, instruction)
+            INSERT INTO recipe_instruction_steps (recipe_id, step_number, instruction)
             VALUES ($1, $2, $3)
           `, [recipeId, i + 1, recipeData.instructions[i]]);
         }
       }
     } else if (!recipeId || saveToMyRecipe || (recipeId && !updateExistingRecipe)) {
-      // Create new post/recipe (or clone if recipeId exists but updateExistingRecipe is false)
-      const postRes = await client.query(`
-        INSERT INTO posts (user_id, food_name, calories, protein, carbs, fat, description, prep_time, image_url, is_recipe, meal_type, category)
+      // Create new recipe (or clone if recipeId exists but updateExistingRecipe is false)
+      const recipeRes = await client.query(`
+        INSERT INTO recipes (user_id, food_name, calories, protein, carbs, fat, description, prep_time, image_url, is_recipe, meal_type, category)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING id
       `, [
@@ -449,13 +449,13 @@ exports.addMealWithRecipe = async (req, res) => {
         recipeData.category || 'food'
       ]);
       
-      recipeId = postRes.rows[0].id;
+      recipeId = recipeRes.rows[0].id;
 
       // Insert ingredients
       for (let ing of recipeData.ingredients) {
         const ingCals = (Number(ing.calories_per_100g || 0) * Number(ing.weight_g || 0) / 100);
         await client.query(`
-          INSERT INTO post_ingredients (post_id, ingredient_name, weight_g, calories)
+          INSERT INTO recipe_ingredients (recipe_id, ingredient_name, weight_g, calories)
           VALUES ($1, $2, $3, $4)
         `, [recipeId, ing.name, Number(ing.weight_g || 0), ingCals]);
       }
@@ -464,7 +464,7 @@ exports.addMealWithRecipe = async (req, res) => {
       if (recipeData.instructions && Array.isArray(recipeData.instructions)) {
         for (let i = 0; i < recipeData.instructions.length; i++) {
           await client.query(`
-            INSERT INTO post_instructions (post_id, step_number, instruction)
+            INSERT INTO recipe_instruction_steps (recipe_id, step_number, instruction)
             VALUES ($1, $2, $3)
           `, [recipeId, i + 1, recipeData.instructions[i]]);
         }
@@ -477,9 +477,9 @@ exports.addMealWithRecipe = async (req, res) => {
     const targetDate = mealDate || new Date().toISOString().split('T')[0];
 
     await client.query(`
-      INSERT INTO meal_plans (user_id, day_name, meal_type, post_id, meal_date)
+      INSERT INTO meal_plans (user_id, day_name, meal_type, recipe_id, meal_date)
       VALUES ($1, $2, $3, $4, $5)
-      ON CONFLICT (user_id, meal_date, meal_type, post_id) 
+      ON CONFLICT (user_id, meal_date, meal_type, recipe_id) 
       DO NOTHING
     `, [userId, dayName, mealType, recipeId, targetDate]);
 

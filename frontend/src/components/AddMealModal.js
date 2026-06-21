@@ -6,6 +6,18 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
   const [userRecipes, setUserRecipes] = useState([]);
   const [allIngredients, setAllIngredients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
+
+  const removeAccents = (str) => {
+    if (!str) return '';
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+  };
+
+  const filteredRecipes = userRecipes.filter(recipe => {
+    const name = removeAccents(recipe.name?.toLowerCase() || '');
+    const query = removeAccents(recipeSearchQuery.toLowerCase());
+    return name.includes(query);
+  });
 
   // Form states for creating a new recipe
   const [dishName, setDishName] = useState('');
@@ -22,6 +34,16 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
   // New states for editing flow
   const [editingRecipeId, setEditingRecipeId] = useState(null);
   const [updateExistingRecipe, setUpdateExistingRecipe] = useState(false);
+  const [toastError, setToastError] = useState(null);
+
+  useEffect(() => {
+    if (toastError) {
+      const timer = setTimeout(() => {
+        setToastError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastError]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +69,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
             image_url: brand.image_url || '',
             source: 'brand',
             isBrand: true,
+            category: brand.category || brand.type || 'food',
             brandData: brand
           }));
 
@@ -154,7 +177,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
     if (initialRecipe && !isLoading) {
       const fetchFullRecipe = async () => {
         try {
-          const res = await fetch(`http://localhost:5002/api/posts/${initialRecipe.id || initialRecipe.recipeId}`, {
+          const res = await fetch(`http://localhost:5002/api/recipes/${initialRecipe.id || initialRecipe.recipeId}`, {
             headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
           });
           const data = await res.json();
@@ -227,8 +250,9 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
   const filterIngredients = (query) => {
     const baseList = allIngredients.filter(ing => (!ing.type || ing.type === 'ingredient') && !ing.brand_name);
     if (!query) return baseList.slice(0, 10);
+    const normalizedQuery = removeAccents(query.toLowerCase());
     return baseList
-      .filter(ing => ing.name.toLowerCase().includes(query.toLowerCase()))
+      .filter(ing => removeAccents(ing.name.toLowerCase()).includes(normalizedQuery))
       .slice(0, 10);
   };
 
@@ -256,11 +280,11 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
 
   const handleConfirm = async () => {
     if (!dishName.trim()) {
-      alert('Vui lòng nhập tên món ăn');
+      setToastError({ message: <><span className="font-black text-gray-800">Tên công thức</span> là bắt buộc. Yêu cầu nhập đủ thông tin!</>, id: Date.now() });
       return;
     }
     if (selectedIngredients.length === 0) {
-      alert('Vui lòng chọn ít nhất một nguyên liệu');
+      setToastError({ message: <><span className="font-black text-gray-800">Nguyên liệu</span> là bắt buộc. Yêu cầu nhập đủ thông tin!</>, id: Date.now() });
       return;
     }
 
@@ -306,8 +330,46 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
 
   if (isLoading) return null;
 
+  const formattedMealDate = mealDate ? mealDate.split('-').reverse().join('-') : '';
+  const dayText = getDayTranslation(day);
+  const displayDateText = [dayText, formattedMealDate].filter(Boolean).join(', ');
+
   return (
     <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
+      {/* Toast Error */}
+      {toastError && (
+        <div className="fixed top-6 right-6 z-[999] animate-in slide-in-from-right-8 fade-in duration-300">
+          <div className="bg-white rounded-2xl shadow-xl border border-red-100 p-4 flex items-center gap-3 w-max min-w-[380px] pr-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+            
+            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0 border border-red-100 relative z-10">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            
+            <div className="flex-1 relative z-10">
+              <p className="text-sm font-bold text-gray-900">Lỗi xác thực</p>
+              <p className="text-[13px] font-medium text-gray-600 whitespace-nowrap mt-0.5">{toastError.message}</p>
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-red-100">
+              <div 
+                key={toastError.id} 
+                className="h-full bg-red-500 w-full"
+                style={{ animation: 'cooldown 5s linear forwards' }}
+              />
+            </div>
+          </div>
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes cooldown {
+              from { width: 100%; }
+              to { width: 0%; }
+            }
+          `}} />
+        </div>
+      )}
+
       <div className="bg-white rounded-[2rem] shadow-2xl w-[95vw] max-w-[1400px] overflow-hidden flex flex-col h-[95vh] animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="p-4 sm:p-5 sm:px-6 border-b border-[#B5E361]/30 flex justify-between items-start sm:items-center gap-4 bg-[#EAF6E3]/60 backdrop-blur-2xl rounded-t-[2rem] relative overflow-hidden">
@@ -326,7 +388,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
               </h2>
               <div className="flex flex-wrap items-center gap-2 mt-1">
                 <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-wider bg-[#B5E361]/20 text-[#5a7820] border border-[#B5E361]/30">
-                  {getDayTranslation(day)}{mealDate ? `, ${mealDate}` : ''}
+                  {displayDateText}
                 </span>
                 <span className="text-xs text-gray-500 font-bold">Lên kế hoạch ăn uống và tính calo</span>
               </div>
@@ -385,9 +447,30 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
           {/* Content */}
           <div className="p-4 sm:p-6 overflow-y-auto flex-1 custom-scrollbar">
             {activeTab === 'choose' ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-5 pr-1">
-                {userRecipes.length > 0 ? (
-                  userRecipes.map(recipe => (
+              <div className="flex flex-col gap-4 h-full">
+                {/* Search Bar */}
+                <div className="relative pr-1 shrink-0">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm món ăn..."
+                    value={recipeSearchQuery}
+                    onChange={(e) => setRecipeSearchQuery(e.target.value)}
+                    className="w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#B5E361]/30 focus:border-[#B5E361] transition-all placeholder:text-gray-400 shadow-sm"
+                  />
+                  {recipeSearchQuery && (
+                    <button
+                      onClick={() => setRecipeSearchQuery('')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 bg-gray-200 hover:bg-gray-300 rounded-full p-1 transition-all"
+                    >
+                      <X size={12} strokeWidth={3} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-5 pr-1 pb-4">
+                  {filteredRecipes.length > 0 ? (
+                    filteredRecipes.map(recipe => (
                     <div
                       key={recipe.id}
                       onClick={() => handleSelectRecipe(recipe)}
@@ -460,16 +543,21 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-16 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-100 rounded-3xl">
+                  <div className="col-span-full text-center py-16 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-100 rounded-3xl">
                     <ChefHat size={36} className="text-gray-300" />
                     <div className="max-w-xs">
-                      <p className="text-sm font-bold text-gray-800">Chưa có công thức nào</p>
+                      <p className="text-sm font-bold text-gray-800">
+                        {recipeSearchQuery ? 'Không tìm thấy món ăn' : 'Chưa có công thức nào'}
+                      </p>
                       <p className="text-xs text-gray-400 font-medium mt-1 leading-relaxed">
-                        Hãy tự tạo công thức của riêng bạn ở tab bên cạnh để dễ dàng chọn ở đây.
+                        {recipeSearchQuery 
+                          ? 'Thử tìm kiếm với từ khóa khác xem sao.' 
+                          : 'Hãy tự tạo công thức của riêng bạn ở tab bên cạnh để dễ dàng chọn ở đây.'}
                       </p>
                     </div>
                   </div>
                 )}
+                </div>
               </div>
             ) : (
               <div className="flex flex-col h-full">
@@ -797,9 +885,11 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                       </span>
                     </label>
                   </div>
+                </div>
 
-                  {/* Summary and Actions (Moved from Footer to Body) */}
-                  <div className="mt-8 p-5 sm:p-6 bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] border border-[#B5E361]/30 rounded-2xl relative overflow-hidden shrink-0">
+                {/* Summary and Actions (Moved from Footer to Body) */}
+                <div className="mt-auto sticky bottom-0 z-50 py-2 bg-white shadow-[0_-12px_20px_rgba(255,255,255,1)]">
+                  <div className="p-5 sm:p-6 bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] border border-[#B5E361]/30 rounded-2xl relative overflow-hidden shrink-0">
                     {/* Eye-catching glowing orbs */}
                     <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#B5E361]/40 to-transparent rounded-full blur-[64px] pointer-events-none -translate-x-1/3 translate-y-1/2"></div>
                     <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-gradient-to-bl from-[#98d15a]/30 to-transparent rounded-full blur-[48px] pointer-events-none translate-x-1/4 -translate-y-1/4"></div>

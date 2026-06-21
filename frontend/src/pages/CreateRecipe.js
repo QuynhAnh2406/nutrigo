@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowLeft, ChefHat, Trash2 } from 'lucide-react';
+import { Sparkles, ArrowLeft, ChefHat, Trash2, Plus } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 function CreateRecipe() {
@@ -13,29 +13,31 @@ function CreateRecipe() {
     description: '',
     image: '',
     prepTime: '',
-    difficulty: 'Easy',
-    mealType: 'all',
-    category: 'food',
-    healthLevel: 'medium'
+    servings: 1,
+    category: 'food'
   });
 
-  const [ingredients, setIngredients] = useState([{ name: '', amount: '', calories: '', selectedIng: null, showDropdown: false }]);
+  const [ingredients, setIngredients] = useState([
+    { name: '', weight_g: 0, calories_per_100g: 0, showDropdown: false }
+  ]);
   const [instructions, setInstructions] = useState(['']);
   const [dbIngredients, setDbIngredients] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [prepTimeValue, setPrepTimeValue] = useState('');
-  const [prepTimeUnit, setPrepTimeUnit] = useState('phút');
+  const prepTimeUnit = 'phút';
 
   useEffect(() => {
     const fetchDbIngredients = async () => {
       try {
-        const res = await fetch('http://localhost:5002/api/mealplan/ingredients');
+        const res = await fetch('http://localhost:5002/api/mealplan/ingredients', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
         const data = await res.json();
-        if (data.success && data.data) {
+        if (data.success) {
           setDbIngredients(data.data);
         }
-      } catch (e) {
-        console.error('Failed to fetch ingredients:', e);
+      } catch (err) {
+        console.error('Lỗi khi tải nguyên liệu', err);
       }
     };
     fetchDbIngredients();
@@ -59,30 +61,17 @@ function CreateRecipe() {
     });
   };
 
-  const calculateCal = (ing, amount) => {
-    if (!ing || !amount) return '';
-    // Lấy số đầu tiên từ chuỗi định lượng (VD: "150g" -> 150, "1.5 cái" -> 1.5, "2" -> 2)
-    const match = amount.match(/\d+(\.\d+)?/);
-    if (!match) return '';
-    const num = parseFloat(match[0]);
-    
-    const calPer100g = parseFloat(ing.calories_per_100g || 0);
-    const isGrams = ing.serving_unit === '100g' || ing.type === 'ingredient';
-    
-    if (isGrams) {
-      // Tính theo gram: (khối lượng * calo_per_100g) / 100
-      return Math.round((num * calPer100g) / 100);
-    } else {
-      // Tính theo số lượng (cái, cốc, miếng...): số lượng * calo_per_khẩu_phần
-      return Math.round(num * calPer100g);
-    }
+  const removeAccents = (str) => {
+    if (!str) return '';
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
   };
 
   const filterIngredients = (query) => {
     const baseList = dbIngredients.filter(ing => (!ing.type || ing.type === 'ingredient') && !ing.brand_name);
     if (!query) return baseList.slice(0, 10);
+    const normalizedQuery = removeAccents(query.toLowerCase());
     return baseList
-      .filter(ing => ing.name.toLowerCase().includes(query.toLowerCase()))
+      .filter(ing => removeAccents(ing.name.toLowerCase()).includes(normalizedQuery))
       .slice(0, 10);
   };
 
@@ -90,41 +79,27 @@ function CreateRecipe() {
     const newIngs = [...ingredients];
     newIngs[index].name = value;
     newIngs[index].showDropdown = true;
-    
-    // Nếu người dùng xóa hết chữ, xóa selectedIng luôn
-    if (!value.trim()) {
-      newIngs[index].selectedIng = null;
-      newIngs[index].calories = '';
-    }
     setIngredients(newIngs);
   };
 
-  const handleIngredientAmountChange = (index, value) => {
-    const newIngs = [...ingredients];
-    newIngs[index].amount = value;
-    
-    // Tự động tính lại calo nếu đã chọn nguyên liệu
-    if (newIngs[index].selectedIng) {
-      newIngs[index].calories = calculateCal(newIngs[index].selectedIng, value);
-    }
-    setIngredients(newIngs);
-  };
-
-  const handleIngredientCaloriesChange = (index, value) => {
-    const newIngs = [...ingredients];
-    newIngs[index].calories = value;
-    setIngredients(newIngs);
+  const updateWeight = (index, weight) => {
+    setIngredients(ingredients.map((item, i) =>
+      i === index ? { ...item, weight_g: parseFloat(weight) || 0 } : item
+    ));
   };
 
   const handleSelectIngredient = (index, ing) => {
-    const newIngs = [...ingredients];
-    newIngs[index].name = ing.name;
-    newIngs[index].selectedIng = ing;
-    newIngs[index].showDropdown = false;
-    
-    // Tự động tính lại calo nếu đã có định lượng
-    newIngs[index].calories = calculateCal(ing, newIngs[index].amount);
-    setIngredients(newIngs);
+    setIngredients(ingredients.map((item, i) => {
+      if (i === index) {
+        return {
+          ...item,
+          name: ing.name,
+          calories_per_100g: parseFloat(ing.calories_per_100g || 0),
+          showDropdown: false
+        };
+      }
+      return item;
+    }));
   };
 
   const handleIngredientBlur = (index) => {
@@ -145,7 +120,7 @@ function CreateRecipe() {
     setInstructions(newInsts);
   };
 
-  const addIngredientRow = () => setIngredients([...ingredients, { name: '', amount: '', calories: '', selectedIng: null, showDropdown: false }]);
+  const addIngredientRow = () => setIngredients([...ingredients, { name: '', weight_g: 0, calories_per_100g: 0, showDropdown: false }]);
   const removeIngredientRow = (index) => setIngredients(ingredients.filter((_, i) => i !== index));
 
   const addInstructionRow = () => setInstructions([...instructions, '']);
@@ -183,28 +158,35 @@ function CreateRecipe() {
       return;
     }
 
+    const formattedIngredients = ingredients
+        .filter(ing => ing.name.trim())
+        .map(ing => ({
+          name: ing.name,
+          weight_g: ing.weight_g,
+          calories_per_100g: ing.calories_per_100g
+        }));
+
+    const payload = {
+        ...formData,
+        prepTime: `${prepTimeValue} ${prepTimeUnit}`,
+        ingredients: formattedIngredients,
+        instructions: instructions.filter(inst => inst.trim() !== ''),
+        calories: totalCaloriesCount,
+        isRecipe: true
+    };
+
     if (!formData.foodName.trim()) return;
 
     setLoading(true);
-    const totalCal = ingredients.reduce((sum, ing) => sum + (Number(ing.calories) || 0), 0);
-
-    const newRecipeData = {
-      ...formData,
-      prepTime: prepTimeValue ? `${prepTimeValue} ${prepTimeUnit}` : '',
-      ingredients: ingredients.filter(i => i.name),
-      instructions: instructions.filter(i => i),
-      calories: totalCal,
-      isRecipe: true
-    };
 
     try {
-      const res = await fetch('http://localhost:5002/api/posts', {
+      const res = await fetch('http://localhost:5002/api/recipes', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + localStorage.getItem('token')
         },
-        body: JSON.stringify(newRecipeData)
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.success) {
@@ -221,7 +203,10 @@ function CreateRecipe() {
     }
   };
 
-  const totalCaloriesCount = ingredients.reduce((sum, ing) => sum + (Number(ing.calories) || 0), 0);
+  const totalCaloriesCount = ingredients.reduce((sum, ing) => {
+    const cals = Math.round((ing.calories_per_100g || 0) * (ing.weight_g || 0) / 100);
+    return sum + (cals || 0);
+  }, 0);
 
   return (
     <div className="create-recipe-page main-content" style={{ overflowY: 'auto', paddingBottom: '80px' }}>
@@ -275,184 +260,147 @@ function CreateRecipe() {
 
             {/* Bước 1: Thông tin cơ bản */}
             <div className={currentStep === 1 ? 'space-y-6 animate-in slide-in-from-right-4 duration-300 fade-in' : 'hidden'}>
-              {/* Basic Info Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="form-group flex flex-col gap-1.5">
-                <label className="text-xs font-black text-gray-705 uppercase tracking-wider pl-1 text-gray-700">Tên món ăn *</label>
-                <input
-                  type="text"
-                  name="foodName"
-                  value={formData.foodName}
-                  onChange={handleFormInputChange}
-                  placeholder="Ví dụ: Salad ức gà sốt mè, Bún chả chay..."
-                  required
-                  className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all"
-                />
-              </div>
+              <div className="flex flex-col gap-6">
+                
+                {/* Form Fields Container */}
+                <div className="flex flex-col space-y-6 w-full">
+                  {/* Image Upload Banner */}
+                  <div className={`relative w-full rounded-2xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 transition-colors group hover:border-[#B5E361]/50`}>
+                    <label className="cursor-pointer flex flex-col items-center justify-center w-full min-h-[200px] text-gray-400 hover:text-[#3d6600]">
+                      {formData.image ? (
+                        <img src={formData.image} alt="Preview" className="w-full h-full min-h-[200px] object-cover" />
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 py-8">
+                          <ChefHat size={36} />
+                          <span className="text-sm font-bold">Tải ảnh lên từ máy</span>
+                          <span className="text-xs text-gray-400 font-medium">Nhấn vào đây để chọn ảnh</span>
+                        </div>
+                      )}
+                      {formData.image && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-white font-bold bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm">Thay đổi ảnh</span>
+                        </div>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setFormData({ ...formData, image: reader.result });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }} 
+                      />
+                    </label>
+                  </div>
 
-              <div className="form-group flex flex-col gap-1.5">
-                <label className="text-xs font-black text-gray-705 uppercase tracking-wider pl-1 text-gray-700">Đường dẫn hình ảnh (URL)</label>
-                <input
-                  type="url"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleFormInputChange}
-                  placeholder="Nhập liên kết ảnh minh họa (Tùy chọn)..."
-                  className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all"
-                />
-              </div>
-            </div>
+                  {/* Dish Name */}
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-sm font-bold text-gray-700 pl-1">Tên công thức *</label>
+                    <input
+                      type="text"
+                      name="foodName"
+                      value={formData.foodName}
+                      onChange={handleFormInputChange}
+                      placeholder="Ví dụ: Salad Ức Gà, Bún Chả..."
+                      required
+                      className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
+                    />
+                  </div>
 
-            {/* Description */}
-            <div className="form-group flex flex-col gap-1.5">
-              <label className="text-xs font-black text-gray-705 uppercase tracking-wider pl-1 text-gray-700">Mô tả công thức</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleFormInputChange}
-                placeholder="Nhập mô tả ngắn gọn về món ăn, công dụng sức khỏe, hương vị..."
-                rows="3"
-                className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 resize-none transition-all"
-              />
-            </div>
+                  {/* Description */}
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-sm font-bold text-gray-700 pl-1">Mô tả công thức</label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleFormInputChange}
+                      placeholder="Nhập mô tả ngắn gọn về món ăn, công dụng sức khỏe, hương vị..."
+                      rows="3"
+                      className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 resize-none transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
+                    />
+                  </div>
 
-            {/* Prep Time, Difficulty, Tags Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="form-group flex flex-col gap-1.5">
-                <label className="text-xs font-black text-gray-705 uppercase tracking-wider pl-1 text-gray-700">Thời gian chuẩn bị</label>
-                <div className="grid grid-cols-3 gap-2">
-                  <input
-                    type="number"
-                    min="1"
-                    value={prepTimeValue}
-                    onChange={(e) => setPrepTimeValue(e.target.value)}
-                    placeholder="Nhập số..."
-                    className="col-span-1 min-w-0 px-3 sm:px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all"
-                  />
-                  <select
-                    value={prepTimeUnit}
-                    onChange={(e) => setPrepTimeUnit(e.target.value)}
-                    className="col-span-2 w-full px-3 sm:px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-white cursor-pointer transition-all"
-                  >
-                    <option value="phút">phút</option>
-                    <option value="giờ">giờ</option>
-                    <option value="ngày">ngày</option>
-                  </select>
+                  {/* Prep Time, Difficulty Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-sm font-bold text-gray-700 pl-1">Thời gian nấu (phút)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={prepTimeValue}
+                        onChange={(e) => setPrepTimeValue(e.target.value)}
+                        className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
+                      />
+                    </div>
+
+                    <div className="form-group flex flex-col gap-1.5">
+                      <label className="text-sm font-bold text-gray-700 pl-1">Số phần ăn (khẩu phần)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
+                        value={formData.servings || 1}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFormData({ ...formData, servings: val === '' ? '' : parseInt(val) || 1 });
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="form-group flex flex-col gap-1.5">
-                <label className="text-xs font-black text-gray-705 uppercase tracking-wider pl-1 text-gray-700">Độ khó</label>
-                <select
-                  name="difficulty"
-                  value={formData.difficulty}
-                  onChange={handleFormInputChange}
-                  className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-white cursor-pointer transition-all"
-                >
-                  <option value="Easy">Dễ (Easy)</option>
-                  <option value="Medium">Trung bình (Medium)</option>
-                  <option value="Hard">Khó (Hard)</option>
-                </select>
-              </div>
-            </div>
-
-
-            {/* Advanced Recipe Fields Grid */}
-            <div className="grid grid-cols-1 gap-6 pt-2">
-              <div className="form-group flex flex-col gap-2">
-                <label className="text-[11px] font-black text-gray-400 uppercase tracking-wider pl-1">Bữa ăn đề xuất</label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { value: 'all', label: 'Tất cả', icon: null },
-                    { value: 'breakfast', label: 'Sáng', icon: '🍳' },
-                    { value: 'lunch', label: 'Trưa', icon: '🍲' },
-                    { value: 'snack', label: 'Phụ', icon: '🍪' },
-                    { value: 'dinner', label: 'Tối', icon: '🌃' }
-                  ].map(option => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, mealType: option.value })}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 active:scale-95 ${
-                        formData.mealType === option.value
-                          ? 'bg-[#1f3b00] text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                      }`}
-                    >
-                      {option.icon && <span className="text-base">{option.icon}</span>}
-                      {option.label}
-                    </button>
-                  ))}
+                {/* Categories */}
+                <div className="flex flex-col space-y-6 w-full">
+                  <div className="form-group flex flex-col gap-2">
+                    <label className="text-sm font-bold text-gray-700 pl-1">Loại món</label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { value: 'food', label: 'Đồ ăn', icon: '🍲' },
+                        { value: 'drink', label: 'Đồ uống', icon: '🥤' },
+                        { value: 'snack', label: 'Ăn vặt', icon: '🍪' },
+                        { value: 'other', label: 'Khác', icon: null }
+                      ].map(option => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, category: option.value })}
+                          className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 active:scale-95 ${
+                            formData.category === option.value
+                              ? 'bg-[#1f3b00] text-white shadow-md'
+                              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          {option.icon && <span className="text-base">{option.icon}</span>}
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="form-group flex flex-col gap-2">
-                <label className="text-[11px] font-black text-gray-400 uppercase tracking-wider pl-1">Phân loại chi tiết</label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { value: 'food', label: 'Đồ ăn', icon: '🍲' },
-                    { value: 'drink', label: 'Đồ uống', icon: '🥤' },
-                    { value: 'snack', label: 'Ăn vặt', icon: '🍪' },
-                    { value: 'fruit', label: 'Hoa quả', icon: '🍎' },
-                    { value: 'other', label: 'Khác', icon: null }
-                  ].map(option => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, category: option.value })}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 active:scale-95 ${
-                        formData.category === option.value
-                          ? 'bg-[#1f3b00] text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                      }`}
-                    >
-                      {option.icon && <span className="text-base">{option.icon}</span>}
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
               </div>
-
-              <div className="form-group flex flex-col gap-2">
-                <label className="text-[11px] font-black text-gray-400 uppercase tracking-wider pl-1">Tốt cho sức khỏe</label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { value: 'excellent', label: 'Rất tốt', icon: '🟢' },
-                    { value: 'good', label: 'Tốt', icon: '🟡' },
-                    { value: 'medium', label: 'Bình thường', icon: '🟠' }
-                  ].map(option => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, healthLevel: option.value })}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 active:scale-95 ${
-                        formData.healthLevel === option.value
-                          ? 'bg-[#1f3b00] text-white shadow-md'
-                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                      }`}
-                    >
-                      <span className="text-base">{option.icon}</span>
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
 
             </div>
 
             {/* Bước 2: Nguyên liệu */}
             <div className={currentStep === 2 ? 'space-y-6 animate-in slide-in-from-right-4 duration-300 fade-in' : 'hidden'}>
               {/* Ingredients Section */}
-            <div className="p-5 bg-gray-50/50 rounded-[22px] border border-gray-100/80 flex flex-col gap-4">
+            <div className="space-y-4 pt-2">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider pl-1">Danh sách nguyên liệu chi tiết</span>
+                <label className="text-sm font-bold text-gray-800 pl-1">Nguyên liệu & dinh dưỡng từng phần</label>
                 <button
                   type="button"
                   onClick={addIngredientRow}
-                  className="text-xs font-black text-green-600 hover:text-green-700 flex items-center gap-1 bg-white px-3 py-1.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all"
+                  className="bg-[#B5E361] hover:bg-[#98d15a] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
                 >
-                  + THÊM DÒNG
+                  <Plus size={14} />
+                  THÊM NGUYÊN LIỆU
                 </button>
               </div>
 
@@ -520,38 +468,47 @@ function CreateRecipe() {
                     {/* Weight and Custom Calories */}
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
-                         <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-xl border border-gray-200">
-                           <span className="text-xs font-bold text-gray-500">Định lượng:</span>
-                           <input 
-                             type="text"
-                             value={ing.amount}
-                             onChange={(e) => handleIngredientAmountChange(idx, e.target.value)}
-                             placeholder="VD: 150g"
-                             className="w-20 bg-transparent font-black text-sm text-gray-900 border-none p-0 focus:ring-0 placeholder:text-gray-300"
-                           />
-                         </div>
+                        {/* Weight */}
+                        <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-xl border border-gray-200">
+                          <span className="text-[10px] font-bold text-gray-400">Nặng:</span>
+                          <input
+                            type="number"
+                            value={ing.weight_g === 0 ? '' : ing.weight_g}
+                            onChange={(e) => updateWeight(idx, e.target.value)}
+                            placeholder="0"
+                            className="w-12 text-center font-black text-xs text-gray-900 border-none p-0 focus:ring-0"
+                          />
+                          <span className="text-[10px] font-bold text-gray-400">g</span>
+                        </div>
+
+                        {/* Calories per 100g */}
+                        <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-xl border border-gray-100" title="Lượng Calories trên 100g (Được tự động điền khi chọn nguyên liệu)">
+                          <span className="text-[10px] font-bold text-gray-400">Mật độ:</span>
+                          <input
+                            type="number"
+                            value={ing.calories_per_100g === 0 ? '' : ing.calories_per_100g}
+                            placeholder="0"
+                            disabled
+                            className="w-12 text-center font-black text-xs text-gray-500 bg-transparent border-none p-0 focus:ring-0 cursor-not-allowed"
+                          />
+                          <span className="text-[9px] font-bold text-gray-400" title="kcal trên 100g">kcal/100g</span>
+                        </div>
                       </div>
-                      
+
+                      {/* Calculated calories and delete */}
                       <div className="flex items-center gap-3">
-                         <div className="text-sm font-black text-green-700 bg-green-50 px-3 py-1.5 rounded-xl border border-green-100 flex items-center gap-1.5 shadow-sm">
-                           <input 
-                             type="number"
-                             value={ing.calories}
-                             onChange={(e) => handleIngredientCaloriesChange(idx, e.target.value)}
-                             placeholder="0"
-                             className="w-12 text-right bg-transparent text-green-700 font-black text-sm border-none p-0 focus:ring-0 placeholder:text-green-300"
-                           />
-                           <span>kcal</span>
-                         </div>
-                         
-                         <button 
-                            type="button"
-                            onClick={() => removeIngredientRow(idx)}
-                            disabled={ingredients.length <= 1}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all disabled:opacity-30 disabled:hover:bg-transparent"
-                          >
-                            <Trash2 size={18} />
-                          </button>
+                        <div className="text-[11px] font-black text-green-700 bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
+                          {Math.round((ing.calories_per_100g || 0) * (ing.weight_g || 0) / 100)} kcal
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => removeIngredientRow(idx)}
+                          disabled={ingredients.length <= 1}
+                          className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-white rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -568,37 +525,42 @@ function CreateRecipe() {
             {/* Bước 3: Cách làm */}
             <div className={currentStep === 3 ? 'space-y-6 animate-in slide-in-from-right-4 duration-300 fade-in' : 'hidden'}>
               {/* Instruction Steps Section */}
-            <div className="p-5 bg-gray-50/50 rounded-[22px] border border-gray-100/80 flex flex-col gap-4">
+            <div className="space-y-4 pt-2">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider pl-1">Các bước chế biến</span>
+                <label className="text-sm font-bold text-gray-800 pl-1">Các bước chế biến</label>
                 <button
                   type="button"
                   onClick={addInstructionRow}
-                  className="text-xs font-black text-green-600 hover:text-green-700 flex items-center gap-1 bg-white px-3 py-1.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all"
+                  className="bg-[#B5E361] hover:bg-[#98d15a] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
                 >
-                  + THÊM BƯỚC
+                  <Plus size={14} />
+                  THÊM BƯỚC
                 </button>
               </div>
 
               <div className="space-y-4 max-h-60 overflow-y-auto pr-1">
                 {instructions.map((inst, idx) => (
-                  <div key={idx} className="flex gap-3 items-start animate-in slide-in-from-top-1 duration-200">
-                    <span className="text-xs font-black text-gray-400 mt-3.5 w-4 shrink-0 text-center">{idx + 1}.</span>
-                    <textarea
-                      placeholder="Mô tả các bước thực hiện chi tiết (VD: Rửa sạch ức gà, luộc chín...)"
-                      value={inst}
-                      onChange={(e) => handleInstructionChange(idx, e.target.value)}
-                      rows="2"
-                      className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-xs outline-none focus:border-[#B5E361] resize-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeInstructionRow(idx)}
-                      disabled={instructions.length <= 1}
-                      className="p-2 text-gray-300 hover:text-red-500 mt-2.5 disabled:opacity-30 transition-colors shrink-0"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <div key={idx} className="flex gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-[#B5E361]/20 transition-all duration-300">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-white text-gray-400 flex items-center justify-center font-black text-sm border border-gray-100 shadow-sm">
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                      <textarea
+                        value={inst}
+                        onChange={(e) => handleInstructionChange(idx, e.target.value)}
+                        placeholder={`Mô tả chi tiết bước ${idx + 1}...`}
+                        rows="2"
+                        className="w-full bg-transparent border-none p-0 text-sm font-semibold text-gray-900 focus:ring-0 placeholder:text-gray-300 resize-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeInstructionRow(idx)}
+                        disabled={instructions.length <= 1}
+                        className="self-end sm:self-center p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shrink-0 disabled:opacity-30 disabled:hover:bg-transparent"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -49,9 +49,9 @@ CREATE TABLE ingredients (
 );
 
 -- ==========================================
--- BẢNG POSTS (Bài đăng / Công thức nấu ăn)
+-- BẢNG RECIPES (Công thức nấu ăn)
 -- ==========================================
-CREATE TABLE posts (
+CREATE TABLE recipes (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     food_name VARCHAR(255) NOT NULL,
@@ -75,11 +75,11 @@ CREATE TABLE posts (
 
 
 -- ==========================================
--- BẢNG POST_INGREDIENTS (Nguyên liệu chi tiết cho từng công thức)
+-- BẢNG RECIPE_INGREDIENTS (Nguyên liệu chi tiết cho từng công thức)
 -- ==========================================
-CREATE TABLE post_ingredients (
+CREATE TABLE recipe_ingredients (
     id SERIAL PRIMARY KEY,
-    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+    recipe_id INTEGER REFERENCES recipes(id) ON DELETE CASCADE,
     ingredient_id INTEGER REFERENCES ingredients(id) ON DELETE SET NULL,
     ingredient_name VARCHAR(255), -- Lưu tên nguyên liệu (đề phòng không có trong DB dinh dưỡng)
     amount VARCHAR(100), -- Ví dụ: "1 muỗng", "2 quả"
@@ -88,14 +88,14 @@ CREATE TABLE post_ingredients (
 );
 
 -- ==========================================
--- BẢNG POST_INSTRUCTION_STEPS (Các bước hướng dẫn nấu ăn)
+-- BẢNG RECIPE_INSTRUCTION_STEPS (Các bước hướng dẫn nấu ăn)
 -- ==========================================
-CREATE TABLE post_instruction_steps (
+CREATE TABLE recipe_instruction_steps (
     id SERIAL PRIMARY KEY,
-    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+    recipe_id INTEGER REFERENCES recipes(id) ON DELETE CASCADE,
     step_number INTEGER NOT NULL,
     instruction TEXT NOT NULL,
-    UNIQUE (post_id, step_number)
+    UNIQUE (recipe_id, step_number)
 );
 
 -- ==========================================
@@ -116,9 +116,9 @@ CREATE TABLE meal_plans (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     day_name VARCHAR(20) NOT NULL, -- Ví dụ: 'Monday', 'Tuesday'
     meal_type VARCHAR(50) NOT NULL, -- 'breakfast', 'lunch', 'dinner', 'snack'
-    post_id INTEGER REFERENCES posts(id) ON DELETE SET NULL, -- Tham chiếu tới công thức nấu ăn
+    recipe_id INTEGER REFERENCES recipes(id) ON DELETE SET NULL, -- Tham chiếu tới công thức nấu ăn
     meal_date DATE NOT NULL,
-    UNIQUE (user_id, meal_date, meal_type, post_id)
+    UNIQUE (user_id, meal_date, meal_type, recipe_id)
 );
 
 
@@ -135,15 +135,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Hàm tính toán tổng calories cho một post dựa trên post_ingredients (nếu cần dùng)
-CREATE OR REPLACE FUNCTION calculate_post_calories(p_post_id INTEGER)
+-- Hàm tính toán tổng calories cho một recipe dựa trên recipe_ingredients (nếu cần dùng)
+CREATE OR REPLACE FUNCTION calculate_recipe_calories(p_recipe_id INTEGER)
 RETURNS NUMERIC AS $$
 DECLARE
     total_cal NUMERIC;
 BEGIN
     SELECT COALESCE(SUM(calories), 0) INTO total_cal
-    FROM post_ingredients
-    WHERE post_id = p_post_id;
+    FROM recipe_ingredients
+    WHERE recipe_id = p_recipe_id;
     
     RETURN total_cal;
 END;
@@ -238,9 +238,22 @@ CREATE TRIGGER update_user_health_data_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Trigger cập nhật updated_at cho posts
-DROP TRIGGER IF EXISTS update_posts_updated_at ON posts;
-CREATE TRIGGER update_posts_updated_at
-    BEFORE UPDATE ON posts
+-- Trigger cập nhật updated_at cho recipes
+DROP TRIGGER IF EXISTS update_recipes_updated_at ON recipes;
+CREATE TRIGGER update_recipes_updated_at
+    BEFORE UPDATE ON recipes
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+-- ==========================================
+-- LỆNH ĐỂ XÓA DỮ LIỆU ĐANG DÙNG THỬ (TEST DATA)
+-- (Chỉ chạy các lệnh này nếu bạn muốn reset lại các công thức và lịch ăn uống do người dùng tạo ra)
+-- ==========================================
+/*
+TRUNCATE TABLE meal_plans CASCADE;
+TRUNCATE TABLE user_fridge CASCADE;
+TRUNCATE TABLE recipe_instruction_steps CASCADE;
+TRUNCATE TABLE recipe_ingredients CASCADE;
+-- Lệnh dưới đây sẽ xóa mọi món ăn của user tạo, ngoại trừ các dữ liệu gốc (KFC, Pizza, gạo tẻ...) nếu chúng được coi là is_recipe = FALSE hoặc là data nền.
+DELETE FROM recipes WHERE is_recipe = TRUE;
+*/

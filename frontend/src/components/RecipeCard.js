@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MoreHorizontal, Edit2, Trash2, Flame, Wheat, Fish, Droplet, ChefHat } from 'lucide-react';
 
-function PostCard({ post, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
+function RecipeCard({ recipe, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
 
@@ -28,7 +28,7 @@ function PostCard({ post, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
     'lunch': 'Bữa trưa',
     'dinner': 'Bữa tối'
   };
-  const mealCategory = categoryMap[post.meal_type] || categoryMap[post.category] || post.meal_type || post.category || 'Món ăn';
+  const mealCategory = categoryMap[recipe.meal_type] || categoryMap[recipe.category] || recipe.meal_type || recipe.category || 'Món ăn';
 
 
   return (
@@ -55,7 +55,7 @@ function PostCard({ post, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowMenu(false);
-                    onEdit(post);
+                    onEdit(recipe);
                   }}
                   className="w-full text-left px-4 py-2.5 text-xs font-extrabold text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 transition-colors"
                 >
@@ -69,7 +69,7 @@ function PostCard({ post, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowMenu(false);
-                    onDelete(post);
+                    onDelete(recipe);
                   }}
                   className="w-full text-left px-4 py-2.5 text-xs font-extrabold text-red-500 hover:bg-red-50 flex items-center gap-2.5 transition-colors"
                 >
@@ -83,11 +83,11 @@ function PostCard({ post, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
       )}
 
       {/* Top Section: Image + Title + Tags */}
-      <div className="flex gap-3 items-start relative z-10" onClick={() => onOpenDetail(post)}>
+      <div className="flex gap-3 items-start relative z-10" onClick={() => onOpenDetail(recipe)}>
         {/* Image Container */}
         <div className="w-[85px] h-[85px] shrink-0 rounded-[18px] overflow-hidden bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] shadow-sm">
-          {post.image ? (
-            <img src={post.image} alt={post.foodName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          {recipe.image ? (
+            <img src={recipe.image} alt={recipe.foodName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-1">
                <ChefHat size={24} className="text-[#8CB33D]" />
@@ -99,7 +99,7 @@ function PostCard({ post, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
         {/* Title and Tags Container */}
         <div className="flex-1 flex flex-col py-0.5 h-[85px] pr-8">
            <h3 className="text-[15px] sm:text-base font-extrabold text-[#2d3748] leading-tight line-clamp-2 mb-2">
-             {post.foodName}
+             {recipe.foodName}
            </h3>
            <div className="flex flex-wrap gap-1.5 mt-auto">
              <span className="bg-[#c5e87a] text-[#3d6600] px-2.5 py-1 rounded-xl text-[10px] font-extrabold capitalize shadow-sm inline-block">
@@ -114,7 +114,7 @@ function PostCard({ post, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onAddToPlan(post);
+            onAddToPlan(recipe);
           }}
           className="w-full bg-white group-hover:bg-[#c5e87a] border border-[#e4e1d6] group-hover:border-[#c5e87a] text-[#6d795a] group-hover:text-[#3d6600] font-bold text-sm py-2 rounded-xl transition-all shadow-sm relative z-20 mt-1"
         >
@@ -128,29 +128,29 @@ function PostCard({ post, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
           <div className="flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] text-gray-400 font-medium mb-0.5">
             <Flame size={12} strokeWidth={2.5} className="text-[#8CB33D]" /> kcal
           </div>
-          <span className="text-[11px] sm:text-[12px] font-black text-gray-700">{post.calories || 0}</span>
+          <span className="text-[11px] sm:text-[12px] font-black text-gray-700">{recipe.calories || 0}</span>
         </div>
         <div className="flex flex-col items-center justify-center border-l border-gray-100">
           <div className="flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] text-gray-400 font-medium mb-0.5">
             <Wheat size={12} strokeWidth={2.5} className="text-orange-500" /> Carb
           </div>
-          <span className="text-[11px] sm:text-[12px] font-black text-gray-700">{post.carbs || 0}g</span>
+          <span className="text-[11px] sm:text-[12px] font-black text-gray-700">{recipe.carbs || 0}g</span>
         </div>
         <div className="flex flex-col items-center justify-center border-l border-gray-100">
           <div className="flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] text-gray-400 font-medium mb-0.5">
             <Fish size={12} strokeWidth={2.5} className="text-blue-500" /> Pro
           </div>
-          <span className="text-[11px] sm:text-[12px] font-black text-gray-700">{post.protein || 0}g</span>
+          <span className="text-[11px] sm:text-[12px] font-black text-gray-700">{recipe.protein || 0}g</span>
         </div>
         <div className="flex flex-col items-center justify-center border-l border-gray-100">
           <div className="flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] text-gray-400 font-medium mb-0.5">
             <Droplet size={12} strokeWidth={2.5} className="text-red-500" /> Béo
           </div>
-          <span className="text-[11px] sm:text-[12px] font-black text-gray-700">{post.fat || 0}g</span>
+          <span className="text-[11px] sm:text-[12px] font-black text-gray-700">{recipe.fat || 0}g</span>
         </div>
       </div>
     </div>
   );
 }
 
-export default PostCard;
+export default RecipeCard;
