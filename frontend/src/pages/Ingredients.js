@@ -142,7 +142,7 @@ function Ingredients({ mode = 'ingredient' }) {
 
   return (
     <div className="ingredients-page main-content" style={{ overflowY: 'auto', paddingBottom: '80px' }}>
-      <div className="mb-8 relative z-30">
+      <div className="mb-2 relative z-30">
         <PageHeader
           title={mode === 'ingredient' ? 'Nguyên liệu cơ bản' : 'Thương hiệu / Đồ ăn ngoài'}
           subtitle={
@@ -165,7 +165,7 @@ function Ingredients({ mode = 'ingredient' }) {
         >
           <div className="relative w-full flex gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-600 z-10" />
               <input
                 type="text"
                 placeholder="Tìm kiếm nguyên liệu (VD: Ức gà, Trứng...)"
@@ -291,8 +291,6 @@ function Ingredients({ mode = 'ingredient' }) {
           </div>
         </PageHeader>
       </div>
-
-      <div className="mb-6" />
 
       {filteredIngredients.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in-50 duration-500">

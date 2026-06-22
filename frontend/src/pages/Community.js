@@ -34,7 +34,7 @@ function Community() {
 
   const fetchPosts = useCallback(async () => {
     try {
-      let url = `http://localhost:5002/api/posts?tab=${activeTab}&search=${searchQuery}`;
+      let url = `http://localhost:5002/api/posts?tab=${activeTab}`;
       const res = await fetch(url, {
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token')
@@ -47,7 +47,7 @@ function Community() {
     } catch (error) {
       console.error("Error fetching posts:", error);
     }
-  }, [activeTab, searchQuery]);
+  }, [activeTab]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -122,7 +122,7 @@ function Community() {
         >
           <div className="relative w-full flex gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-600 z-10" />
               <input
                 type="text"
                 placeholder="Tìm kiếm công thức (VD: Salad, cá hồi...)"
@@ -398,13 +398,17 @@ function Community() {
       {/* FEED */}
       <div className="feed-container">
         {(() => {
+          const removeTones = (str) => {
+            if (!str) return '';
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase();
+          };
+
           const filteredPosts = posts.filter(r => {
             const matchMealType = selectedMealType === 'All' || r.mealType === selectedMealType;
             const matchCategory = selectedCategory === 'All' || r.category === selectedCategory;
             const matchHealthLevel = selectedHealthLevel === 'All' || r.healthLevel === selectedHealthLevel;
             const matchRating = selectedRating === 'All' || parseFloat(r.rating || 0) >= parseFloat(selectedRating);
 
-            
             const matchCalories = (() => {
               if (selectedCalories === 'All') return true;
               const cal = parseFloat(r.calories || 0);
@@ -415,7 +419,17 @@ function Community() {
               return true;
             })();
 
-            return matchMealType && matchCategory && matchHealthLevel && matchRating && matchCalories;
+            if (!matchMealType || !matchCategory || !matchHealthLevel || !matchRating || !matchCalories) return false;
+
+            if (searchQuery) {
+              const normalizedSearch = removeTones(searchQuery);
+              const name = removeTones(r.foodName);
+              const desc = removeTones(r.description);
+              const author = removeTones(r.author);
+              return name.includes(normalizedSearch) || desc.includes(normalizedSearch) || author.includes(normalizedSearch);
+            }
+
+            return true;
           });
           
           return filteredPosts.length > 0 ? (

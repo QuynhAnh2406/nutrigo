@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChefHat, X, Flame, Search, Plus, Check, Trash2, Wheat, Fish, Droplet } from 'lucide-react';
+import { ChefHat, X, Flame, Search, Plus, Check, Trash2, Wheat, Fish, Droplet, ArrowLeft } from 'lucide-react';
 
 function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialRecipe }) {
   const [activeTab, setActiveTab] = useState('choose'); // 'choose' or 'create'
@@ -35,6 +35,21 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
   const [editingRecipeId, setEditingRecipeId] = useState(null);
   const [updateExistingRecipe, setUpdateExistingRecipe] = useState(false);
   const [toastError, setToastError] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const nextStep = () => {
+    if (currentStep === 1 && !dishName.trim()) {
+      setToastError({ message: <><span className="font-black text-gray-800">Tên công thức</span> là bắt buộc. Yêu cầu nhập đủ thông tin!</>, id: Date.now() });
+      return;
+    }
+    if (currentStep === 2 && selectedIngredients.length === 0) {
+      setToastError({ message: <><span className="font-black text-gray-800">Nguyên liệu</span> là bắt buộc. Yêu cầu nhập đủ thông tin!</>, id: Date.now() });
+      return;
+    }
+    setCurrentStep(prev => Math.min(prev + 1, 3));
+  };
+
+  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   useEffect(() => {
     if (toastError) {
@@ -171,6 +186,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
     setEditingRecipeId(recipe.id || recipe.recipeId);
     setUpdateExistingRecipe(false); // Default to not updating original
     setActiveTab('create');
+    setCurrentStep(1);
   };
 
   useEffect(() => {
@@ -279,12 +295,8 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
   const totals = calculateTotals();
 
   const handleConfirm = async () => {
-    if (!dishName.trim()) {
-      setToastError({ message: <><span className="font-black text-gray-800">Tên công thức</span> là bắt buộc. Yêu cầu nhập đủ thông tin!</>, id: Date.now() });
-      return;
-    }
-    if (selectedIngredients.length === 0) {
-      setToastError({ message: <><span className="font-black text-gray-800">Nguyên liệu</span> là bắt buộc. Yêu cầu nhập đủ thông tin!</>, id: Date.now() });
+    // Validation is mostly handled by nextStep, but just in case:
+    if (!dishName.trim() || selectedIngredients.length === 0) {
       return;
     }
 
@@ -427,6 +439,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
               type="button"
               onClick={() => {
                 setActiveTab('create');
+                setCurrentStep(1);
                 setSaveToMyRecipe(true);
                 if (editingRecipeId) {
                   setEditingRecipeId(null);
@@ -450,7 +463,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
               <div className="flex flex-col gap-4 h-full">
                 {/* Search Bar */}
                 <div className="relative pr-1 shrink-0">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 w-5 h-5 z-10" />
                   <input
                     type="text"
                     placeholder="Tìm kiếm món ăn..."
@@ -561,10 +574,40 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
               </div>
             ) : (
               <div className="flex flex-col h-full">
-                <div className="flex flex-col md:flex-row gap-8 pr-1">
-                  {/* Left Column: Image & Basic Info */}
-                  <div className="flex-1 space-y-5 shrink-0 w-full md:w-[45%]">
-                    {/* Image Upload Banner */}
+                {/* Progress Indicator */}
+                <div className="relative flex justify-between items-center mb-8 px-2 sm:px-6">
+                  {/* Progress Line */}
+                  <div className="absolute left-6 right-6 top-5 h-1.5 bg-gray-100 -z-10 rounded-full translate-y-[-50%]"></div>
+                  <div 
+                    className="absolute left-6 top-5 h-1.5 bg-[#B5E361] -z-10 rounded-full translate-y-[-50%] transition-all duration-500 ease-out" 
+                    style={{ width: currentStep === 1 ? '0%' : currentStep === 2 ? 'calc(50% - 1.5rem)' : 'calc(100% - 3rem)' }}
+                  ></div>
+                  
+                  {[
+                    { step: 1, label: 'Thông tin' },
+                    { step: 2, label: 'Nguyên liệu' },
+                    { step: 3, label: 'Cách làm' }
+                  ].map(({ step, label }) => (
+                    <div key={step} className={`flex flex-col items-center gap-2 bg-white px-2 sm:px-4 ${currentStep >= step ? 'opacity-100' : 'opacity-40'}`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm transition-all duration-500 ring-4 ring-white ${currentStep >= step ? 'bg-[#B5E361] text-[#1f3b00] shadow-md shadow-[#B5E361]/30 scale-110' : 'bg-gray-100 text-gray-400'}`}>
+                        {step}
+                      </div>
+                      <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wider transition-colors duration-300 ${currentStep >= step ? 'text-[#2d5200]' : 'text-gray-400'}`}>
+                        {label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-col gap-8 pr-1 pb-40">
+                  {/* STEP 1: Basic Info */}
+                  {currentStep === 1 && (
+                    <div className="flex-1 space-y-5 shrink-0 w-full animate-in slide-in-from-right-4 duration-300 fade-in">
+                      <div className="flex items-center gap-2.5 pb-2">
+                        <div className="w-1.5 h-5 bg-[#B5E361] rounded-full shadow-[0_2px_8px_rgba(181,227,97,0.4)]"></div>
+                        <h3 className="text-base font-black text-gray-800 tracking-tight">Thông tin cơ bản</h3>
+                      </div>
+                      {/* Image Upload Banner */}
                     <div className="relative w-full rounded-2xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 hover:border-[#B5E361]/50 transition-colors group">
                       <label className="cursor-pointer flex flex-col items-center justify-center w-full min-h-[160px] text-gray-400 hover:text-[#3d6600]">
                         {imageUrl ? (
@@ -605,7 +648,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                       <input
                         type="text"
                         placeholder="Ví dụ: Salad Ức Gà, Bún Chả..."
-                        className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/30 transition-all placeholder:text-gray-300"
+                        className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:text-gray-400 placeholder:font-normal"
                         value={dishName}
                         onChange={(e) => setDishName(e.target.value)}
                       />
@@ -617,10 +660,24 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                       <textarea
                         placeholder="Nhập mô tả ngắn gọn về món ăn này..."
                         rows={2}
-                        className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-semibold focus:ring-2 focus:ring-[#B5E361]/30 transition-all placeholder:text-gray-300 resize-none"
+                        className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:text-gray-400 placeholder:font-normal resize-none"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                       />
+                    </div>
+
+                    {/* Dish Category */}
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-bold text-gray-700 pl-1">Phân loại món</label>
+                      <select
+                        className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 cursor-pointer"
+                        value={dishCategory}
+                        onChange={(e) => setDishCategory(e.target.value)}
+                      >
+                        <option value="food">Món ăn</option>
+                        <option value="drink">Đồ uống</option>
+                        <option value="snack">Ăn vặt</option>
+                      </select>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -630,7 +687,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                         <input
                           type="number"
                           min="1"
-                          className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/30 transition-all"
+                          className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:font-normal placeholder:text-gray-400"
                           value={cookTime === 0 ? '' : cookTime}
                           onChange={(e) => {
                             const val = e.target.value;
@@ -645,7 +702,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                         <input
                           type="number"
                           min="1"
-                          className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/30 transition-all"
+                          className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:font-normal placeholder:text-gray-400"
                           value={servings === 0 ? '' : servings}
                           onChange={(e) => {
                             const val = e.target.value;
@@ -654,27 +711,22 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                         />
                       </div>
                     </div>
-
-
-
                   </div>
+                  )}
 
-                  {/* Right Column: Ingredients & Options */}
-                  <div className="flex-1 flex flex-col space-y-6">
-                    {/* Dish Category Dropdown (Moved to Right Column) */}
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-bold text-gray-700 pl-1">Loại món</label>
-                      <select
-                        className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/30 transition-all cursor-pointer"
-                        value={dishCategory}
-                        onChange={(e) => setDishCategory(e.target.value)}
-                      >
-                        <option value="food">Món ăn</option>
-                        <option value="drink">Đồ uống</option>
-                        <option value="snack">Ăn vặt</option>
-                      </select>
-                    </div>
-
+                  {/* STEP 2: Ingredients */}
+                  {currentStep === 2 && (
+                    <div className="flex-1 flex flex-col space-y-6 animate-in slide-in-from-right-4 duration-300 fade-in">
+                      <div className="flex items-center gap-3 pb-2">
+                        <button onClick={prevStep} className="p-2 -ml-2 text-gray-400 hover:text-[#1f3b00] bg-gray-50 hover:bg-[#B5E361]/20 rounded-xl transition-all active:scale-95" title="Quay lại">
+                          <ArrowLeft size={18} />
+                        </button>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-1.5 h-5 bg-[#B5E361] rounded-full shadow-[0_2px_8px_rgba(181,227,97,0.4)]"></div>
+                          <h3 className="text-base font-black text-gray-800 tracking-tight">Nguyên liệu</h3>
+                        </div>
+                      </div>
+                      
                     {/* Ingredients Builder */}
                     <div className="space-y-4 pt-2">
                       <div className="flex justify-between items-center">
@@ -694,7 +746,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                           <div key={idx} className="flex flex-col gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-[#B5E361]/20 transition-all duration-300">
                             {/* Name input with custom Dropdown */}
                             <div className="relative flex-1">
-                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 z-10" />
                               <input
                                 type="text"
                                 placeholder="Nhập tên nguyên liệu (ví dụ: Ức gà)..."
@@ -810,9 +862,25 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                           </div>
                         )}
                       </div>
+                    </div>
+                  </div>
+                  )}
+
+                  {/* STEP 3: Instructions & Save */}
+                  {currentStep === 3 && (
+                    <div className="flex-1 flex flex-col space-y-6 animate-in slide-in-from-right-4 duration-300 fade-in">
+                      <div className="flex items-center gap-3 pb-2">
+                        <button onClick={prevStep} className="p-2 -ml-2 text-gray-400 hover:text-[#1f3b00] bg-gray-50 hover:bg-[#B5E361]/20 rounded-xl transition-all active:scale-95" title="Quay lại">
+                          <ArrowLeft size={18} />
+                        </button>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-1.5 h-5 bg-[#B5E361] rounded-full shadow-[0_2px_8px_rgba(181,227,97,0.4)]"></div>
+                          <h3 className="text-base font-black text-gray-800 tracking-tight">Cách làm & Lưu</h3>
+                        </div>
+                      </div>
 
                       {/* Recipe Instructions (Các bước chế biến) */}
-                      <div className="mt-8 space-y-4 pt-2 border-t border-gray-100 pr-1">
+                      <div className="space-y-4 pt-2 pr-1">
                         <div className="flex justify-between items-center">
                           <label className="text-sm font-bold text-gray-800 pl-1">Các bước chế biến</label>
                           <button
@@ -857,9 +925,8 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                           )}
                         </div>
                       </div>
-                    </div>
 
-                    {/* Save checkbox */}
+                      {/* Save checkbox */}
                     <label className="flex items-center gap-2.5 cursor-pointer group pt-2 select-none">
                       <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${(editingRecipeId ? updateExistingRecipe : saveToMyRecipe) ? 'bg-[#8CB33D] border-[#8CB33D]' : 'border-gray-300 group-hover:border-gray-400'}`}>
                         {(editingRecipeId ? updateExistingRecipe : saveToMyRecipe) && <Check size={14} className="text-white font-black stroke-[3]" />}
@@ -885,6 +952,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                       </span>
                     </label>
                   </div>
+                  )}
                 </div>
 
                 {/* Summary and Actions (Moved from Footer to Body) */}
@@ -940,10 +1008,10 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                         </button>
                         <button
                           type="button"
-                          onClick={handleConfirm}
+                          onClick={currentStep < 3 ? nextStep : handleConfirm}
                           className="px-8 sm:px-10 py-3 bg-green-700 hover:bg-green-800 text-white font-bold text-[13px] rounded-xl transition-all shadow-md hover:shadow-lg active:scale-95"
                         >
-                          XÁC NHẬN
+                          {currentStep < 3 ? 'TIẾP TỤC' : 'XÁC NHẬN'}
                         </button>
                       </div>
                     </div>

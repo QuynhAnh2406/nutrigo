@@ -61,7 +61,7 @@ function MyRecipes() {
 
   const fetchRecipes = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:5002/api/recipes?tab=My Recipes&search=${searchQuery}`, {
+      const res = await fetch(`http://localhost:5002/api/recipes?tab=My Recipes`, {
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token')
         }
@@ -73,20 +73,36 @@ function MyRecipes() {
     } catch (e) {
       console.error('Failed to fetch recipes:', e);
     }
-  }, [searchQuery]);
+  }, []);
 
   useEffect(() => {
     fetchRecipes();
   }, [fetchRecipes]);
 
-  // Filter recipes based on advanced filters
+  // Helper to remove Vietnamese tones for searching
+  const removeTones = (str) => {
+    if (!str) return '';
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase();
+  };
+
+  // Filter recipes based on advanced filters and search query
   const filteredRecipes = recipes.filter(r => {
 
     // Advanced Filters
     const matchMealType = selectedMealType === 'All' || r.mealType === selectedMealType;
     const matchCategory = selectedCategory === 'All' || r.category === selectedCategory;
 
-    return matchMealType && matchCategory;
+    if (!matchMealType || !matchCategory) return false;
+
+    // Search Query Filter
+    if (searchQuery) {
+      const normalizedSearch = removeTones(searchQuery);
+      const name = removeTones(r.foodName);
+      const desc = removeTones(r.description);
+      return name.includes(normalizedSearch) || desc.includes(normalizedSearch);
+    }
+
+    return true;
   });
 
   return (
@@ -109,7 +125,7 @@ function MyRecipes() {
         >
           <div className="relative w-full flex gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-600 z-10" />
               <input
                 type="text"
                 placeholder="Tìm kiếm công thức (VD: Salad, cá hồi...)"
