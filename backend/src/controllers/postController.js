@@ -77,10 +77,7 @@ exports.getPostById = async (req, res) => {
   
   try {
     let baseQuery = `
-      SELECT p.*, u.full_name as author, u.avatar_url as avatar,
-      0 as likes,
-      false as "isLiked",
-      false as "isSaved"
+      SELECT p.*, u.full_name as author, u.avatar_url as avatar
       FROM posts p
       LEFT JOIN users u ON p.user_id = u.id
       WHERE p.id = $1
@@ -205,9 +202,6 @@ exports.createPost = async (req, res) => {
       ingredients: ingredients || [],
       instructions: instructions || [],
       rating: 0,
-      likes: 0,
-      isLiked: false,
-      isSaved: false,
       timeAgo: 'Vừa xong',
       comments: []
     };

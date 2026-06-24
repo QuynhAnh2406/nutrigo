@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext, useLocation } from 'react-router-dom';
-import { UserCircle2, Settings, Activity, HeartPulse, Zap, Target, Leaf } from 'lucide-react';
+import { UserCircle2, Settings, Activity, HeartPulse, Zap, Target, Leaf, ArrowLeft } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 const getGoalLabel = (goal) => {
@@ -64,6 +64,7 @@ function Profile() {
   const [avatarPreview, setAvatarPreview] = useState(user.avatar);
   const [isSaving, setIsSaving] = useState(false);
 
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newEmail, setNewEmail] = useState('');
@@ -239,93 +240,32 @@ function Profile() {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const form = e.target.form;
+      if (!form) return;
+      const elements = Array.from(form.elements).filter(
+        (el) =>
+          !el.disabled &&
+          !el.readOnly &&
+          (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA') &&
+          el.type !== 'hidden'
+      );
+      const index = elements.indexOf(e.target);
+      if (index > -1 && index < elements.length - 1) {
+        elements[index + 1].focus();
+      }
+    }
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
 
       case 'Personal':
         return (
           <div className="profile-tab-content personal-profile animate-in">
-            <div className="bg-white p-8 rounded-[2rem] mb-8 shadow-sm border border-gray-100 relative overflow-hidden group">
-              <div className="absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br from-[#B5E361]/20 to-[#4facfe]/20 rounded-full blur-3xl pointer-events-none"></div>
-              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-gradient-to-tr from-orange-300/10 to-[#8CB33D]/20 rounded-full blur-3xl pointer-events-none"></div>
 
-              <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 pb-6 border-b border-gray-50">
-                <div className="w-14 h-14 bg-gradient-to-br from-[#B5E361]/20 to-[#8CB33D]/20 rounded-2xl flex items-center justify-center shadow-sm border border-[#B5E361]/30 text-[#8CB33D]">
-                  <Leaf size={28} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-gray-900 text-xl tracking-tight mb-1">Tóm tắt năng lượng & dinh dưỡng</h4>
-                  <p className="text-sm text-gray-500 font-medium">Theo dõi các chỉ số sức khỏe cá nhân của bạn</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
-                <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 hover:shadow-md hover:border-[#B5E361]/50 transition-all duration-300 flex flex-col justify-between group/card">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs font-bold text-gray-500 tracking-wide">Chỉ số BMI</span>
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover/card:text-[#B5E361] transition-colors">
-                      <Activity size={16} />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-3xl font-black text-gray-900 tracking-tighter">{metrics.bmi || 0}</span>
-                    </div>
-                    <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-bold ${metrics.bmiStatus === 'Normal' ? 'bg-[#B5E361]/20 text-[#2d5214]' : 'bg-orange-100 text-orange-700'}`}>
-                      {getBmiStatusLabel(metrics.bmiStatus)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 hover:shadow-md hover:border-[#B5E361]/50 transition-all duration-300 flex flex-col justify-between group/card">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs font-bold text-gray-500 tracking-wide">BMR (Nghỉ ngơi)</span>
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover/card:text-blue-500 transition-colors">
-                      <HeartPulse size={16} />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-baseline gap-1.5 mb-1">
-                      <span className="text-3xl font-black text-gray-900 tracking-tighter">{metrics.bmr || 0}</span>
-                      <span className="text-sm font-bold text-gray-400">kcal</span>
-                    </div>
-                    <span className="text-xs font-semibold text-gray-500">Năng lượng cơ bản</span>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 hover:shadow-md hover:border-[#B5E361]/50 transition-all duration-300 flex flex-col justify-between group/card">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs font-bold text-gray-500 tracking-wide">TDEE (Hàng ngày)</span>
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover/card:text-orange-500 transition-colors">
-                      <Zap size={16} />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-baseline gap-1.5 mb-1">
-                      <span className="text-3xl font-black text-gray-900 tracking-tighter">{metrics.tdee || 0}</span>
-                      <span className="text-sm font-bold text-gray-400">kcal</span>
-                    </div>
-                    <span className="text-xs font-semibold text-gray-500">Năng lượng duy trì</span>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-[#B5E361]/20 to-[#8CB33D]/20 rounded-2xl p-5 border border-[#B5E361]/40 shadow-sm hover:shadow-md hover:border-[#B5E361] transition-all duration-300 flex flex-col justify-between group/card relative overflow-hidden">
-                  <div className="absolute -right-4 -bottom-4 opacity-10 group-hover/card:scale-125 transition-transform duration-500"><Target size={80} /></div>
-                  <div className="flex items-center justify-between mb-4 relative z-10">
-                    <span className="text-xs font-bold text-[#2d5214] tracking-wide">Mục tiêu hấp thụ</span>
-                  </div>
-                  <div className="relative z-10">
-                    <div className="flex items-baseline gap-1.5 mb-2">
-                      <span className="text-3xl font-black text-[#1f3b00] tracking-tighter">{metrics.targetCalories || 0}</span>
-                      <span className="text-sm font-bold text-[#3d6600]/70">kcal</span>
-                    </div>
-                    <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-white/60 text-[#2d5214] backdrop-blur-sm shadow-sm">
-                      {getGoalLabel(healthData.goal)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="profile-form border p-6 rounded-2xl border-gray-100 bg-white">
@@ -411,22 +351,48 @@ function Profile() {
                 </div>
               </div>
             </div>
+
           </div>
         );
 
       case 'Edit':
         return (
-          <div className="profile-tab-content edit-profile animate-in space-y-8">
-
-
+          <div className="profile-tab-content edit-profile animate-in space-y-6">
+            <div className="flex items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  const initialState = {
+                    ...healthData,
+                    name: user.name || '',
+                    email: user.email || '',
+                    avatarUrl: user.avatar || ''
+                  };
+                  // Compare current formData with the initial state
+                  const isChanged = JSON.stringify(formData) !== JSON.stringify(initialState);
+                  
+                  if (isChanged) {
+                    setShowCancelConfirm(true);
+                  } else {
+                    setActiveTab('Personal');
+                  }
+                }}
+                className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors font-bold"
+              >
+                <ArrowLeft size={20} strokeWidth={2.5} />
+                <span>Quay lại</span>
+              </button>
+            </div>
+            
             <form
-              className="space-y-8"
+              className="flex flex-col space-y-6"
+              onKeyDown={handleKeyDown}
               onSubmit={async (e) => {
                 e.preventDefault();
                 setIsSaving(true);
                 try {
                   await saveHealthToDb();
-                  alert('Cập nhật hồ sơ thành công!');
+                  setToast({ show: true, message: 'Cập nhật hồ sơ thành công!' });
                   setActiveTab('Personal');
                 } catch (err) {
                   console.error(err);
@@ -436,16 +402,15 @@ function Profile() {
                 }
               }}
             >
-              {/* Basic Info Section */}
-              <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                {/* Basic Info Section */}
+                <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl flex flex-col h-full">
                 <h4 className="font-bold mb-6 text-gray-800 flex items-center gap-2">
                   <span className="w-2 h-6 bg-green-500 rounded-full"></span>
                   Thông tin cơ bản
                 </h4>
                 <div className="form-grid">
-                  {/* Hàng 1 */}
-                  {/* Left: 1. Ảnh đại diện */}
-                  <div className="form-group">
+                  <div className="form-group col-span-2">
                     <label>Ảnh đại diện</label>
                     <div className="flex items-center gap-4 bg-white/80 border border-gray-150 rounded-2xl px-4 py-2 h-[48px]">
                       <img
@@ -483,21 +448,7 @@ function Profile() {
                     </div>
                   </div>
 
-                  {/* Right: 1. Chiều cao (cm) */}
-                  <div className="form-group">
-                    <label>Chiều cao (cm)</label>
-                    <input
-                      type="number"
-                      name="height"
-                      value={formData.height || ''}
-                      onChange={handleFormChange}
-                      className="bg-white/80"
-                    />
-                  </div>
-
-                  {/* Hàng 2 */}
-                  {/* Left: 2. Họ và tên */}
-                  <div className="form-group">
+                  <div className="form-group col-span-2">
                     <label>Họ và tên</label>
                     <input
                       type="text"
@@ -510,57 +461,26 @@ function Profile() {
                     />
                   </div>
 
-                  {/* Right: 2. Cân nặng (kg) */}
                   <div className="form-group">
-                    <label>Cân nặng (kg)</label>
+                    <label>Ngày sinh</label>
+                    <input
+                      type="date"
+                      name="dateOfBirth"
+                      value={formData.dateOfBirth || ''}
+                      onChange={handleFormChange}
+                      className="bg-white/80 border-gray-100 focus:ring-2 focus:ring-green-400 transition-all"
+                    />
+                  </div>
+                  <div className="form-group opacity-60">
+                    <label>Tuổi</label>
                     <input
                       type="number"
-                      name="weight"
-                      value={formData.weight || ''}
-                      onChange={handleFormChange}
-                      className="bg-white/80"
+                      value={calculateAge(formData.dateOfBirth) || 0}
+                      disabled
+                      className="bg-gray-50/50 cursor-not-allowed"
                     />
                   </div>
 
-                  {/* Hàng 3 */}
-                  {/* Left: 3. Ngày sinh và Tuổi (1 hàng) */}
-                  <div className="flex gap-4">
-                    <div className="form-group flex-1">
-                      <label>Ngày sinh</label>
-                      <input
-                        type="date"
-                        name="dateOfBirth"
-                        value={formData.dateOfBirth || ''}
-                        onChange={handleFormChange}
-                        className="bg-white/80 border-gray-100 focus:ring-2 focus:ring-green-400 transition-all"
-                      />
-                    </div>
-                    <div className="form-group w-32 opacity-60">
-                      <label>Tuổi</label>
-                      <input
-                        type="number"
-                        value={calculateAge(formData.dateOfBirth) || 0}
-                        disabled
-                        className="bg-gray-50/50 cursor-not-allowed"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Right: 3. Địa chỉ Email */}
-                  <div className="form-group">
-                    <label>Địa chỉ Email</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email || ''}
-                      onChange={handleFormChange}
-                      placeholder="tenbancuaban@example.com"
-                      className="bg-white/80"
-                    />
-                  </div>
-
-                  {/* Hàng 4 */}
-                  {/* Left: 4. Giới tính */}
                   <div className="form-group">
                     <label>Giới tính</label>
                     <select
@@ -574,8 +494,39 @@ function Profile() {
                       <option value="Female">Nữ</option>
                     </select>
                   </div>
+                  <div className="form-group">
+                    <label>Chiều cao (cm)</label>
+                    <input
+                      type="number"
+                      name="height"
+                      value={formData.height || ''}
+                      onChange={handleFormChange}
+                      className="bg-white/80"
+                    />
+                  </div>
 
-                  {/* Right: 4. Số điện thoại */}
+                  <div className="form-group">
+                    <label>Cân nặng (kg)</label>
+                    <input
+                      type="number"
+                      name="weight"
+                      value={formData.weight || ''}
+                      onChange={handleFormChange}
+                      className="bg-white/80"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Địa chỉ Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email || ''}
+                      onChange={handleFormChange}
+                      placeholder="tenbancuaban@example.com"
+                      className="bg-white/80"
+                    />
+                  </div>
+
                   <div className="form-group">
                     <label>Số điện thoại</label>
                     <input
@@ -591,7 +542,7 @@ function Profile() {
               </div>
 
               {/* Survey Preferences Section */}
-              <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl">
+              <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl flex flex-col h-full">
                 <h4 className="font-bold mb-6 text-gray-800 flex items-center gap-2">
                   <span className="w-2 h-6 bg-green-500 rounded-full"></span>
                   Khảo sát & Mục tiêu sức khỏe
@@ -638,29 +589,29 @@ function Profile() {
                   </div>
                 </div>
               </div>
+              </div>
 
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end pt-4 gap-4">
+
                 <button
                   type="submit"
                   disabled={isSaving}
                   className={`
-                    px-10 py-4 rounded-2xl font-bold text-white shadow-lg transition-all duration-300
-                    flex items-center gap-2
+                    btn-primary px-8 py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-300
                     ${isSaving
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-[#B5E361] to-[#8CB33D] hover:scale-105 hover:shadow-green-200 active:scale-95'
+                      ? 'opacity-60 cursor-not-allowed'
+                      : 'hover:brightness-105 active:scale-95'
                     }
                   `}
                 >
                   {isSaving ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Đang lưu thay đổi...
+                      <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                      Đang lưu...
                     </>
                   ) : (
                     <>
-                      <span>Lưu thay đổi</span>
-                      <span className="text-xl"></span>
+                      <span>Lưu</span>
                     </>
                   )}
                 </button>
@@ -673,13 +624,7 @@ function Profile() {
         return (
           <div className="profile-tab-content account-settings animate-in">
             <div className="settings-list">
-              <div className="setting-item">
-                <div className="setting-info">
-                  <h4>Địa chỉ Email</h4>
-                  <p>{user.email}</p>
-                </div>
-                <button className="btn-outline" onClick={() => { setShowEmailModal(true); setModalError(''); setNewEmail(user.email); }}>Thay đổi</button>
-              </div>
+
               <div className="setting-item">
                 <div className="setting-info">
                   <h4>Mật khẩu</h4>
@@ -689,8 +634,8 @@ function Profile() {
               </div>
               <div className="setting-item">
                 <div className="setting-info">
-                  <h4>Thông báo qua Email</h4>
-                  <p>Nhận lời nhắc lịch ăn hàng ngày</p>
+                  <h4>Thông báo giờ ăn</h4>
+                  <p>Nhận thông báo khi đến giờ ăn các bữa</p>
                 </div>
                 <label className="switch">
                   <input type="checkbox" defaultChecked />
@@ -708,53 +653,9 @@ function Profile() {
 
   return (
     <div className="profile-page main-content">
-      <div className="mb-8">
-        <PageHeader
-          title="Hồ sơ của tôi"
-          icon={UserCircle2}
-          actions={
-            <div className="flex flex-wrap gap-2 items-center">
-              <button
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Personal' ? 'bg-gray-900 text-white' : 'bg-white/70 text-gray-900 ring-1 ring-white/70 backdrop-blur hover:bg-white'
-                  }`}
-                onClick={() => setActiveTab('Personal')}
-              >
-                <UserCircle2 className="h-4 w-4" />
-                Cá nhân
-              </button>
-              <button
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Settings' ? 'bg-gray-900 text-white' : 'bg-white/70 text-gray-900 ring-1 ring-white/70 backdrop-blur hover:bg-white'
-                  }`}
-                onClick={() => setActiveTab('Settings')}
-              >
-                <Settings className="h-4 w-4" />
-                Cài đặt
-              </button>
-              {activeTab === 'Personal' && (
-                <button 
-                  className="btn-primary ml-2 py-2 text-sm shadow-sm" 
-                  onClick={() => setActiveTab('Edit')}
-                >
-                  Chỉnh sửa thông tin
-                </button>
-              )}
-              {activeTab === 'Edit' && (
-                <button
-                  type="button"
-                  className="btn-secondary ml-2 py-2 text-sm shadow-sm"
-                  onClick={() => setActiveTab('Personal')}
-                >
-                  Quay lại
-                </button>
-              )}
-            </div>
-          }
-        />
-      </div>
-
       <div className="flex flex-col lg:flex-row gap-8">
 
-        {/* LEFT MAIN AREA */}
+        {/* LEFT MAIN AREA (Forms and Tabs) */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-3">
             <h3 className="section-title mb-0">
@@ -762,8 +663,27 @@ function Profile() {
                 ? 'Cài đặt tài khoản'
                 : activeTab === 'Edit'
                   ? 'Chỉnh sửa thông tin'
-                  : 'Thông tin cá nhân'}
+                  : 'Hồ sơ tài khoản'}
             </h3>
+            
+            <div className="flex gap-2">
+              <button
+                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Personal' ? 'bg-[#8CB33D] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                onClick={() => setActiveTab('Personal')}
+              >
+                <UserCircle2 className="h-4 w-4" />
+                Cá nhân
+              </button>
+              <button
+                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Settings' ? 'bg-[#8CB33D] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                onClick={() => setActiveTab('Settings')}
+              >
+                <Settings className="h-4 w-4" />
+                Cài đặt
+              </button>
+            </div>
           </div>
 
           <div className="profile-content-area">
@@ -771,33 +691,142 @@ function Profile() {
           </div>
         </div>
 
-        {/* RIGHT SIDEBAR */}
+        {/* RIGHT SIDEBAR (Avatar & Edit) */}
         <div className="w-full lg:w-[320px] shrink-0">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-8">
-            <div className="h-24 bg-gradient-to-r from-[#a8e063] to-[#56ab2f]"></div>
-            <div className="px-6 pb-6 flex flex-col items-center text-center relative">
-              <img
-                src={user.avatar}
-                alt="Ảnh đại diện"
-                className="w-24 h-24 rounded-full border-4 border-white shadow-md -mt-12 mb-3 bg-white object-cover"
-              />
-              <h2 className="text-xl font-bold text-gray-800 mb-1 mt-2">
-                {formData.name || user.name} {user.isPremium && <span title="Thành viên Premium" className="text-yellow-500">👑</span>}
-              </h2>
-              <p className="text-gray-500 text-sm mb-6">{user.email}</p>
+          <div className="sticky top-8 flex flex-col gap-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="h-16 bg-gradient-to-br from-[#cde983] via-[#b5e361] to-[#98d13a]"></div>
+              <div className="px-5 pb-5 flex flex-col items-center text-center relative">
+                <img
+                  src={user.avatar}
+                  alt="Ảnh đại diện"
+                  className="w-20 h-20 rounded-full border-4 border-white shadow-md -mt-10 mb-2 bg-white object-cover"
+                />
 
+                <h2 className="text-lg font-bold text-gray-800 mb-0.5">
+                  {formData.name || user.name} {user.isPremium && <span title="Thành viên Premium" className="text-yellow-500">👑</span>}
+                </h2>
+                <p className="text-gray-500 text-xs mb-4">{user.email}</p>
 
-              <button className="btn-secondary w-full">Chia sẻ hồ sơ</button>
+                <button 
+                  className="btn-primary w-full text-sm py-2 mb-1"
+                  onClick={() => setActiveTab('Edit')}
+                >
+                  Chỉnh sửa thông tin cá nhân
+                </button>
+              </div>
+            </div>
+
+            {/* Tóm tắt năng lượng & dinh dưỡng */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
+              <div className="relative z-10 flex items-center gap-3 mb-3 pb-3 border-b border-gray-50">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#B5E361]/20 to-[#8CB33D]/20 rounded-xl flex items-center justify-center text-[#8CB33D]">
+                  <Leaf size={16} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-gray-900 text-sm tracking-tight">Năng lượng & Dinh dưỡng</h4>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 relative z-10">
+                <div className="bg-gray-50/50 rounded-xl p-3 border border-gray-100 flex items-center justify-between group/card transition-all hover:border-[#B5E361]/50">
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-500 tracking-wide block mb-0.5 uppercase">Chỉ số BMI</span>
+                    <span className="text-xl font-black text-gray-900 tracking-tighter">{metrics.bmi || 0}</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover/card:text-[#B5E361] transition-colors ml-auto mb-1">
+                      <Activity size={12} />
+                    </div>
+                    <span className={`inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold ${metrics.bmiStatus === 'Normal' ? 'bg-[#B5E361]/20 text-[#2d5214]' : 'bg-orange-100 text-orange-700'}`}>
+                      {getBmiStatusLabel(metrics.bmiStatus)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50/50 rounded-xl p-3 border border-gray-100 flex items-center justify-between group/card transition-all hover:border-[#B5E361]/50">
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-500 tracking-wide block mb-0.5 uppercase">BMR (Nghỉ ngơi)</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xl font-black text-gray-900 tracking-tighter">{metrics.bmr || 0}</span>
+                      <span className="text-[10px] font-bold text-gray-400">kcal</span>
+                    </div>
+                  </div>
+                  <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover/card:text-blue-500 transition-colors">
+                    <HeartPulse size={12} />
+                  </div>
+                </div>
+
+                <div className="bg-gray-50/50 rounded-xl p-3 border border-gray-100 flex items-center justify-between group/card transition-all hover:border-[#B5E361]/50">
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-500 tracking-wide block mb-0.5 uppercase">TDEE (Hàng ngày)</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xl font-black text-gray-900 tracking-tighter">{metrics.tdee || 0}</span>
+                      <span className="text-[10px] font-bold text-gray-400">kcal</span>
+                    </div>
+                  </div>
+                  <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover/card:text-orange-500 transition-colors">
+                    <Zap size={12} />
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-[#B5E361]/20 to-[#8CB33D]/20 rounded-xl p-3 border border-[#B5E361]/40 flex items-center justify-between group/card relative overflow-hidden transition-all hover:border-[#B5E361]">
+                  <div className="absolute -right-2 -bottom-2 opacity-10 group-hover/card:scale-125 transition-transform duration-500"><Target size={40} /></div>
+                  <div className="relative z-10">
+                    <span className="text-[10px] font-bold text-[#2d5214] tracking-wide block mb-0.5 uppercase">Mục tiêu hấp thụ</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xl font-black text-[#1f3b00] tracking-tighter">{metrics.targetCalories || 0}</span>
+                      <span className="text-[10px] font-bold text-[#3d6600]/70">kcal</span>
+                    </div>
+                  </div>
+                  <div className="relative z-10 flex flex-col items-end">
+                    <span className="inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold bg-white/60 text-[#2d5214] backdrop-blur-sm shadow-sm whitespace-nowrap text-right">
+                      {getGoalLabel(healthData.goal)}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
       </div>
 
+      {/* CANCEL CONFIRM MODAL */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#1f3b00]/40 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-white rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#B5E361]/30 p-8 w-[90%] max-w-md text-center transform transition-all scale-100 animate-in zoom-in-95 duration-200">
+            <h3 className="text-2xl font-black text-[#1f3b00] mb-3 uppercase tracking-wide">Xác nhận</h3>
+            <p className="text-gray-600 mb-8 font-medium leading-relaxed">
+              Các thông tin bạn đã nhập chưa được Lưu. Bạn có chắc chắn muốn Hủy?
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button
+                type="button"
+                onClick={() => setShowCancelConfirm(false)}
+                className="flex-1 px-6 py-3.5 rounded-2xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+              >
+                Quay lại
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCancelConfirm(false);
+                  setActiveTab('Personal');
+                }}
+                className="flex-1 px-6 py-3.5 rounded-2xl font-black text-[#1f3b00] bg-[#B5E361] hover:bg-[#a3d14f] shadow-lg shadow-[#B5E361]/30 transition-all hover:-translate-y-0.5 active:translate-y-0"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* EMAIL MODAL */}
       {showEmailModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/55 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-11/12 max-w-md overflow-hidden rounded-[2.5rem] bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#1f3b00]/40 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-white rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#B5E361]/30 p-8 w-[90%] max-w-md transform transition-all scale-100 animate-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-black text-gray-900 mb-2">Thay đổi địa chỉ Email</h3>
             <p className="text-gray-500 text-sm mb-6">Nhập địa chỉ email mới bạn muốn sử dụng.</p>
 
@@ -843,8 +872,8 @@ function Profile() {
 
       {/* PASSWORD MODAL */}
       {showPasswordModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/55 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-11/12 max-w-md overflow-hidden rounded-[2.5rem] bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#1f3b00]/40 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-white rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#B5E361]/30 p-8 w-[90%] max-w-md transform transition-all scale-100 animate-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-black text-gray-900 mb-2">Cập nhật Mật khẩu</h3>
             <p className="text-gray-500 text-sm mb-6">Vui lòng điền thông tin để cập nhật mật khẩu của bạn.</p>
 

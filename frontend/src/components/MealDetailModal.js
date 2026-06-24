@@ -151,7 +151,7 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess, initialIsEdit
 
               {/* Dish Name */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Tên món ăn *</label>
+                <label className="text-[12px] font-black text-gray-700 pl-1">Tên món ăn *</label>
                 <input 
                   type="text" name="foodName" value={formData.foodName} onChange={handleInputChange} 
                   disabled={!isEditing}
@@ -162,7 +162,7 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess, initialIsEdit
 
               {/* Description */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Mô tả</label>
+                <label className="text-[12px] font-black text-gray-700 pl-1">Mô tả</label>
                 <textarea 
                   name="description" value={formData.description} onChange={handleInputChange} rows="3" 
                   disabled={!isEditing}
@@ -174,7 +174,7 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess, initialIsEdit
               <div className="grid grid-cols-2 gap-4">
                 {/* Prep Time */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Thời gian nấu</label>
+                  <label className="text-[12px] font-black text-gray-700 pl-1">Thời gian nấu</label>
                   <input 
                     type="text" name="prepTime" value={formData.prepTime} onChange={handleInputChange} 
                     disabled={!isEditing}
@@ -184,7 +184,7 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess, initialIsEdit
                 </div>
                 {/* Difficulty */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-black text-gray-700 uppercase tracking-wider pl-1">Độ khó</label>
+                  <label className="text-[12px] font-black text-gray-700 pl-1">Độ khó</label>
                   <select 
                     name="difficulty" value={formData.difficulty} onChange={handleInputChange} 
                     disabled={!isEditing}
@@ -204,13 +204,13 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess, initialIsEdit
               {/* Ingredients */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
-                  <label className="text-xs font-black text-gray-800 uppercase tracking-widest px-2">Nguyên liệu</label>
+                  <label className="text-[13px] font-black text-gray-800 px-2">Nguyên liệu</label>
                   {isEditing && (
                     <button 
                       type="button" onClick={addIngredient}
                       className="bg-white hover:bg-[#B5E361] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95 border border-gray-200 hover:border-[#B5E361]"
                     >
-                      + THÊM NGUYÊN LIỆU
+                      + Thêm nguyên liệu
                     </button>
                   )}
                 </div>
@@ -258,13 +258,13 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess, initialIsEdit
               {/* Instructions */}
               <div className="space-y-4 pt-4 border-t border-gray-100">
                 <div className="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
-                  <label className="text-xs font-black text-gray-800 uppercase tracking-widest px-2">Cách làm</label>
+                  <label className="text-[13px] font-black text-gray-800 px-2">Cách làm</label>
                   {isEditing && (
                     <button 
                       type="button" onClick={addInstruction}
                       className="bg-white hover:bg-[#B5E361] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95 border border-gray-200 hover:border-[#B5E361]"
                     >
-                      + THÊM BƯỚC LÀM
+                      + Thêm bước làm
                     </button>
                   )}
                 </div>
@@ -301,27 +301,67 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess, initialIsEdit
         </form>
 
         {/* Footer */}
-        <div className="p-6 bg-gray-950 border-t border-gray-900 shrink-0">
-          <div className="flex justify-end gap-3 w-full">
-            {!isEditing ? (
-              <>
-                <button type="button" onClick={onDelete} className="px-5 py-3 text-red-500 font-black rounded-xl hover:bg-red-500/10 transition-all flex items-center gap-1.5">
-                  <Trash2 size={16} strokeWidth={3} /> XÓA
-                </button>
-                <button type="button" onClick={() => setIsEditing(true)} className="px-6 py-3 bg-[#B5E361] text-[#1f3b00] text-xs font-black rounded-xl hover:bg-[#a7e965] transition-all flex items-center justify-center gap-1.5 shadow-md shadow-[#B5E361]/10 active:scale-95">
-                  <Edit2 size={16} strokeWidth={3} /> CHỈNH SỬA
-                </button>
-              </>
-            ) : (
-              <>
-                <button type="button" onClick={() => setIsEditing(false)} className="px-5 py-3 text-white text-xs font-black rounded-xl hover:bg-white/5 transition-all">
-                  HỦY
-                </button>
-                <button type="button" onClick={handleSave} className="px-6 py-3 bg-[#B5E361] text-[#1f3b00] text-xs font-black rounded-xl hover:bg-[#a7e965] transition-all flex items-center justify-center gap-1.5 shadow-md shadow-[#B5E361]/10 active:scale-95">
-                  <Check size={16} strokeWidth={3} /> XÁC NHẬN
-                </button>
-              </>
-            )}
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-[#eef8da] to-[#f4fbe7] border-t border-[#e2f1c3] shrink-0">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            
+            {/* Macros Section */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Calories */}
+              <div className="bg-[#fcfdfa] rounded-2xl p-2 sm:p-3 flex flex-col items-center justify-center min-w-[70px] sm:min-w-[90px] shadow-sm border border-white">
+                <span className="text-[10px] sm:text-[11px] font-black text-[#95b058] mb-0.5">Calories</span>
+                <span className="text-lg sm:text-2xl font-black text-[#3d6600] leading-none mt-1">{meal.calories || 0}</span>
+              </div>
+              {/* Protein */}
+              <div className="bg-[#f2f8fc] rounded-2xl p-2 sm:p-3 flex flex-col items-center justify-center min-w-[70px] sm:min-w-[90px] shadow-sm border border-white">
+                <span className="text-[10px] sm:text-[11px] font-black text-[#4b8beb] mb-0.5">Protein</span>
+                <div className="flex items-baseline gap-0.5 mt-1">
+                  <span className="text-lg sm:text-2xl font-black text-[#2563eb] leading-none">{meal.macros?.protein || 0}</span>
+                  <span className="text-[10px] sm:text-xs font-black text-[#60a5fa]">g</span>
+                </div>
+              </div>
+              {/* Carbs */}
+              <div className="bg-[#fff9f0] rounded-2xl p-2 sm:p-3 flex flex-col items-center justify-center min-w-[70px] sm:min-w-[90px] shadow-sm border border-white">
+                <span className="text-[10px] sm:text-[11px] font-black text-[#f17b35] mb-0.5">Carbs</span>
+                <div className="flex items-baseline gap-0.5 mt-1">
+                  <span className="text-lg sm:text-2xl font-black text-[#ea580c] leading-none">{meal.macros?.carbs || 0}</span>
+                  <span className="text-[10px] sm:text-xs font-black text-[#fb923c]">g</span>
+                </div>
+              </div>
+              {/* Fat */}
+              <div className="bg-[#fff4f5] rounded-2xl p-2 sm:p-3 flex flex-col items-center justify-center min-w-[70px] sm:min-w-[90px] shadow-sm border border-white">
+                <span className="text-[10px] sm:text-[11px] font-black text-[#f15e61] mb-0.5">Fat</span>
+                <div className="flex items-baseline gap-0.5 mt-1">
+                  <span className="text-lg sm:text-2xl font-black text-[#e11d48] leading-none">{meal.macros?.fat || 0}</span>
+                  <span className="text-[10px] sm:text-xs font-black text-[#fb7185]">g</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3">
+              {!isEditing ? (
+                <>
+                  {onDelete && (
+                    <button type="button" onClick={onDelete} className="px-4 py-2.5 text-red-500 font-black rounded-xl hover:bg-white transition-all flex items-center gap-1.5 shadow-sm">
+                      <Trash2 size={16} strokeWidth={3} /> Xóa
+                    </button>
+                  )}
+                  <button type="button" onClick={() => setIsEditing(true)} className="px-5 py-2.5 bg-white text-[#1f3b00] text-[13px] font-black rounded-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 border border-[#e2f1c3]">
+                    <Edit2 size={16} strokeWidth={3} /> Chỉnh sửa
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2.5 text-gray-500 text-[13px] font-black rounded-xl hover:bg-white transition-all shadow-sm border border-[#e2f1c3] bg-white/50">
+                    Hủy
+                  </button>
+                  <button type="button" onClick={handleSave} className="px-5 py-2.5 bg-[#B5E361] text-[#1f3b00] text-[13px] font-black rounded-xl hover:bg-[#a7e965] transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 border border-[#9dcf46]">
+                    <Check size={16} strokeWidth={3} /> Xác nhận
+                  </button>
+                </>
+              )}
+            </div>
+
           </div>
         </div>
 

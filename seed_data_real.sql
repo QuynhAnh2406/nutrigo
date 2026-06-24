@@ -6,7 +6,7 @@
 BEGIN;
 
 -- Xóa dữ liệu cũ để tránh trùng lặp hoặc lỗi khóa ngoại
-TRUNCATE TABLE meal_plans, user_fridge, post_instruction_steps, post_ingredients, posts, ingredients, user_health_data, users RESTART IDENTITY CASCADE;
+TRUNCATE TABLE meal_plans, user_fridge, recipe_instruction_steps, recipe_ingredients, recipes, ingredients, user_health_data, users RESTART IDENTITY CASCADE;
 
 -- 1. TẠO TÀI KHOẢN NGƯỜI DÙNG MẪU (Mật khẩu hash bên dưới tương ứng với '20236032')
 INSERT INTO users (id, email, password_hash, full_name, avatar_url, is_premium)
@@ -66,7 +66,7 @@ VALUES
 SELECT setval('ingredients_id_seq', (SELECT MAX(id) FROM ingredients));
 
 -- 4. TẠO CÁC MÓN ĂN / CÔNG THỨC (Với Calo và Macros tổng hợp thực tế)
-INSERT INTO posts (id, user_id, food_name, description, image_url, prep_time, difficulty, calories, carbs, protein, fat, is_recipe, meal_type, category, health_level)
+INSERT INTO recipes (id, user_id, food_name, description, image_url, prep_time, difficulty, calories, carbs, protein, fat, is_recipe, meal_type, category, health_level)
 VALUES
 (1, 1, 'Phở Bò Chín', 'Món ăn truyền thống thơm ngon, nước dùng ngọt thanh từ xương ống bò, thịt bò chín mềm.', '/images/pho_bo_chin.png', '45 phút', 'Medium', 450, 58.00, 28.00, 12.00, true, 'breakfast', 'food', 'medium'),
 (2, 1, 'Salad Ức Gà Sốt Oliu', 'Salad ức gà áp chảo thơm lừng cùng rau củ giòn mát, thích hợp cho người ăn kiêng giảm mỡ.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500', '15 phút', 'Easy', 350, 12.00, 32.00, 18.00, true, 'lunch', 'food', 'excellent'),
@@ -75,10 +75,10 @@ VALUES
 (5, 1, 'Đậu Phụ Nhồi Thịt Sốt Cà Chua', 'Món ăn gia đình truyền thống, đậu phụ mềm béo nhồi thịt nạc heo sốt cà chua đậm vị.', '/images/dau_phu_nhoi_thit.png', '30 phút', 'Easy', 280, 15.00, 18.00, 16.00, true, 'lunch', 'food', 'medium'),
 (6, 1, 'Tôm Rim Ăn Kèm Cơm Gạo Lứt', 'Tôm sú ngọt thịt rim nhạt, dùng kèm cơm gạo lứt dẻo bùi tốt cho sức khỏe.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74?w=500', '25 phút', 'Easy', 390, 45.00, 30.00, 8.00, true, 'lunch', 'food', 'excellent');
 
-SELECT setval('posts_id_seq', (SELECT MAX(id) FROM posts));
+SELECT setval('recipes_id_seq', (SELECT MAX(id) FROM recipes));
 
 -- 5. CHI TIẾT NGUYÊN LIỆU CHO TỪNG MÓN ĂN (Tính calo tương ứng với trọng lượng)
-INSERT INTO post_ingredients (post_id, ingredient_id, ingredient_name, amount, weight_g, calories)
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, ingredient_name, amount, weight_g, calories)
 VALUES
 -- Phở Bò Chín (ID = 1)
 (1, 5, 'Bánh phở (gạo)', '150g', 150.00, 213.00),
@@ -113,7 +113,7 @@ VALUES
 (6, 21, 'Dầu oliu', '3g', 3.00, 26.52);
 
 -- 6. CÁC BƯỚC HƯỚNG DẪN NẤU ĂN
-INSERT INTO post_instruction_steps (post_id, step_number, instruction)
+INSERT INTO recipe_instruction_steps (recipe_id, step_number, instruction)
 VALUES
 -- Phở Bò Chín
 (1, 1, 'Hầm xương bò cùng hành tây, gừng nướng trong khoảng 2-3 tiếng để lấy nước dùng ngọt trong.'),
@@ -151,21 +151,9 @@ VALUES
 (6, 3, 'Rim tôm trên chảo nóng với 3g dầu oliu đến khi tôm săn lại và chín đỏ.'),
 (6, 4, 'Xới cơm gạo lứt ra đĩa, xếp tôm rim lên trên, ăn kèm dưa leo hoặc rau luộc.');
 
--- 7. NGUYÊN LIỆU CÓ SẴN TRONG TỦ LẠNH CỦA NGƯỜI DÙNG (USER FRIDGE)
-INSERT INTO user_fridge (user_id, ingredient_name)
-VALUES 
-(1, 'Ức gà (không da)'),
-(1, 'Trứng gà'),
-(1, 'Súp lơ xanh'),
-(1, 'Dầu oliu'),
-(1, 'Cà chua'),
-(2, 'Gạo lứt'),
-(2, 'Trứng gà'),
-(2, 'Quả chuối'),
-(2, 'Yến mạch');
 
 -- 8. THIẾT LẬP KẾ HOẠCH ĂN UỐNG (MEAL PLANS) CHO TUẦN HIỆN TẠI
-INSERT INTO meal_plans (user_id, day_name, meal_type, post_id, meal_date)
+INSERT INTO meal_plans (user_id, day_name, meal_type, recipe_id, meal_date)
 VALUES 
 (1, 'Monday', 'breakfast', 1, CURRENT_DATE),
 (1, 'Monday', 'lunch', 2, CURRENT_DATE),

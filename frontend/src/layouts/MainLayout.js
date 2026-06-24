@@ -276,8 +276,8 @@ function MainLayout() {
 
             {/* FULL SCREEN MEAL TIME REMINDER OVERLAY */}
             {reminder.show && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md transition-opacity duration-300">
-                    <div className="relative w-11/12 max-w-md overflow-hidden rounded-[2.5rem] bg-white p-8 text-center shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#1f3b00]/40 backdrop-blur-sm transition-all duration-300">
+                    <div className="bg-white rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#B5E361]/30 p-8 w-[90%] max-w-md text-center transform transition-all scale-100 animate-in zoom-in-95 duration-200 relative overflow-hidden">
                         {/* Decorative background blur shapes */}
                         <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-[#B5E361]/30 blur-2xl"></div>
                         <div className="absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-[#4facfe]/20 blur-2xl"></div>

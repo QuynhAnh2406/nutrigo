@@ -70,16 +70,13 @@ exports.getRecipeById = async (req, res) => {
   
   try {
     let baseQuery = `
-      SELECT p.*, u.full_name as author, u.avatar_url as avatar,
-      (SELECT COUNT(*) FROM recipe_likes pl WHERE pl.recipe_id = p.id) as likes,
-      EXISTS(SELECT 1 FROM recipe_likes pl WHERE pl.recipe_id = p.id AND pl.user_id = $1) as "isLiked",
-      EXISTS(SELECT 1 FROM recipe_favorites pf WHERE pf.recipe_id = p.id AND pf.user_id = $1) as "isSaved"
+      SELECT p.*, u.full_name as author, u.avatar_url as avatar
       FROM recipes p
       LEFT JOIN users u ON p.user_id = u.id
-      WHERE p.id = $2
+      WHERE p.id = $1
     `;
     
-    const { rows: recipes } = await db.query(baseQuery, [userId, recipeId]);
+    const { rows: recipes } = await db.query(baseQuery, [recipeId]);
     
     if (recipes.length === 0) {
       return res.status(404).json({ success: false, message: 'Recipe not found' });
@@ -198,9 +195,6 @@ exports.createRecipe = async (req, res) => {
       ingredients: ingredients || [],
       instructions: instructions || [],
       rating: 0,
-      likes: 0,
-      isLiked: false,
-      isSaved: false,
       timeAgo: 'Vừa xong',
       comments: []
     };

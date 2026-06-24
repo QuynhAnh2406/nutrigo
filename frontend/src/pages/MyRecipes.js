@@ -287,7 +287,7 @@ function MyRecipes() {
             {filteredRecipes.map(recipe => (
               <RecipeCard
                 key={recipe.id}
-                post={recipe}
+                recipe={recipe}
                 onOpenDetail={(p) => setSelectedPost(p)}
                 onAddToPlan={(p) => {
                   if (!healthData.weight || !healthData.height || !healthData.dateOfBirth) {
