@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
   // Start with current date, aligned to Monday
@@ -11,11 +11,7 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
 
   const [weeklyPlan, setWeeklyPlan] = useState([]);
 
-  useEffect(() => {
-    fetchWeeklyPlan();
-  }, [currentWeekStart]);
-
-  const fetchWeeklyPlan = async () => {
+  const fetchWeeklyPlan = useCallback(async () => {
     try {
       const weekStartStr = currentWeekStart.toISOString().split('T')[0];
       const res = await fetch(`http://localhost:5002/api/mealplan?weekStart=${weekStartStr}`, {
@@ -26,7 +22,11 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
         setWeeklyPlan(data.data);
       }
     } catch (e) { console.error(e); }
-  };
+  }, [currentWeekStart]);
+
+  useEffect(() => {
+    fetchWeeklyPlan();
+  }, [fetchWeeklyPlan]);
 
   const nextWeek = () => {
     const next = new Date(currentWeekStart);
@@ -65,8 +65,13 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
       });
       const data = await res.json();
       if (data.success) {
-        alert('Đã thêm vào lịch ăn uống thành công!');
-        if (onAddSuccess) onAddSuccess();
+        if (onAddSuccess) {
+          onAddSuccess({
+            name: post.foodName || post.title || post.name,
+            mealType,
+            mealDate
+          });
+        }
         onClose();
       }
     } catch (error) {

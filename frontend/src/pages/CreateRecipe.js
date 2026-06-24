@@ -317,7 +317,7 @@ function CreateRecipe() {
                       onChange={handleFormInputChange}
                       placeholder="Ví dụ: Salad Ức Gà, Bún Chả..."
                       required
-                      className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
+                      className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-[15px] font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
                     />
                   </div>
 
@@ -330,7 +330,7 @@ function CreateRecipe() {
                       onChange={handleFormInputChange}
                       placeholder="Nhập mô tả ngắn gọn về món ăn, công dụng sức khỏe, hương vị..."
                       rows="3"
-                      className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 resize-none transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
+                      className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-[15px] font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 resize-none transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
                     />
                   </div>
 
@@ -343,7 +343,7 @@ function CreateRecipe() {
                         min="1"
                         value={prepTimeValue}
                         onChange={(e) => setPrepTimeValue(e.target.value)}
-                        className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
+                        className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-[15px] font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
                       />
                     </div>
 
@@ -352,7 +352,7 @@ function CreateRecipe() {
                       <input
                         type="number"
                         min="1"
-                        className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
+                        className="px-4 py-3 rounded-2xl border border-gray-150 outline-none text-[15px] font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/10 bg-gray-50/30 transition-all placeholder:text-gray-400 placeholder:font-medium placeholder:text-sm"
                         value={formData.servings || 1}
                         onChange={(e) => {
                           const val = e.target.value;
@@ -483,7 +483,7 @@ function CreateRecipe() {
                               value={ing.weight_g === 0 ? '' : ing.weight_g}
                               onChange={(e) => updateWeight(idx, e.target.value)}
                               placeholder="0"
-                              className="w-12 text-center font-black text-xs text-gray-900 border-none p-0 focus:ring-0"
+                              className="w-12 text-center font-black text-sm text-gray-900 border-none p-0 focus:ring-0"
                             />
                             <span className="text-[10px] font-bold text-gray-400">g</span>
                           </div>
@@ -496,7 +496,7 @@ function CreateRecipe() {
                               value={ing.calories_per_100g === 0 ? '' : ing.calories_per_100g}
                               placeholder="0"
                               disabled
-                              className="w-12 text-center font-black text-xs text-gray-500 bg-transparent border-none p-0 focus:ring-0 cursor-not-allowed"
+                              className="w-12 text-center font-black text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0 cursor-not-allowed"
                             />
                             <span className="text-[9px] font-bold text-gray-400" title="kcal trên 100g">kcal/100g</span>
                           </div>

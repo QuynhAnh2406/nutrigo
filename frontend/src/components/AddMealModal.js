@@ -648,7 +648,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                       <input
                         type="text"
                         placeholder="Ví dụ: Salad Ức Gà, Bún Chả..."
-                        className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:text-gray-400 placeholder:font-normal"
+                        className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-[15px] text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:text-gray-400 placeholder:font-normal"
                         value={dishName}
                         onChange={(e) => setDishName(e.target.value)}
                       />
@@ -660,7 +660,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                       <textarea
                         placeholder="Nhập mô tả ngắn gọn về món ăn này..."
                         rows={2}
-                        className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:text-gray-400 placeholder:font-normal resize-none"
+                        className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-[15px] text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:text-gray-400 placeholder:font-normal resize-none"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                       />
@@ -687,7 +687,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                         <input
                           type="number"
                           min="1"
-                          className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:font-normal placeholder:text-gray-400"
+                          className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-[15px] text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:font-normal placeholder:text-gray-400"
                           value={cookTime === 0 ? '' : cookTime}
                           onChange={(e) => {
                             const val = e.target.value;
@@ -702,7 +702,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                         <input
                           type="number"
                           min="1"
-                          className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-sm text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:font-normal placeholder:text-gray-400"
+                          className="w-full bg-gray-50/80 border border-gray-200 hover:bg-white hover:border-[#B5E361]/50 shadow-sm rounded-xl px-4 py-3 text-[15px] text-gray-900 font-bold focus:bg-white focus:ring-4 focus:ring-[#B5E361]/20 focus:border-[#B5E361] transition-all duration-300 placeholder:font-normal placeholder:text-gray-400"
                           value={servings === 0 ? '' : servings}
                           onChange={(e) => {
                             const val = e.target.value;
@@ -758,7 +758,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                                   ));
                                 }}
                                 onBlur={() => handleIngredientBlur(idx)}
-                                className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-9 py-2 text-xs text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/25 focus:border-[#B5E361] transition-all"
+                                className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-9 py-2 text-sm text-gray-900 font-bold focus:ring-2 focus:ring-[#B5E361]/25 focus:border-[#B5E361] transition-all"
                               />
                               {ing.name && (
                                 <button
@@ -819,7 +819,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                                     value={ing.weight_g === 0 ? '' : ing.weight_g}
                                     onChange={(e) => updateWeight(idx, e.target.value)}
                                     placeholder="0"
-                                    className="w-12 text-center font-black text-xs text-gray-900 border-none p-0 focus:ring-0"
+                                    className="w-12 text-center font-black text-sm text-gray-900 border-none p-0 focus:ring-0"
                                   />
                                   <span className="text-[10px] font-bold text-gray-400">g</span>
                                 </div>
@@ -832,7 +832,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                                     value={ing.calories_per_100g === 0 ? '' : ing.calories_per_100g}
                                     placeholder="0"
                                     disabled
-                                    className="w-12 text-center font-black text-xs text-gray-500 bg-transparent border-none p-0 focus:ring-0 cursor-not-allowed"
+                                    className="w-12 text-center font-black text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0 cursor-not-allowed"
                                   />
                                   <span className="text-[9px] font-bold text-gray-400" title="kcal trên 100g">kcal/100g</span>
                                 </div>

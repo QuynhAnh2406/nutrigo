@@ -4,7 +4,7 @@ import RecipeCard from '../components/RecipeCard';
 import MealDetailModal from '../components/MealDetailModal';
 import AddToMealPlanModal from '../components/AddToMealPlanModal';
 import PageHeader from '../components/PageHeader';
-import { BookOpen, Plus, Search, SlidersHorizontal, RotateCcw, Trash2 } from 'lucide-react';
+import { BookOpen, Plus, Search, SlidersHorizontal, RotateCcw, Trash2, Check } from 'lucide-react';
 
 function MyRecipes() {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ function MyRecipes() {
   const [postToAddPlan, setPostToAddPlan] = useState(null);
   const [recipeToEdit, setRecipeToEdit] = useState(null);
   const [recipeToDelete, setRecipeToDelete] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
 
   const confirmDeleteRecipe = async () => {
     if (!recipeToDelete) return;
@@ -383,7 +384,46 @@ function MyRecipes() {
         <AddToMealPlanModal
           post={postToAddPlan}
           onClose={() => setPostToAddPlan(null)}
+          onAddSuccess={(addedMealInfo) => {
+            const d = new Date(addedMealInfo.mealDate);
+            const dateString = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            
+            const getMealLabel = (mealType) => {
+              switch (mealType) {
+                case 'breakfast': return 'Bữa sáng';
+                case 'lunch': return 'Bữa trưa';
+                case 'dinner': return 'Bữa tối';
+                case 'snack': return 'Bữa phụ';
+                default: return mealType;
+              }
+            };
+            const mealTypeLabel = getMealLabel(addedMealInfo.mealType);
+
+            setToastMessage({
+              name: addedMealInfo.name,
+              mealTypeLabel,
+              dateString
+            });
+
+            setTimeout(() => {
+              setToastMessage(null);
+            }, 5000);
+          }}
         />
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-[150] bg-white border border-[#B5E361]/50 shadow-xl rounded-2xl p-4 flex items-center gap-3 animate-in slide-in-from-right-8 fade-in duration-300">
+          <div className="w-8 h-8 bg-[#EAF7D5] rounded-full flex items-center justify-center shrink-0">
+            <Check size={16} className="text-[#3d6600]" strokeWidth={3} />
+          </div>
+          <p className="text-sm font-semibold text-gray-600 pr-2">
+            <span className="text-[#1f3b00] font-black">{toastMessage.name}</span> đã thêm vào{' '}
+            <span className="text-[#1f3b00] font-black bg-[#B5E361]/30 px-2 py-0.5 rounded-md border border-[#B5E361]/40">{toastMessage.mealTypeLabel}</span>{' '}
+            ngày <span className="text-[#1f3b00] font-black bg-[#EAF7D5] px-2 py-0.5 rounded-md border border-[#B5E361]/30">{toastMessage.dateString}</span>
+          </p>
+        </div>
       )}
     </div>
   );
