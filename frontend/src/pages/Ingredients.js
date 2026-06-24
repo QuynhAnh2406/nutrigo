@@ -10,7 +10,7 @@ function Ingredients({ mode = 'ingredient' }) {
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [calorieRange, setCalorieRange] = useState('All');
-  const [brandSearchQuery, setBrandSearchQuery] = useState('');
+  const brandSearchQuery = '';
   const popoverContainerRef = useRef(null);
   const portionWeight = 100;
 

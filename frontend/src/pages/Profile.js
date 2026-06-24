@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext, useLocation } from 'react-router-dom';
-import { UserCircle2, Settings, Activity, HeartPulse, Zap, Target, Leaf, ArrowLeft } from 'lucide-react';
-import PageHeader from '../components/PageHeader';
+import { UserCircle2, Settings, Activity, HeartPulse, Zap, Target, Leaf, ArrowLeft, Camera } from 'lucide-react';
+
 
 const getGoalLabel = (goal) => {
   switch (goal) {
@@ -264,13 +264,13 @@ function Profile() {
 
       case 'Personal':
         return (
-          <div className="profile-tab-content personal-profile animate-in">
+          <div className="profile-tab-content personal-profile animate-in flex-1 flex flex-col">
 
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="profile-form border p-6 rounded-2xl border-gray-100 bg-white">
-                <h4 className="font-bold mb-4 text-gray-800">Thông tin cơ bản</h4>
-                <div className="form-grid opacity-80 pointer-events-none">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+              <div className="profile-form border p-4 rounded-2xl border-gray-100 bg-white">
+                <h4 className="font-bold mb-2 text-gray-800">Thông tin cơ bản</h4>
+                <div className="form-grid opacity-80 pointer-events-none flex-1 content-between">
                   <div className="form-group">
                     <label>Ngày sinh</label>
                     <input type="date" value={healthData.dateOfBirth} disabled className="bg-gray-50 border-gray-200" />
@@ -306,9 +306,9 @@ function Profile() {
                 </div>
               </div>
 
-              <div className="profile-form border p-6 rounded-2xl border-gray-100 bg-white flex flex-col h-full">
-                <h4 className="font-bold mb-4 text-gray-800">Khảo sát & Tùy chọn</h4>
-                <div className="form-grid opacity-80 pointer-events-none">
+              <div className="profile-form border p-4 rounded-2xl border-gray-100 bg-white flex flex-col h-full">
+                <h4 className="font-bold mb-2 text-gray-800">Khảo sát & Tùy chọn</h4>
+                <div className="form-grid opacity-80 pointer-events-none flex-1 content-between">
                   <div className="form-group col-span-2">
                     <label>Mục tiêu</label>
                     <select value={healthData.goal || ''} disabled className="bg-gray-50 border-gray-200 custom-select">
@@ -357,35 +357,12 @@ function Profile() {
 
       case 'Edit':
         return (
-          <div className="profile-tab-content edit-profile animate-in space-y-6">
-            <div className="flex items-center">
-              <button
-                type="button"
-                onClick={() => {
-                  const initialState = {
-                    ...healthData,
-                    name: user.name || '',
-                    email: user.email || '',
-                    avatarUrl: user.avatar || ''
-                  };
-                  // Compare current formData with the initial state
-                  const isChanged = JSON.stringify(formData) !== JSON.stringify(initialState);
-                  
-                  if (isChanged) {
-                    setShowCancelConfirm(true);
-                  } else {
-                    setActiveTab('Personal');
-                  }
-                }}
-                className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors font-bold"
-              >
-                <ArrowLeft size={20} strokeWidth={2.5} />
-                <span>Quay lại</span>
-              </button>
-            </div>
+          <div className="profile-tab-content edit-profile animate-in flex-1 flex flex-col">
+            
             
             <form
-              className="flex flex-col space-y-6"
+              id="edit-profile-form"
+              className="flex flex-col flex-1"
               onKeyDown={handleKeyDown}
               onSubmit={async (e) => {
                 e.preventDefault();
@@ -402,65 +379,13 @@ function Profile() {
                 }
               }}
             >
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 flex-1">
                 {/* Basic Info Section */}
-                <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl flex flex-col h-full">
-                <h4 className="font-bold mb-6 text-gray-800 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-green-500 rounded-full"></span>
+                <div className="profile-form border p-4 rounded-2xl border-gray-100 bg-white flex flex-col h-full">
+                <h4 className="font-bold mb-2 text-gray-800">
                   Thông tin cơ bản
                 </h4>
-                <div className="form-grid">
-                  <div className="form-group col-span-2">
-                    <label>Ảnh đại diện</label>
-                    <div className="flex items-center gap-4 bg-white/80 border border-gray-150 rounded-2xl px-4 py-2 h-[48px]">
-                      <img
-                        src={avatarPreview || user.avatar || 'https://via.placeholder.com/96'}
-                        alt="Ảnh đại diện"
-                        className="w-8 h-8 object-cover rounded-full border border-gray-100 shadow-sm bg-white shrink-0"
-                      />
-                      <label className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-[#B5E361]/25 text-[#1f3b00] hover:bg-[#B5E361]/35 cursor-pointer text-[11px] font-black transition-all active:scale-95">
-                        Chọn ảnh
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(event) => {
-                            const file = event.target.files?.[0];
-                            if (!file) return;
-                            if (!file.type.startsWith('image/')) {
-                              alert('Vui lòng chọn một tệp ảnh hợp lệ.');
-                              return;
-                            }
-                            if (file.size > 5 * 1024 * 1024) {
-                              alert('Kích thước ảnh không quá 5MB.');
-                              return;
-                            }
-
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                              setFormData((prev) => ({ ...prev, avatarUrl: reader.result }));
-                              setAvatarPreview(reader.result);
-                            };
-                            reader.readAsDataURL(file);
-                          }}
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="form-group col-span-2">
-                    <label>Họ và tên</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name || ''}
-                      onChange={handleFormChange}
-                      placeholder="Nhập họ và tên"
-                      className="bg-white/80 border-gray-100 focus:ring-2 focus:ring-green-400 transition-all"
-                      required
-                    />
-                  </div>
-
+                <div className="form-grid flex-1 content-between">
                   <div className="form-group">
                     <label>Ngày sinh</label>
                     <input
@@ -542,16 +467,15 @@ function Profile() {
               </div>
 
               {/* Survey Preferences Section */}
-              <div className="bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white/40 shadow-xl flex flex-col h-full">
-                <h4 className="font-bold mb-6 text-gray-800 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-green-500 rounded-full"></span>
-                  Khảo sát & Mục tiêu sức khỏe
+              <div className="profile-form border p-4 rounded-2xl border-gray-100 bg-white flex flex-col h-full">
+                <h4 className="font-bold mb-2 text-gray-800">
+                  Khảo sát & Tùy chọn
                 </h4>
-                <div className="form-grid">
+                <div className="form-grid flex-1 content-between">
                   <div className="form-group col-span-2">
-                    <label>Mục tiêu sức khỏe</label>
+                    <label>Mục tiêu</label>
                     <select name="goal" value={formData.goal || ''} onChange={handleFormChange} className="custom-select bg-white/80">
-                      <option value="">Chọn mục tiêu sức khỏe</option>
+                      <option value="">Chọn mục tiêu</option>
                       <option value="Lose weight">Giảm cân</option>
                       <option value="Maintain weight">Duy trì cân nặng</option>
                       <option value="Gain weight">Tăng cân</option>
@@ -589,32 +513,6 @@ function Profile() {
                   </div>
                 </div>
               </div>
-              </div>
-
-              <div className="flex justify-end pt-4 gap-4">
-
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className={`
-                    btn-primary px-8 py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-300
-                    ${isSaving
-                      ? 'opacity-60 cursor-not-allowed'
-                      : 'hover:brightness-105 active:scale-95'
-                    }
-                  `}
-                >
-                  {isSaving ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                      Đang lưu...
-                    </>
-                  ) : (
-                    <>
-                      <span>Lưu</span>
-                    </>
-                  )}
-                </button>
               </div>
             </form>
           </div>
@@ -656,69 +554,174 @@ function Profile() {
       <div className="flex flex-col lg:flex-row gap-8">
 
         {/* LEFT MAIN AREA (Forms and Tabs) */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="section-title mb-0">
-              {activeTab === 'Settings'
-                ? 'Cài đặt tài khoản'
-                : activeTab === 'Edit'
-                  ? 'Chỉnh sửa thông tin'
-                  : 'Hồ sơ tài khoản'}
-            </h3>
+            <div className="flex items-center gap-3">
+              {activeTab === 'Edit' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const initialState = {
+                      ...healthData,
+                      name: user.name || '',
+                      email: user.email || '',
+                      avatarUrl: user.avatar || ''
+                    };
+                    const isChanged = JSON.stringify(formData) !== JSON.stringify(initialState);
+                    
+                    if (isChanged) {
+                      setShowCancelConfirm(true);
+                    } else {
+                      setActiveTab('Personal');
+                    }
+                  }}
+                  className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 text-gray-500 hover:text-[#1f3b00] hover:bg-[#B5E361]/30 transition-all active:scale-95"
+                  title="Quay lại"
+                >
+                  <ArrowLeft size={20} strokeWidth={2.5} />
+                </button>
+              )}
+              <h3 className="section-title !mb-0 leading-none flex items-center h-10">
+                {activeTab === 'Settings'
+                  ? 'Cài đặt tài khoản'
+                  : activeTab === 'Edit'
+                    ? 'Chỉnh sửa thông tin'
+                    : 'Hồ sơ tài khoản'}
+              </h3>
+            </div>
             
             <div className="flex gap-2">
-              <button
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Personal' ? 'bg-[#8CB33D] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-                  }`}
-                onClick={() => setActiveTab('Personal')}
-              >
-                <UserCircle2 className="h-4 w-4" />
-                Cá nhân
-              </button>
-              <button
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Settings' ? 'bg-[#8CB33D] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-                  }`}
-                onClick={() => setActiveTab('Settings')}
-              >
-                <Settings className="h-4 w-4" />
-                Cài đặt
-              </button>
+              {activeTab === 'Edit' ? (
+                <button
+                  type="submit"
+                  form="edit-profile-form"
+                  disabled={isSaving}
+                  className={`
+                    btn-primary px-8 py-2 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 h-10
+                    ${isSaving
+                      ? 'opacity-60 cursor-not-allowed'
+                      : 'hover:brightness-105 active:scale-95'
+                    }
+                  `}
+                >
+                  {isSaving ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                      Đang lưu...
+                    </>
+                  ) : (
+                    <span>Lưu</span>
+                  )}
+                </button>
+              ) : (
+                <>
+                  <button
+                    className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Personal' ? 'bg-[#8CB33D] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('Personal')}
+                  >
+                    <UserCircle2 className="h-4 w-4" />
+                    Cá nhân
+                  </button>
+                  <button
+                    className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Settings' ? 'bg-[#8CB33D] text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                      }`}
+                    onClick={() => setActiveTab('Settings')}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Cài đặt
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
-          <div className="profile-content-area">
+          <div className="profile-content-area flex-1 flex flex-col">
             {renderTabContent()}
           </div>
         </div>
 
         {/* RIGHT SIDEBAR (Avatar & Edit) */}
-        <div className="w-full lg:w-[320px] shrink-0">
-          <div className="sticky top-8 flex flex-col gap-4">
+        <div className="w-full lg:w-[320px] shrink-0 flex flex-col">
+          <div className="sticky top-8 flex flex-col gap-4 h-full">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="h-16 bg-gradient-to-br from-[#cde983] via-[#b5e361] to-[#98d13a]"></div>
               <div className="px-5 pb-5 flex flex-col items-center text-center relative">
-                <img
-                  src={user.avatar}
-                  alt="Ảnh đại diện"
-                  className="w-20 h-20 rounded-full border-4 border-white shadow-md -mt-10 mb-2 bg-white object-cover"
-                />
+                {activeTab === 'Edit' ? (
+                  <div className="relative -mt-10 mb-2">
+                    <img
+                      src={avatarPreview || user.avatar || 'https://via.placeholder.com/96'}
+                      alt="Ảnh đại diện"
+                      className="w-20 h-20 rounded-full border-4 border-white shadow-md bg-white object-cover"
+                    />
+                    <label className="absolute bottom-0 right-0 w-6 h-6 bg-[#B5E361] text-[#1f3b00] rounded-full flex items-center justify-center cursor-pointer shadow-sm hover:scale-105 transition-transform" title="Đổi ảnh đại diện">
+                      <Camera size={12} strokeWidth={3} />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (!file) return;
+                          if (!file.type.startsWith('image/')) {
+                            alert('Vui lòng chọn một tệp ảnh hợp lệ.');
+                            return;
+                          }
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert('Kích thước ảnh không quá 5MB.');
+                            return;
+                          }
 
-                <h2 className="text-lg font-bold text-gray-800 mb-0.5">
-                  {formData.name || user.name} {user.isPremium && <span title="Thành viên Premium" className="text-yellow-500">👑</span>}
-                </h2>
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            setFormData((prev) => ({ ...prev, avatarUrl: reader.result }));
+                            setAvatarPreview(reader.result);
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  <img
+                    src={user.avatar}
+                    alt="Ảnh đại diện"
+                    className="w-20 h-20 rounded-full border-4 border-white shadow-md -mt-10 mb-2 bg-white object-cover"
+                  />
+                )}
+
+                {activeTab === 'Edit' ? (
+                  <div className="w-full mt-2 mb-3">
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name || ''}
+                      onChange={handleFormChange}
+                      className="w-full text-center text-lg font-bold border-b-2 border-gray-200 focus:border-[#B5E361] bg-transparent outline-none pb-1 transition-colors"
+                      placeholder="Nhập họ và tên"
+                    />
+                  </div>
+                ) : (
+                  <h2 className="text-lg font-bold text-gray-800 mb-0.5">
+                    {user.name} {user.isPremium && <span title="Thành viên Premium" className="text-yellow-500">👑</span>}
+                  </h2>
+                )}
+                
                 <p className="text-gray-500 text-xs mb-4">{user.email}</p>
 
-                <button 
-                  className="btn-primary w-full text-sm py-2 mb-1"
-                  onClick={() => setActiveTab('Edit')}
-                >
-                  Chỉnh sửa thông tin cá nhân
-                </button>
+                {activeTab !== 'Edit' && (
+                  <button 
+                    className="btn-primary w-full text-sm py-2 mb-1"
+                    onClick={() => setActiveTab('Edit')}
+                  >
+                    Chỉnh sửa thông tin cá nhân
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Tóm tắt năng lượng & dinh dưỡng */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group flex-1 flex flex-col">
               <div className="relative z-10 flex items-center gap-3 mb-3 pb-3 border-b border-gray-50">
                 <div className="w-8 h-8 bg-gradient-to-br from-[#B5E361]/20 to-[#8CB33D]/20 rounded-xl flex items-center justify-center text-[#8CB33D]">
                   <Leaf size={16} strokeWidth={2.5} />
@@ -728,7 +731,7 @@ function Profile() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 relative z-10">
+              <div className="flex flex-col gap-3 relative z-10 flex-1 justify-between">
                 <div className="bg-gray-50/50 rounded-xl p-3 border border-gray-100 flex items-center justify-between group/card transition-all hover:border-[#B5E361]/50">
                   <div>
                     <span className="text-[10px] font-bold text-gray-500 tracking-wide block mb-0.5 uppercase">Chỉ số BMI</span>
