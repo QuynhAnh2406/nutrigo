@@ -102,7 +102,15 @@ function MainLayout() {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('user', JSON.stringify(user));
+        try {
+            const userToSave = { ...user };
+            if (userToSave.avatar && userToSave.avatar.startsWith('data:image/')) {
+                userToSave.avatar = '';
+            }
+            localStorage.setItem('user', JSON.stringify(userToSave));
+        } catch (err) {
+            console.warn('Failed to save user to localStorage:', err);
+        }
     }, [user]);
 
     useEffect(() => {

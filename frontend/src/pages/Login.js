@@ -57,7 +57,15 @@ export default function Login() {
       if (response.ok && data.success) {
         // Store user and token in localStorage
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        try {
+          const userToSave = { ...data.user };
+          if (userToSave.avatar && userToSave.avatar.startsWith('data:image/')) {
+            userToSave.avatar = '';
+          }
+          localStorage.setItem('user', JSON.stringify(userToSave));
+        } catch (err) {
+          console.warn('Failed to save user to localStorage:', err);
+        }
         navigate('/dashboard');
       } else {
         setError(data.message || 'Email hoặc mật khẩu không chính xác.');

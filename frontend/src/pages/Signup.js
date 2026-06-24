@@ -39,7 +39,15 @@ export default function Signup() {
 
       if (response.ok && data.success) {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        try {
+          const userToSave = { ...data.user };
+          if (userToSave.avatar && userToSave.avatar.startsWith('data:image/')) {
+            userToSave.avatar = '';
+          }
+          localStorage.setItem('user', JSON.stringify(userToSave));
+        } catch (err) {
+          console.warn('Failed to save user to localStorage:', err);
+        }
         navigate('/dashboard');
       } else {
         setError(data.message || 'Đăng ký không thành công. Vui lòng thử lại.');
