@@ -44,6 +44,10 @@ exports.login = async (req, res) => {
 exports.register = async (req, res) => {
   const { email, password, fullName } = req.body;
 
+  if (!password || password.length < 6) {
+    return res.status(400).json({ success: false, message: 'Mật khẩu phải có ít nhất 6 ký tự.' });
+  }
+
   try {
     const existingUser = await db.query('SELECT * FROM users WHERE email = $1', [email]);
     if (existingUser.rows.length > 0) {

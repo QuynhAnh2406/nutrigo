@@ -144,7 +144,7 @@ function Ingredients({ mode = 'ingredient' }) {
     <div className="ingredients-page main-content" style={{ overflowY: 'auto', paddingBottom: '80px' }}>
       <div className="mb-2 relative z-30">
         <PageHeader
-          title={mode === 'ingredient' ? 'Nguyên liệu cơ bản' : 'Thương hiệu / Đồ ăn ngoài'}
+          title={mode === 'ingredient' ? 'Nguyên liệu cơ bản' : 'Thương hiệu/Đồ ăn ngoài'}
           subtitle={
             mode === 'ingredient'
               ? 'Tra cứu thông số dinh dưỡng của các loại nguyên liệu nấu ăn cơ bản.'
@@ -152,16 +152,7 @@ function Ingredients({ mode = 'ingredient' }) {
           }
           icon={Scale}
           badge={`${filteredIngredients.length} ${mode === 'ingredient' ? 'nguyên liệu' : 'món ăn'}`}
-          actions={
-            <button
-              className="inline-flex items-center gap-2 rounded-2xl bg-gray-900 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-white shadow-sm transition-all hover:bg-black hover:scale-105 active:scale-95"
-              onClick={() => setIsModalOpen(true)}
-              type="button"
-            >
-              <Plus className="h-4 w-4" />
-              Thêm nguyên liệu mới
-            </button>
-          }
+
         >
           <div className="relative w-full flex gap-3">
             <div className="relative flex-1">
@@ -178,11 +169,10 @@ function Ingredients({ mode = 'ingredient' }) {
               <button
                 type="button"
                 onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
-                className={`h-full px-4 rounded-2xl border transition-all flex items-center gap-2 text-xs sm:text-sm font-extrabold ${
-                  showAdvancedFilter
+                className={`h-full px-4 rounded-2xl border transition-all flex items-center gap-2 text-xs sm:text-sm font-extrabold ${showAdvancedFilter
                     ? 'bg-[#B5E361] border-[#B5E361] text-[#1f3b00]'
                     : 'border-white/70 bg-white/70 text-gray-700 hover:bg-white hover:border-white'
-                }`}
+                  }`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 <span className="hidden sm:inline">Bộ lọc nâng cao</span>
@@ -201,44 +191,40 @@ function Ingredients({ mode = 'ingredient' }) {
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('All')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                            selectedCategory === 'All'
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${selectedCategory === 'All'
                               ? 'bg-gray-900 text-white'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                          }`}
+                            }`}
                         >
                           Tất cả
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('food')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
-                            selectedCategory === 'food'
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'food'
                               ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                          }`}
+                            }`}
                         >
                           🍲Đồ ăn
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('drink')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
-                            selectedCategory === 'drink'
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'drink'
                               ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                          }`}
+                            }`}
                         >
                           🥤Đồ uống
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('snack')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
-                            selectedCategory === 'snack'
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'snack'
                               ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                          }`}
+                            }`}
                         >
                           🍪Ăn vặt
                         </button>
@@ -332,8 +318,8 @@ function Ingredients({ mode = 'ingredient' }) {
                       {ing.category === 'drink'
                         ? '🥤 Đồ uống'
                         : ing.category === 'snack'
-                        ? '🍪 Ăn vặt'
-                        : '🍲 Đồ ăn'}
+                          ? '🍪 Ăn vặt'
+                          : '🍲 Đồ ăn'}
                     </span>
                   </div>
                   <span className="text-gray-400">Khẩu phần: {ing.serving_unit || '100g'}</span>
@@ -346,16 +332,9 @@ function Ingredients({ mode = 'ingredient' }) {
         <div className="flex flex-col items-center justify-center text-center py-16 bg-white rounded-[24px] border border-gray-100/80 shadow-sm">
           <span className="text-3xl mb-3">🔍</span>
           <h4 className="font-extrabold text-gray-800 text-base mb-1">Không tìm thấy nguyên liệu nào</h4>
-          <p className="text-xs text-gray-400 font-semibold max-w-xs leading-relaxed mb-4">
-            Hãy thử tìm bằng từ khóa khác hoặc thêm nguyên liệu mới này vào hệ thống của chúng tôi!
+          <p className="text-xs text-gray-400 font-semibold max-w-xs leading-relaxed">
+            Hãy thử tìm bằng từ khóa khác!
           </p>
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-black hover:bg-black transition-all"
-          >
-            +Thêm nguyên liệu ngay
-          </button>
         </div>
       )}
 
@@ -547,8 +526,8 @@ function Ingredients({ mode = 'ingredient' }) {
                     {selectedDetailIng.category === 'drink'
                       ? '🥤 Đồ uống'
                       : selectedDetailIng.category === 'snack'
-                      ? '🍪 Ăn vặt'
-                      : '🍲 Đồ ăn'}
+                        ? '🍪 Ăn vặt'
+                        : '🍲 Đồ ăn'}
                   </span>
                 </div>
                 <h3 className="font-extrabold text-gray-900 text-xl leading-snug">{selectedDetailIng.name}</h3>

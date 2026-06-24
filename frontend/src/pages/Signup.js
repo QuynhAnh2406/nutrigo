@@ -16,6 +16,11 @@ export default function Signup() {
     e.preventDefault();
     setError('');
 
+    if (password.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự.');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Mật khẩu xác nhận không khớp.');
       return;

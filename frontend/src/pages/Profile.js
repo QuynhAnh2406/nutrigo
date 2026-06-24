@@ -64,6 +64,15 @@ function Profile() {
   const [avatarPreview, setAvatarPreview] = useState(user.avatar);
   const [isSaving, setIsSaving] = useState(false);
 
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [modalError, setModalError] = useState('');
+  const [modalLoading, setModalLoading] = useState(false);
+
   // Re-sync local form if healthData or user changes (e.g. initial load)
   useEffect(() => {
     if (activeTab === 'Edit') {
@@ -76,6 +85,88 @@ function Profile() {
       setAvatarPreview(user.avatar);
     }
   }, [activeTab, healthData, user.name, user.email, user.avatar]);
+
+  const handleUpdateEmail = async (e) => {
+    e.preventDefault();
+    setModalError('');
+    if (!newEmail) {
+      setModalError('Vui lòng nhập email mới.');
+      return;
+    }
+    setModalLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5002/api/profile/health', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          ...healthData,
+          email: newEmail,
+          fullName: user.name,
+          avatarUrl: user.avatar
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Không thể cập nhật email.');
+      }
+      setUser(prev => ({ ...prev, email: newEmail }));
+      setShowEmailModal(false);
+      setNewEmail('');
+      alert('Cập nhật email thành công! ✨');
+    } catch (err) {
+      console.error(err);
+      setModalError(err.message || 'Lỗi kết nối máy chủ.');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    setModalError('');
+    if (!oldPassword || !newPassword || !confirmNewPassword) {
+      setModalError('Vui lòng điền đầy đủ thông tin.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setModalError('Mật khẩu mới phải có ít nhất 6 ký tự.');
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setModalError('Mật khẩu mới xác nhận không khớp.');
+      return;
+    }
+    setModalLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5002/api/profile/change-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ oldPassword, newPassword })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Không thể cập nhật mật khẩu.');
+      }
+      setShowPasswordModal(false);
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      alert('Đổi mật khẩu thành công! ✨');
+    } catch (err) {
+      console.error(err);
+      setModalError(err.message || 'Lỗi kết nối máy chủ.');
+    } finally {
+      setModalLoading(false);
+    }
+  };
 
   const saveHealthToDb = async () => {
     const token = localStorage.getItem('token');
@@ -323,78 +414,149 @@ function Profile() {
                   Thông tin cơ bản
                 </h4>
                 <div className="form-grid">
+                  {/* Hàng 1 */}
+                  {/* Left: 1. Ảnh đại diện */}
                   <div className="form-group">
-                    <label>Ngày sinh</label>
-                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleFormChange} className="bg-white/80 border-gray-100 focus:ring-2 focus:ring-green-400 transition-all" />
+                    <label>Ảnh đại diện</label>
+                    <div className="flex items-center gap-4 bg-white/80 border border-gray-150 rounded-2xl px-4 py-2 h-[48px]">
+                      <img
+                        src={avatarPreview || user.avatar || 'https://via.placeholder.com/96'}
+                        alt="Ảnh đại diện"
+                        className="w-8 h-8 object-cover rounded-full border border-gray-100 shadow-sm bg-white shrink-0"
+                      />
+                      <label className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-[#B5E361]/25 text-[#1f3b00] hover:bg-[#B5E361]/35 cursor-pointer text-[11px] font-black transition-all active:scale-95">
+                        Chọn ảnh
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            if (!file) return;
+                            if (!file.type.startsWith('image/')) {
+                              alert('Vui lòng chọn một tệp ảnh hợp lệ.');
+                              return;
+                            }
+                            if (file.size > 5 * 1024 * 1024) {
+                              alert('Kích thước ảnh không quá 5MB.');
+                              return;
+                            }
+
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              setFormData((prev) => ({ ...prev, avatarUrl: reader.result }));
+                              setAvatarPreview(reader.result);
+                            };
+                            reader.readAsDataURL(file);
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
                   </div>
-                  <div className="form-group opacity-60">
-                    <label>Tuổi</label>
-                    <input type="number" value={calculateAge(formData.dateOfBirth) || 0} disabled className="bg-gray-50/50 cursor-not-allowed" />
-                  </div>
-                  <div className="form-group">
-                    <label>Giới tính</label>
-                    <select name="gender" value={formData.gender || ''} onChange={handleFormChange} className="custom-select bg-white/80">
-                      <option value="">Chọn giới tính</option>
-                      <option value="Male">Nam</option>
-                      <option value="Female">Nữ</option>
-                    </select>
-                  </div>
+
+                  {/* Right: 1. Chiều cao (cm) */}
                   <div className="form-group">
                     <label>Chiều cao (cm)</label>
-                    <input type="number" name="height" value={formData.height} onChange={handleFormChange} className="bg-white/80" />
+                    <input
+                      type="number"
+                      name="height"
+                      value={formData.height || ''}
+                      onChange={handleFormChange}
+                      className="bg-white/80"
+                    />
                   </div>
+
+                  {/* Hàng 2 */}
+                  {/* Left: 2. Họ và tên */}
+                  <div className="form-group">
+                    <label>Họ và tên</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name || ''}
+                      onChange={handleFormChange}
+                      placeholder="Nhập họ và tên"
+                      className="bg-white/80 border-gray-100 focus:ring-2 focus:ring-green-400 transition-all"
+                      required
+                    />
+                  </div>
+
+                  {/* Right: 2. Cân nặng (kg) */}
                   <div className="form-group">
                     <label>Cân nặng (kg)</label>
-                    <input type="number" name="weight" value={formData.weight} onChange={handleFormChange} className="bg-white/80" />
+                    <input
+                      type="number"
+                      name="weight"
+                      value={formData.weight || ''}
+                      onChange={handleFormChange}
+                      className="bg-white/80"
+                    />
                   </div>
+
+                  {/* Hàng 3 */}
+                  {/* Left: 3. Ngày sinh và Tuổi (1 hàng) */}
+                  <div className="flex gap-4">
+                    <div className="form-group flex-1">
+                      <label>Ngày sinh</label>
+                      <input
+                        type="date"
+                        name="dateOfBirth"
+                        value={formData.dateOfBirth || ''}
+                        onChange={handleFormChange}
+                        className="bg-white/80 border-gray-100 focus:ring-2 focus:ring-green-400 transition-all"
+                      />
+                    </div>
+                    <div className="form-group w-32 opacity-60">
+                      <label>Tuổi</label>
+                      <input
+                        type="number"
+                        value={calculateAge(formData.dateOfBirth) || 0}
+                        disabled
+                        className="bg-gray-50/50 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right: 3. Địa chỉ Email */}
                   <div className="form-group">
                     <label>Địa chỉ Email</label>
                     <input
                       type="email"
                       name="email"
-                      value={formData.email}
+                      value={formData.email || ''}
                       onChange={handleFormChange}
                       placeholder="tenbancuaban@example.com"
                       className="bg-white/80"
                     />
                   </div>
-                  <div className="form-group">
-                    <label>Ảnh đại diện</label>
-                    <div className="space-y-3">
-                      <img
-                        src={avatarPreview || user.avatar || 'https://via.placeholder.com/96'}
-                        alt="Ảnh đại diện"
-                        className="w-24 h-24 object-cover rounded-full border border-gray-200"
-                      />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(event) => {
-                          const file = event.target.files?.[0];
-                          if (!file) return;
-                          if (!file.type.startsWith('image/')) {
-                            alert('Vui lòng chọn một tệp ảnh hợp lệ.');
-                            return;
-                          }
-                          if (file.size > 5 * 1024 * 1024) {
-                            alert('Kích thước ảnh không quá 5MB.');
-                            return;
-                          }
 
-                          const reader = new FileReader();
-                          reader.onload = () => {
-                            setFormData((prev) => ({ ...prev, avatarUrl: reader.result }));
-                            setAvatarPreview(reader.result);
-                          };
-                          reader.readAsDataURL(file);
-                        }}
-                        className="bg-white/80"
-                      />
-                    </div>
+                  {/* Hàng 4 */}
+                  {/* Left: 4. Giới tính */}
+                  <div className="form-group">
+                    <label>Giới tính</label>
+                    <select
+                      name="gender"
+                      value={formData.gender || ''}
+                      onChange={handleFormChange}
+                      className="custom-select bg-white/80"
+                    >
+                      <option value="">Chọn giới tính</option>
+                      <option value="Male">Nam</option>
+                      <option value="Female">Nữ</option>
+                    </select>
                   </div>
+
+                  {/* Right: 4. Số điện thoại */}
                   <div className="form-group">
                     <label>Số điện thoại</label>
-                    <input type="text" name="phone" value={formData.phone || ''} onChange={handleFormChange} placeholder="Nhập số điện thoại của bạn" className="bg-white/80" />
+                    <input
+                      type="text"
+                      name="phone"
+                      value={formData.phone || ''}
+                      onChange={handleFormChange}
+                      placeholder="Nhập số điện thoại của bạn"
+                      className="bg-white/80"
+                    />
                   </div>
                 </div>
               </div>
@@ -487,14 +649,14 @@ function Profile() {
                   <h4>Địa chỉ Email</h4>
                   <p>{user.email}</p>
                 </div>
-                <button className="btn-outline">Thay đổi</button>
+                <button className="btn-outline" onClick={() => { setShowEmailModal(true); setModalError(''); setNewEmail(user.email); }}>Thay đổi</button>
               </div>
               <div className="setting-item">
                 <div className="setting-info">
                   <h4>Mật khẩu</h4>
                   <p>Mật khẩu</p>
                 </div>
-                <button className="btn-outline">Cập nhật</button>
+                <button className="btn-outline" onClick={() => { setShowPasswordModal(true); setModalError(''); setOldPassword(''); setNewPassword(''); setConfirmNewPassword(''); }}>Cập nhật</button>
               </div>
               <div className="setting-item">
                 <div className="setting-info">
@@ -586,23 +748,9 @@ function Profile() {
                 alt="Ảnh đại diện"
                 className="w-24 h-24 rounded-full border-4 border-white shadow-md -mt-12 mb-3 bg-white object-cover"
               />
-              {activeTab === 'Edit' ? (
-                <div className="w-full px-2 mb-3">
-                  <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block text-left mb-1">Họ và tên</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name || ''}
-                    onChange={handleFormChange}
-                    placeholder="Nhập họ và tên"
-                    className="w-full text-center font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all"
-                  />
-                </div>
-              ) : (
-                <h2 className="text-xl font-bold text-gray-800 mb-1">
-                  {user.name} {user.isPremium && <span title="Thành viên Premium" className="text-yellow-500">👑</span>}
-                </h2>
-              )}
+              <h2 className="text-xl font-bold text-gray-800 mb-1 mt-2">
+                {formData.name || user.name} {user.isPremium && <span title="Thành viên Premium" className="text-yellow-500">👑</span>}
+              </h2>
               <p className="text-gray-500 text-sm mb-6">{user.email}</p>
 
 
@@ -612,6 +760,124 @@ function Profile() {
         </div>
 
       </div>
+
+      {/* EMAIL MODAL */}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/55 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-11/12 max-w-md overflow-hidden rounded-[2.5rem] bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+            <h3 className="text-2xl font-black text-gray-900 mb-2">Thay đổi địa chỉ Email</h3>
+            <p className="text-gray-500 text-sm mb-6">Nhập địa chỉ email mới bạn muốn sử dụng.</p>
+
+            {modalError && (
+              <div className="mb-4 p-3.5 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs font-semibold">
+                {modalError}
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateEmail} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Email mới</label>
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="nhapemailmoi@example.com"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowEmailModal(false); setModalError(''); }}
+                  className="flex-1 py-3 rounded-2xl border border-gray-200 text-sm font-extrabold text-gray-700 hover:bg-gray-50 transition-all active:scale-95"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={modalLoading}
+                  className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-[#B5E361] to-[#8CB33D] text-sm font-extrabold text-white shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {modalLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* PASSWORD MODAL */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/55 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-11/12 max-w-md overflow-hidden rounded-[2.5rem] bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+            <h3 className="text-2xl font-black text-gray-900 mb-2">Cập nhật Mật khẩu</h3>
+            <p className="text-gray-500 text-sm mb-6">Vui lòng điền thông tin để cập nhật mật khẩu của bạn.</p>
+
+            {modalError && (
+              <div className="mb-4 p-3.5 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs font-semibold">
+                {modalError}
+              </div>
+            )}
+
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Mật khẩu hiện tại</label>
+                <input
+                  type="password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Mật khẩu mới</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Xác nhận mật khẩu mới</label>
+                <input
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowPasswordModal(false); setModalError(''); }}
+                  className="flex-1 py-3 rounded-2xl border border-gray-200 text-sm font-extrabold text-gray-700 hover:bg-gray-50 transition-all active:scale-95"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={modalLoading}
+                  className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-[#B5E361] to-[#8CB33D] text-sm font-extrabold text-white shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {modalLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

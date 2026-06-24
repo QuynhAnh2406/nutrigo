@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const bcrypt = require('bcryptjs');
 
 const getUserId = (req) => (req.user && req.user.id ? req.user.id : 1);
 
@@ -167,5 +168,41 @@ exports.upsertMyHealth = async(req, res) => {
             return res.status(400).json({ success: false, message: 'Email đã tồn tại.' });
         }
         res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+exports.changePassword = async (req, res) => {
+    const userId = getUserId(req);
+    const { oldPassword, newPassword } = req.body || {};
+
+    if (!oldPassword || !newPassword) {
+        return res.status(400).json({ success: false, message: 'Vui lòng cung cấp mật khẩu cũ và mật khẩu mới.' });
+    }
+
+    if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: 'Mật khẩu mới phải có ít nhất 6 ký tự.' });
+    }
+
+    try {
+        const userRes = await db.query('SELECT password_hash FROM users WHERE id = $1', [userId]);
+        const user = userRes.rows[0];
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng.' });
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password_hash).catch(() => false);
+        if (!isMatch && oldPassword !== user.password_hash) {
+            return res.status(400).json({ success: false, message: 'Mật khẩu cũ không chính xác.' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(newPassword, salt);
+
+        await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, userId]);
+
+        res.json({ success: true, message: 'Thay đổi mật khẩu thành công.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Lỗi máy chủ khi đổi mật khẩu.' });
     }
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, BookOpen, Database, Apple, Store, Leaf } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, BookOpen, Database, Apple, Store, Leaf, User, Settings, LogOut } from 'lucide-react';
 
 function Sidebar({ user }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -97,9 +97,9 @@ function Sidebar({ user }) {
 
                 {isDropdownOpen && (
                     <div className="profile-dropdown">
-                        <button className="dropdown-item" onClick={() => window.location.href = '/profile?tab=Personal'}>👤Thông tin cá nhân</button>
-                        <button className="dropdown-item" onClick={() => window.location.href = '/profile?tab=Settings'}>⚙️Cài đặt tài khoản</button>
-                        <button className="dropdown-item text-red" onClick={handleLogout}>🚪Đăng xuất</button>
+                        <button className="dropdown-item" onClick={() => window.location.href = '/profile?tab=Personal'}><User size={16} /> Thông tin cá nhân</button>
+                        <button className="dropdown-item" onClick={() => window.location.href = '/profile?tab=Settings'}><Settings size={16} /> Cài đặt tài khoản</button>
+                        <button className="dropdown-item text-red" onClick={handleLogout}><LogOut size={16} /> Đăng xuất</button>
                     </div>
                 )}
             </div>

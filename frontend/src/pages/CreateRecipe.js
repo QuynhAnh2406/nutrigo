@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Sparkles, ArrowLeft, ChefHat, Trash2, Plus } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 function CreateRecipe() {
   const navigate = useNavigate();
+  const { healthData } = useOutletContext();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (healthData && (!healthData.weight || !healthData.height || !healthData.dateOfBirth)) {
+      alert("Vui lòng hoàn thiện hồ sơ cá nhân (ngày sinh, chiều cao, cân nặng,...) trước khi tạo công thức mới!");
+      navigate('/profile?tab=Edit');
+    }
+  }, [healthData, navigate]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -159,20 +167,20 @@ function CreateRecipe() {
     }
 
     const formattedIngredients = ingredients
-        .filter(ing => ing.name.trim())
-        .map(ing => ({
-          name: ing.name,
-          weight_g: ing.weight_g,
-          calories_per_100g: ing.calories_per_100g
-        }));
+      .filter(ing => ing.name.trim())
+      .map(ing => ({
+        name: ing.name,
+        weight_g: ing.weight_g,
+        calories_per_100g: ing.calories_per_100g
+      }));
 
     const payload = {
-        ...formData,
-        prepTime: `${prepTimeValue} ${prepTimeUnit}`,
-        ingredients: formattedIngredients,
-        instructions: instructions.filter(inst => inst.trim() !== ''),
-        calories: totalCaloriesCount,
-        isRecipe: true
+      ...formData,
+      prepTime: `${prepTimeValue} ${prepTimeUnit}`,
+      ingredients: formattedIngredients,
+      instructions: instructions.filter(inst => inst.trim() !== ''),
+      calories: totalCaloriesCount,
+      isRecipe: true
     };
 
     if (!formData.foodName.trim()) return;
@@ -182,7 +190,7 @@ function CreateRecipe() {
     try {
       const res = await fetch('http://localhost:5002/api/recipes', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + localStorage.getItem('token')
         },
@@ -237,11 +245,11 @@ function CreateRecipe() {
             {/* Stepper UI */}
             <div className="flex items-start justify-between mb-8 relative px-2">
               <div className="absolute left-6 right-6 top-5 h-1.5 bg-gray-100 -z-10 rounded-full translate-y-[-50%]"></div>
-              <div 
-                className="absolute left-6 top-5 h-1.5 bg-[#B5E361] -z-10 rounded-full translate-y-[-50%] transition-all duration-500 ease-out" 
+              <div
+                className="absolute left-6 top-5 h-1.5 bg-[#B5E361] -z-10 rounded-full translate-y-[-50%] transition-all duration-500 ease-out"
                 style={{ width: currentStep === 1 ? '0%' : currentStep === 2 ? 'calc(50% - 1.5rem)' : 'calc(100% - 3rem)' }}
               ></div>
-              
+
               {[
                 { step: 1, label: 'Thông tin' },
                 { step: 2, label: 'Nguyên liệu' },
@@ -261,7 +269,7 @@ function CreateRecipe() {
             {/* Bước 1: Thông tin cơ bản */}
             <div className={currentStep === 1 ? 'space-y-6 animate-in slide-in-from-right-4 duration-300 fade-in' : 'hidden'}>
               <div className="flex flex-col gap-6">
-                
+
                 {/* Form Fields Container */}
                 <div className="flex flex-col space-y-6 w-full">
                   {/* Image Upload Banner */}
@@ -281,10 +289,10 @@ function CreateRecipe() {
                           <span className="text-white font-bold bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm">Thay đổi ảnh</span>
                         </div>
                       )}
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
                         onChange={(e) => {
                           const file = e.target.files[0];
                           if (file) {
@@ -294,7 +302,7 @@ function CreateRecipe() {
                             };
                             reader.readAsDataURL(file);
                           }
-                        }} 
+                        }}
                       />
                     </label>
                   </div>
@@ -370,11 +378,10 @@ function CreateRecipe() {
                           key={option.value}
                           type="button"
                           onClick={() => setFormData({ ...formData, category: option.value })}
-                          className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 active:scale-95 ${
-                            formData.category === option.value
+                          className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 active:scale-95 ${formData.category === option.value
                               ? 'bg-[#1f3b00] text-white shadow-md'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                          }`}
+                            }`}
                         >
                           {option.icon && <span className="text-base">{option.icon}</span>}
                           {option.label}
@@ -391,182 +398,182 @@ function CreateRecipe() {
             {/* Bước 2: Nguyên liệu */}
             <div className={currentStep === 2 ? 'space-y-6 animate-in slide-in-from-right-4 duration-300 fade-in' : 'hidden'}>
               {/* Ingredients Section */}
-            <div className="space-y-4 pt-2">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-bold text-gray-800 pl-1">Nguyên liệu & dinh dưỡng từng phần</label>
-                <button
-                  type="button"
-                  onClick={addIngredientRow}
-                  className="bg-[#B5E361] hover:bg-[#98d15a] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-                >
-                  <Plus size={14} />
-                  THÊM NGUYÊN LIỆU
-                </button>
-              </div>
+              <div className="space-y-4 pt-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-bold text-gray-800 pl-1">Nguyên liệu & dinh dưỡng từng phần</label>
+                  <button
+                    type="button"
+                    onClick={addIngredientRow}
+                    className="bg-[#B5E361] hover:bg-[#98d15a] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                  >
+                    <Plus size={14} />
+                    THÊM NGUYÊN LIỆU
+                  </button>
+                </div>
 
-              <div className="space-y-3 pr-1">
-                {ingredients.map((ing, idx) => (
-                  <div key={idx} className="flex flex-col gap-3 p-3 bg-white rounded-2xl border border-gray-100 group hover:border-[#B5E361]/40 transition-all duration-300 shadow-sm hover:shadow-md">
-                    {/* Name input with custom Dropdown */}
-                    <div className="relative w-full ingredient-dropdown-container">
-                      <input
-                        type="text"
-                        placeholder="Nhập tên nguyên liệu (ví dụ: Ức gà)..."
-                        value={ing.name}
-                        onChange={(e) => handleIngredientNameChange(idx, e.target.value)}
-                        onFocus={() => {
-                          const newIngs = [...ingredients];
-                          newIngs[idx].showDropdown = true;
-                          setIngredients(newIngs);
-                        }}
-                        onBlur={() => handleIngredientBlur(idx)}
-                        className="w-full bg-white border-2 border-gray-800 rounded-xl px-4 py-2.5 text-sm text-gray-900 font-bold focus:ring-4 focus:ring-[#B5E361]/25 focus:border-[#B5E361] transition-all"
-                      />
-                      {/* Chevron Arrow to make it visually clear it's a dropdown */}
-                      <button
-                        type="button"
-                        tabIndex="-1"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          const newIngs = [...ingredients];
-                          newIngs[idx].showDropdown = !newIngs[idx].showDropdown;
-                          setIngredients(newIngs);
-                        }}
-                        className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-gray-900 focus:outline-none cursor-pointer"
-                      >
-                        <svg className={`fill-current h-5 w-5 transition-transform duration-200 ${ing.showDropdown ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
-                      </button>
-                      {ing.showDropdown && (
-                        <div className="absolute left-0 right-0 top-full mt-2 z-50 max-h-56 overflow-y-auto bg-white border border-gray-150 rounded-2xl shadow-xl">
-                          {filterIngredients(ing.name).map((dbIng) => (
-                            <button
-                              key={dbIng.id}
-                              type="button"
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                handleSelectIngredient(idx, dbIng);
-                              }}
-                              className="w-full text-left px-4 py-3 text-sm font-semibold hover:bg-[#F4FBE7] hover:text-[#1f3b00] transition-colors border-b border-gray-50 last:border-0 flex justify-between items-center"
-                            >
-                              <span>{dbIng.name}</span>
-                              <span className="text-xs text-gray-400 font-bold">
-                                {dbIng.calories_per_100g} kcal / {dbIng.serving_unit || '100g'}
-                              </span>
-                            </button>
-                          ))}
-                          {filterIngredients(ing.name).length === 0 && (
-                            <div className="px-4 py-3 text-sm text-gray-400 italic text-center">
-                              Không tìm thấy nguyên liệu
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Weight and Custom Calories */}
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        {/* Weight */}
-                        <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-xl border border-gray-200">
-                          <span className="text-[10px] font-bold text-gray-400">Nặng:</span>
-                          <input
-                            type="number"
-                            value={ing.weight_g === 0 ? '' : ing.weight_g}
-                            onChange={(e) => updateWeight(idx, e.target.value)}
-                            placeholder="0"
-                            className="w-12 text-center font-black text-xs text-gray-900 border-none p-0 focus:ring-0"
-                          />
-                          <span className="text-[10px] font-bold text-gray-400">g</span>
-                        </div>
-
-                        {/* Calories per 100g */}
-                        <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-xl border border-gray-100" title="Lượng Calories trên 100g (Được tự động điền khi chọn nguyên liệu)">
-                          <span className="text-[10px] font-bold text-gray-400">Mật độ:</span>
-                          <input
-                            type="number"
-                            value={ing.calories_per_100g === 0 ? '' : ing.calories_per_100g}
-                            placeholder="0"
-                            disabled
-                            className="w-12 text-center font-black text-xs text-gray-500 bg-transparent border-none p-0 focus:ring-0 cursor-not-allowed"
-                          />
-                          <span className="text-[9px] font-bold text-gray-400" title="kcal trên 100g">kcal/100g</span>
-                        </div>
-                      </div>
-
-                      {/* Calculated calories and delete */}
-                      <div className="flex items-center gap-3">
-                        <div className="text-[11px] font-black text-green-700 bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
-                          {Math.round((ing.calories_per_100g || 0) * (ing.weight_g || 0) / 100)} kcal
-                        </div>
-
+                <div className="space-y-3 pr-1">
+                  {ingredients.map((ing, idx) => (
+                    <div key={idx} className="flex flex-col gap-3 p-3 bg-white rounded-2xl border border-gray-100 group hover:border-[#B5E361]/40 transition-all duration-300 shadow-sm hover:shadow-md">
+                      {/* Name input with custom Dropdown */}
+                      <div className="relative w-full ingredient-dropdown-container">
+                        <input
+                          type="text"
+                          placeholder="Nhập tên nguyên liệu (ví dụ: Ức gà)..."
+                          value={ing.name}
+                          onChange={(e) => handleIngredientNameChange(idx, e.target.value)}
+                          onFocus={() => {
+                            const newIngs = [...ingredients];
+                            newIngs[idx].showDropdown = true;
+                            setIngredients(newIngs);
+                          }}
+                          onBlur={() => handleIngredientBlur(idx)}
+                          className="w-full bg-white border-2 border-gray-800 rounded-xl px-4 py-2.5 text-sm text-gray-900 font-bold focus:ring-4 focus:ring-[#B5E361]/25 focus:border-[#B5E361] transition-all"
+                        />
+                        {/* Chevron Arrow to make it visually clear it's a dropdown */}
                         <button
                           type="button"
-                          onClick={() => removeIngredientRow(idx)}
-                          disabled={ingredients.length <= 1}
-                          className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-white rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                          tabIndex="-1"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            const newIngs = [...ingredients];
+                            newIngs[idx].showDropdown = !newIngs[idx].showDropdown;
+                            setIngredients(newIngs);
+                          }}
+                          className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-gray-900 focus:outline-none cursor-pointer"
                         >
-                          <Trash2 size={16} />
+                          <svg className={`fill-current h-5 w-5 transition-transform duration-200 ${ing.showDropdown ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                          </svg>
                         </button>
+                        {ing.showDropdown && (
+                          <div className="absolute left-0 right-0 top-full mt-2 z-50 max-h-56 overflow-y-auto bg-white border border-gray-150 rounded-2xl shadow-xl">
+                            {filterIngredients(ing.name).map((dbIng) => (
+                              <button
+                                key={dbIng.id}
+                                type="button"
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  handleSelectIngredient(idx, dbIng);
+                                }}
+                                className="w-full text-left px-4 py-3 text-sm font-semibold hover:bg-[#F4FBE7] hover:text-[#1f3b00] transition-colors border-b border-gray-50 last:border-0 flex justify-between items-center"
+                              >
+                                <span>{dbIng.name}</span>
+                                <span className="text-xs text-gray-400 font-bold">
+                                  {dbIng.calories_per_100g} kcal / {dbIng.serving_unit || '100g'}
+                                </span>
+                              </button>
+                            ))}
+                            {filterIngredients(ing.name).length === 0 && (
+                              <div className="px-4 py-3 text-sm text-gray-400 italic text-center">
+                                Không tìm thấy nguyên liệu
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Weight and Custom Calories */}
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          {/* Weight */}
+                          <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-xl border border-gray-200">
+                            <span className="text-[10px] font-bold text-gray-400">Nặng:</span>
+                            <input
+                              type="number"
+                              value={ing.weight_g === 0 ? '' : ing.weight_g}
+                              onChange={(e) => updateWeight(idx, e.target.value)}
+                              placeholder="0"
+                              className="w-12 text-center font-black text-xs text-gray-900 border-none p-0 focus:ring-0"
+                            />
+                            <span className="text-[10px] font-bold text-gray-400">g</span>
+                          </div>
+
+                          {/* Calories per 100g */}
+                          <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-xl border border-gray-100" title="Lượng Calories trên 100g (Được tự động điền khi chọn nguyên liệu)">
+                            <span className="text-[10px] font-bold text-gray-400">Mật độ:</span>
+                            <input
+                              type="number"
+                              value={ing.calories_per_100g === 0 ? '' : ing.calories_per_100g}
+                              placeholder="0"
+                              disabled
+                              className="w-12 text-center font-black text-xs text-gray-500 bg-transparent border-none p-0 focus:ring-0 cursor-not-allowed"
+                            />
+                            <span className="text-[9px] font-bold text-gray-400" title="kcal trên 100g">kcal/100g</span>
+                          </div>
+                        </div>
+
+                        {/* Calculated calories and delete */}
+                        <div className="flex items-center gap-3">
+                          <div className="text-[11px] font-black text-green-700 bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
+                            {Math.round((ing.calories_per_100g || 0) * (ing.weight_g || 0) / 100)} kcal
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => removeIngredientRow(idx)}
+                            disabled={ingredients.length <= 1}
+                            className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-white rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              <div className="pt-3 border-t border-dashed border-gray-200 text-right text-xs font-extrabold text-gray-600">
-                Tổng Calo ước tính: <span className="text-base font-black text-green-600 ml-1">{totalCaloriesCount} kcal</span>
+                <div className="pt-3 border-t border-dashed border-gray-200 text-right text-xs font-extrabold text-gray-600">
+                  Tổng Calo ước tính: <span className="text-base font-black text-green-600 ml-1">{totalCaloriesCount} kcal</span>
+                </div>
               </div>
-            </div>
 
             </div>
 
             {/* Bước 3: Cách làm */}
             <div className={currentStep === 3 ? 'space-y-6 animate-in slide-in-from-right-4 duration-300 fade-in' : 'hidden'}>
               {/* Instruction Steps Section */}
-            <div className="space-y-4 pt-2">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-bold text-gray-800 pl-1">Các bước chế biến</label>
-                <button
-                  type="button"
-                  onClick={addInstructionRow}
-                  className="bg-[#B5E361] hover:bg-[#98d15a] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-                >
-                  <Plus size={14} />
-                  THÊM BƯỚC
-                </button>
+              <div className="space-y-4 pt-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-bold text-gray-800 pl-1">Các bước chế biến</label>
+                  <button
+                    type="button"
+                    onClick={addInstructionRow}
+                    className="bg-[#B5E361] hover:bg-[#98d15a] text-[#1f3b00] text-[10px] font-black py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                  >
+                    <Plus size={14} />
+                    THÊM BƯỚC
+                  </button>
+                </div>
+
+                <div className="space-y-4 max-h-60 overflow-y-auto pr-1">
+                  {instructions.map((inst, idx) => (
+                    <div key={idx} className="flex gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-[#B5E361]/20 transition-all duration-300">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-white text-gray-400 flex items-center justify-center font-black text-sm border border-gray-100 shadow-sm">
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                        <textarea
+                          value={inst}
+                          onChange={(e) => handleInstructionChange(idx, e.target.value)}
+                          placeholder={`Mô tả chi tiết bước ${idx + 1}...`}
+                          rows="2"
+                          className="w-full bg-transparent border-none p-0 text-sm font-semibold text-gray-900 focus:ring-0 placeholder:text-gray-300 resize-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeInstructionRow(idx)}
+                          disabled={instructions.length <= 1}
+                          className="self-end sm:self-center p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shrink-0 disabled:opacity-30 disabled:hover:bg-transparent"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="space-y-4 max-h-60 overflow-y-auto pr-1">
-                {instructions.map((inst, idx) => (
-                  <div key={idx} className="flex gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-[#B5E361]/20 transition-all duration-300">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-white text-gray-400 flex items-center justify-center font-black text-sm border border-gray-100 shadow-sm">
-                      {idx + 1}
-                    </div>
-                    <div className="flex-1 flex flex-col sm:flex-row gap-3">
-                      <textarea
-                        value={inst}
-                        onChange={(e) => handleInstructionChange(idx, e.target.value)}
-                        placeholder={`Mô tả chi tiết bước ${idx + 1}...`}
-                        rows="2"
-                        className="w-full bg-transparent border-none p-0 text-sm font-semibold text-gray-900 focus:ring-0 placeholder:text-gray-300 resize-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeInstructionRow(idx)}
-                        disabled={instructions.length <= 1}
-                        className="self-end sm:self-center p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shrink-0 disabled:opacity-30 disabled:hover:bg-transparent"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
-
-              </div>
 
             {/* Form actions */}
             <div className="flex gap-4 pt-6 mt-4 border-t border-gray-100">
@@ -621,7 +628,7 @@ function CreateRecipe() {
             </h3>
             <div className="text-[#2d5200]/90 text-xs font-semibold leading-relaxed space-y-3.5">
               <p>Chào mừng bạn đến với góc sáng tạo ẩm thực lành mạnh! Một công thức lý tưởng sẽ hỗ trợ bạn và cộng đồng duy trì lối sống lành mạnh.</p>
-              
+
               <div className="flex gap-2">
                 <span className="text-base select-none">🎯</span>
                 <p><strong>Tính chính xác cao:</strong> Hãy nhập đúng tên và định lượng của từng nguyên liệu để lượng calo được tính chuẩn nhất.</p>

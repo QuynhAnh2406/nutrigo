@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import RecipeCard from '../components/RecipeCard';
 import MealDetailModal from '../components/MealDetailModal';
 import AddToMealPlanModal from '../components/AddToMealPlanModal';
@@ -8,6 +8,7 @@ import { BookOpen, Plus, Search, SlidersHorizontal, RotateCcw, Trash2 } from 'lu
 
 function MyRecipes() {
   const navigate = useNavigate();
+  const { healthData } = useOutletContext();
 
   const [recipes, setRecipes] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +38,15 @@ function MyRecipes() {
       console.error(e);
       alert('Lỗi kết nối server');
     }
+  };
+
+  const handleCreateRecipe = () => {
+    if (!healthData || !healthData.weight || !healthData.height || !healthData.dateOfBirth) {
+      alert("Vui lòng hoàn thiện hồ sơ cá nhân (ngày sinh, chiều cao, cân nặng,...) trước khi tạo công thức mới!");
+      navigate('/profile?tab=Edit');
+      return;
+    }
+    navigate('/my-recipes/create');
   };
 
   // Advanced Filter State
@@ -116,7 +126,7 @@ function MyRecipes() {
           actions={
             <button
               className="inline-flex items-center gap-2 rounded-2xl bg-gray-900 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-white shadow-sm transition-all hover:bg-black hover:scale-105 active:scale-95"
-              onClick={() => navigate('/my-recipes/create')}
+              onClick={handleCreateRecipe}
             >
               <Plus className="h-4 w-4" />
               Tạo công thức mới
@@ -134,7 +144,7 @@ function MyRecipes() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <div className="relative" ref={popoverContainerRef}>
               <button
                 type="button"
@@ -152,7 +162,7 @@ function MyRecipes() {
               {showAdvancedFilter && (
                 <div className="absolute right-0 top-full mt-2 z-50 w-80 bg-white rounded-[22px] border border-gray-150 shadow-xl p-5 animate-in fade-in-50 zoom-in-95 duration-200">
                   <div className="flex flex-col gap-4">
-                    
+
                     {/* Row 1: Meal Type Filter */}
                     <div className="flex flex-col gap-2">
                       <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Tag bữa ăn</span>
@@ -279,7 +289,14 @@ function MyRecipes() {
                 key={recipe.id}
                 post={recipe}
                 onOpenDetail={(p) => setSelectedPost(p)}
-                onAddToPlan={(p) => setPostToAddPlan(p)}
+                onAddToPlan={(p) => {
+                  if (!healthData.weight || !healthData.height || !healthData.dateOfBirth) {
+                    alert("Vui lòng hoàn thiện hồ sơ cá nhân (ngày sinh, chiều cao, cân nặng) trước khi thêm thực đơn!");
+                    navigate('/profile?tab=Edit');
+                    return;
+                  }
+                  setPostToAddPlan(p);
+                }}
                 onEdit={(p) => setRecipeToEdit(p)}
                 onDelete={(p) => setRecipeToDelete(p)}
               />
@@ -293,7 +310,7 @@ function MyRecipes() {
               Bạn chưa có công thức nào. Hãy tự tạo công thức của riêng bạn ngay bây giờ!
             </p>
             <button
-              onClick={() => navigate('/my-recipes/create')}
+              onClick={handleCreateRecipe}
               className="px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-black hover:bg-black transition-all"
             >
               + Tạo công thức đầu tiên
@@ -345,13 +362,13 @@ function MyRecipes() {
               Bạn có chắc chắn muốn xóa công thức <span className="font-extrabold text-[#3d6600]">{recipeToDelete.foodName || recipeToDelete.name}</span> không? Hành động này không thể hoàn tác.
             </p>
             <div className="flex gap-4 justify-center">
-              <button 
+              <button
                 onClick={() => setRecipeToDelete(null)}
                 className="flex-1 px-6 py-3.5 rounded-2xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 hover:text-gray-700 transition-colors"
               >
                 Trở lại
               </button>
-              <button 
+              <button
                 onClick={confirmDeleteRecipe}
                 className="flex-1 px-6 py-3.5 rounded-2xl font-black text-[#1f3b00] bg-[#B5E361] hover:bg-[#a3d14f] shadow-lg shadow-[#B5E361]/30 transition-all hover:-translate-y-0.5 active:translate-y-0"
               >
