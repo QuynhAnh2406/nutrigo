@@ -25,7 +25,8 @@ exports.getMyHealth = async(req, res) => {
         uh.phone,
         TO_CHAR(uh.date_of_birth, 'YYYY-MM-DD') as date_of_birth,
         TO_CHAR(u.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at,
-        u.avatar_url
+        u.avatar_url,
+        u.full_name
       FROM users u
       LEFT JOIN user_health_data uh ON u.id = uh.user_id
       WHERE u.id = $1`, [userId]
@@ -64,6 +65,7 @@ exports.upsertMyHealth = async(req, res) => {
         phone,
         email,
         avatarUrl,
+        fullName,
     } = req.body || {};
 
     try {
@@ -119,7 +121,7 @@ exports.upsertMyHealth = async(req, res) => {
             ]
         );
 
-        const currentUserResult = await db.query('SELECT email, avatar_url FROM users WHERE id = $1', [userId]);
+        const currentUserResult = await db.query('SELECT email, avatar_url, full_name FROM users WHERE id = $1', [userId]);
         const currentUser = currentUserResult.rows[0] || {};
         const updates = [];
         const updateValues = [];
@@ -134,6 +136,11 @@ exports.upsertMyHealth = async(req, res) => {
             updateValues.push(avatarUrl);
         }
 
+        if (fullName && fullName !== currentUser.full_name) {
+            updates.push('full_name = $' + (updateValues.length + 1));
+            updateValues.push(fullName);
+        }
+
         if (updates.length > 0) {
             await db.query(
                 `UPDATE users SET ${updates.join(', ')} WHERE id = $${updateValues.length + 1}`, [...updateValues, userId]
@@ -142,7 +149,8 @@ exports.upsertMyHealth = async(req, res) => {
 
         const responseRow = {
             ...rows[0],
-            avatar_url: avatarUrl || currentUser.avatar_url || null
+            avatar_url: avatarUrl || currentUser.avatar_url || null,
+            full_name: fullName || currentUser.full_name || null
         };
         if (responseRow.height_cm !== null && responseRow.height_cm !== undefined) {
             responseRow.height_cm = parseFloat(responseRow.height_cm);

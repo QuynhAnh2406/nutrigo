@@ -86,6 +86,7 @@ function MainLayout() {
                     setUser(prev => {
                         const updated = {
                             ...prev,
+                            name: row.full_name || prev.name,
                             createdAt: row.created_at || prev.createdAt,
                             avatar: row.avatar_url || prev.avatar
                         };

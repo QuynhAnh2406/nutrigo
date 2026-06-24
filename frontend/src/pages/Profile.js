@@ -23,11 +23,23 @@ const getBmiStatusLabel = (status) => {
   }
 };
 
+const calculateAge = (dateOfBirth) => {
+  if (!dateOfBirth) return '';
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return Math.max(0, age);
+};
+
 function Profile() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const tabParam = searchParams.get('tab');
-  
+
   const [activeTab, setActiveTab] = useState(tabParam || 'Personal');
 
   useEffect(() => {
@@ -41,12 +53,13 @@ function Profile() {
 
   // Get User Profile & Health Data from MainLayout context
   const { user, setUser, healthData, setHealthData, metrics } = useOutletContext();
-  
+
   // Local form state for editing to prevent immediate global state updates
   const [formData, setFormData] = useState({
     ...healthData,
-    email: user.email,
-    avatarUrl: user.avatar
+    name: user.name || '',
+    email: user.email || '',
+    avatarUrl: user.avatar || ''
   });
   const [avatarPreview, setAvatarPreview] = useState(user.avatar);
   const [isSaving, setIsSaving] = useState(false);
@@ -56,12 +69,13 @@ function Profile() {
     if (activeTab === 'Edit') {
       setFormData({
         ...healthData,
-        email: user.email,
-        avatarUrl: user.avatar
+        name: user.name || '',
+        email: user.email || '',
+        avatarUrl: user.avatar || ''
       });
       setAvatarPreview(user.avatar);
     }
-  }, [activeTab, healthData, user.email, user.avatar]);
+  }, [activeTab, healthData, user.name, user.email, user.avatar]);
 
   const saveHealthToDb = async () => {
     const token = localStorage.getItem('token');
@@ -83,7 +97,8 @@ function Profile() {
         cookingSkill: formData.cookingSkill || '',
         phone: formData.phone,
         email: formData.email,
-        avatarUrl: formData.avatarUrl
+        avatarUrl: formData.avatarUrl,
+        fullName: formData.name
       })
     });
 
@@ -95,9 +110,10 @@ function Profile() {
     // Map DB -> frontend state shape
     const row = data.data || {};
 
-    // Update global user state with new email and avatar
+    // Update global user state with new email, avatar, and name
     setUser(prev => ({
       ...prev,
+      name: row.full_name || prev.name,
       email: formData.email,
       avatar: row.avatar_url || prev.avatar
     }));
@@ -131,7 +147,7 @@ function Profile() {
             <div className="bg-gradient-to-br from-[#B5E361] via-[#8CB33D] to-[#4facfe] p-8 rounded-[2.5rem] mb-8 shadow-xl shadow-green-200 relative overflow-hidden group border-none">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-125"></div>
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/20 rounded-full -ml-24 -mb-24 blur-2xl"></div>
-              
+
               <h4 className="font-black text-white mb-8 flex items-center gap-3 relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">🥗</div>
                 <div>
@@ -290,7 +306,7 @@ function Profile() {
                 setIsSaving(true);
                 try {
                   await saveHealthToDb();
-                  alert('Cập nhật hồ sơ thành công! ✨');
+                  alert('Cập nhật hồ sơ thành công!');
                   setActiveTab('Personal');
                 } catch (err) {
                   console.error(err);
@@ -313,7 +329,7 @@ function Profile() {
                   </div>
                   <div className="form-group opacity-60">
                     <label>Tuổi</label>
-                    <input type="number" value={metrics.age || 0} disabled className="bg-gray-50/50 cursor-not-allowed" />
+                    <input type="number" value={calculateAge(formData.dateOfBirth) || 0} disabled className="bg-gray-50/50 cursor-not-allowed" />
                   </div>
                   <div className="form-group">
                     <label>Giới tính</label>
@@ -333,12 +349,12 @@ function Profile() {
                   </div>
                   <div className="form-group">
                     <label>Địa chỉ Email</label>
-                    <input 
-                      type="email" 
-                      name="email" 
-                      value={formData.email} 
-                      onChange={handleFormChange} 
-                      placeholder="tenbancuaban@example.com" 
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleFormChange}
+                      placeholder="tenbancuaban@example.com"
                       className="bg-white/80"
                     />
                   </div>
@@ -360,8 +376,8 @@ function Profile() {
                             alert('Vui lòng chọn một tệp ảnh hợp lệ.');
                             return;
                           }
-                          if (file.size > 2 * 1024 * 1024) {
-                            alert('Kích thước ảnh không quá 2MB.');
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert('Kích thước ảnh không quá 5MB.');
                             return;
                           }
 
@@ -433,14 +449,14 @@ function Profile() {
               </div>
 
               <div className="flex justify-end pt-4">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isSaving}
                   className={`
                     px-10 py-4 rounded-2xl font-bold text-white shadow-lg transition-all duration-300
                     flex items-center gap-2
-                    ${isSaving 
-                      ? 'bg-gray-400 cursor-not-allowed' 
+                    ${isSaving
+                      ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-[#B5E361] to-[#8CB33D] hover:scale-105 hover:shadow-green-200 active:scale-95'
                     }
                   `}
@@ -453,7 +469,7 @@ function Profile() {
                   ) : (
                     <>
                       <span>Lưu thay đổi</span>
-                      <span className="text-xl">✨</span>
+                      <span className="text-xl"></span>
                     </>
                   )}
                 </button>
@@ -461,7 +477,7 @@ function Profile() {
             </form>
           </div>
         );
-      
+
       case 'Settings':
         return (
           <div className="profile-tab-content account-settings animate-in">
@@ -508,18 +524,16 @@ function Profile() {
           actions={
             <div className="flex flex-wrap gap-2">
               <button
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold shadow-sm transition-colors ${
-                  activeTab === 'Personal' ? 'bg-gray-900 text-white' : 'bg-white/70 text-gray-900 ring-1 ring-white/70 backdrop-blur hover:bg-white'
-                }`}
+                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Personal' ? 'bg-gray-900 text-white' : 'bg-white/70 text-gray-900 ring-1 ring-white/70 backdrop-blur hover:bg-white'
+                  }`}
                 onClick={() => setActiveTab('Personal')}
               >
                 <UserCircle2 className="h-4 w-4" />
                 Cá nhân
               </button>
               <button
-                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold shadow-sm transition-colors ${
-                  activeTab === 'Settings' ? 'bg-gray-900 text-white' : 'bg-white/70 text-gray-900 ring-1 ring-white/70 backdrop-blur hover:bg-white'
-                }`}
+                className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Settings' ? 'bg-gray-900 text-white' : 'bg-white/70 text-gray-900 ring-1 ring-white/70 backdrop-blur hover:bg-white'
+                  }`}
                 onClick={() => setActiveTab('Settings')}
               >
                 <Settings className="h-4 w-4" />
@@ -531,7 +545,7 @@ function Profile() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        
+
         {/* LEFT MAIN AREA */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-6">
@@ -567,17 +581,31 @@ function Profile() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-8">
             <div className="h-24 bg-gradient-to-r from-[#a8e063] to-[#56ab2f]"></div>
             <div className="px-6 pb-6 flex flex-col items-center text-center relative">
-              <img 
-                src={user.avatar} 
-                alt="Ảnh đại diện" 
-                className="w-24 h-24 rounded-full border-4 border-white shadow-md -mt-12 mb-3 bg-white object-cover" 
+              <img
+                src={user.avatar}
+                alt="Ảnh đại diện"
+                className="w-24 h-24 rounded-full border-4 border-white shadow-md -mt-12 mb-3 bg-white object-cover"
               />
-              <h2 className="text-xl font-bold text-gray-800">
-                {user.name} {user.isPremium && <span title="Thành viên Premium" className="text-yellow-500">👑</span>}
-              </h2>
+              {activeTab === 'Edit' ? (
+                <div className="w-full px-2 mb-3">
+                  <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block text-left mb-1">Họ và tên</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name || ''}
+                    onChange={handleFormChange}
+                    placeholder="Nhập họ và tên"
+                    className="w-full text-center font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all"
+                  />
+                </div>
+              ) : (
+                <h2 className="text-xl font-bold text-gray-800 mb-1">
+                  {user.name} {user.isPremium && <span title="Thành viên Premium" className="text-yellow-500">👑</span>}
+                </h2>
+              )}
               <p className="text-gray-500 text-sm mb-6">{user.email}</p>
 
-              
+
               <button className="btn-secondary w-full">Chia sẻ hồ sơ</button>
             </div>
           </div>
