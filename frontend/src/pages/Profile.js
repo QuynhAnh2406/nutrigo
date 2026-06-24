@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext, useLocation } from 'react-router-dom';
-import { UserCircle2, Settings } from 'lucide-react';
+import { UserCircle2, Settings, Activity, HeartPulse, Zap, Target, Leaf } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 const getGoalLabel = (goal) => {
@@ -72,6 +72,16 @@ function Profile() {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [modalError, setModalError] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '' });
+
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        setToast({ show: false, message: '' });
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.show]);
 
   // Re-sync local form if healthData or user changes (e.g. initial load)
   useEffect(() => {
@@ -159,7 +169,7 @@ function Profile() {
       setOldPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
-      alert('Đổi mật khẩu thành công! ✨');
+      setToast({ show: true, message: 'Đổi mật khẩu thành công' });
     } catch (err) {
       console.error(err);
       setModalError(err.message || 'Lỗi kết nối máy chủ.');
@@ -235,55 +245,83 @@ function Profile() {
       case 'Personal':
         return (
           <div className="profile-tab-content personal-profile animate-in">
-            <div className="bg-gradient-to-br from-[#B5E361] via-[#8CB33D] to-[#4facfe] p-8 rounded-[2.5rem] mb-8 shadow-xl shadow-green-200 relative overflow-hidden group border-none">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-125"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/20 rounded-full -ml-24 -mb-24 blur-2xl"></div>
+            <div className="bg-white p-8 rounded-[2rem] mb-8 shadow-sm border border-gray-100 relative overflow-hidden group">
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br from-[#B5E361]/20 to-[#4facfe]/20 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-gradient-to-tr from-orange-300/10 to-[#8CB33D]/20 rounded-full blur-3xl pointer-events-none"></div>
 
-              <h4 className="font-black text-white mb-8 flex items-center gap-3 relative z-10">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">🥗</div>
-                <div>
-                  <span className="block text-xl tracking-tight">Tóm tắt Năng lượng & Dinh dưỡng</span>
-                  <span className="block text-[10px] text-white/70 font-bold uppercase tracking-[0.2em] mt-1">Thông tin Sức khỏe Cá nhân hóa</span>
+              <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 pb-6 border-b border-gray-50">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#B5E361]/20 to-[#8CB33D]/20 rounded-2xl flex items-center justify-center shadow-sm border border-[#B5E361]/30 text-[#8CB33D]">
+                  <Leaf size={28} strokeWidth={2.5} />
                 </div>
-              </h4>
+                <div>
+                  <h4 className="font-extrabold text-gray-900 text-xl tracking-tight mb-1">Tóm tắt năng lượng & dinh dưỡng</h4>
+                  <p className="text-sm text-gray-500 font-medium">Theo dõi các chỉ số sức khỏe cá nhân của bạn</p>
+                </div>
+              </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
-                <div className="bg-white/10 backdrop-blur-xl px-5 py-6 rounded-[2rem] border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300">
-                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">Chỉ số BMI</span>
-                  <div className="flex items-baseline gap-2">
-                    <strong className="text-3xl text-white font-black">{metrics.bmi}</strong>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase ${metrics.bmiStatus === 'Normal' ? 'bg-white/30 text-white' : 'bg-orange-400/40 text-white'}`}>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
+                <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 hover:shadow-md hover:border-[#B5E361]/50 transition-all duration-300 flex flex-col justify-between group/card">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold text-gray-500 tracking-wide">Chỉ số BMI</span>
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover/card:text-[#B5E361] transition-colors">
+                      <Activity size={16} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span className="text-3xl font-black text-gray-900 tracking-tighter">{metrics.bmi || 0}</span>
+                    </div>
+                    <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-bold ${metrics.bmiStatus === 'Normal' ? 'bg-[#B5E361]/20 text-[#2d5214]' : 'bg-orange-100 text-orange-700'}`}>
                       {getBmiStatusLabel(metrics.bmiStatus)}
                     </span>
                   </div>
                 </div>
 
-                <div className="bg-white/10 backdrop-blur-xl px-5 py-6 rounded-[2rem] border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300">
-                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">BMR (Nghỉ ngơi)</span>
-                  <div className="flex items-baseline gap-2">
-                    <strong className="text-3xl text-white font-black">{metrics.bmr}</strong>
-                    <small className="text-[10px] text-white/60 font-black uppercase tracking-tighter">kcal</small>
+                <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 hover:shadow-md hover:border-[#B5E361]/50 transition-all duration-300 flex flex-col justify-between group/card">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold text-gray-500 tracking-wide">BMR (Nghỉ ngơi)</span>
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover/card:text-blue-500 transition-colors">
+                      <HeartPulse size={16} />
+                    </div>
                   </div>
-                  <span className="text-[9px] text-white/40 font-bold block mt-1 uppercase">Tỉ lệ trao đổi chất cơ bản</span>
+                  <div>
+                    <div className="flex items-baseline gap-1.5 mb-1">
+                      <span className="text-3xl font-black text-gray-900 tracking-tighter">{metrics.bmr || 0}</span>
+                      <span className="text-sm font-bold text-gray-400">kcal</span>
+                    </div>
+                    <span className="text-xs font-semibold text-gray-500">Năng lượng cơ bản</span>
+                  </div>
                 </div>
 
-                <div className="bg-white/10 backdrop-blur-xl px-5 py-6 rounded-[2rem] border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300">
-                  <span className="block text-[10px] text-white/60 uppercase font-black tracking-widest mb-3">TDEE (Hàng ngày)</span>
-                  <div className="flex items-baseline gap-2">
-                    <strong className="text-3xl text-white font-black">{metrics.tdee}</strong>
-                    <small className="text-[10px] text-white/60 font-black uppercase tracking-tighter">kcal</small>
+                <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 hover:shadow-md hover:border-[#B5E361]/50 transition-all duration-300 flex flex-col justify-between group/card">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold text-gray-500 tracking-wide">TDEE (Hàng ngày)</span>
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-400 group-hover/card:text-orange-500 transition-colors">
+                      <Zap size={16} />
+                    </div>
                   </div>
-                  <span className="text-[9px] text-white/40 font-bold block mt-1 uppercase">Mức năng lượng duy trì</span>
+                  <div>
+                    <div className="flex items-baseline gap-1.5 mb-1">
+                      <span className="text-3xl font-black text-gray-900 tracking-tighter">{metrics.tdee || 0}</span>
+                      <span className="text-sm font-bold text-gray-400">kcal</span>
+                    </div>
+                    <span className="text-xs font-semibold text-gray-500">Năng lượng duy trì</span>
+                  </div>
                 </div>
 
-                <div className="bg-white/95 backdrop-blur-md px-5 py-6 rounded-[2rem] shadow-2xl shadow-green-900/10 hover:scale-105 transition-all duration-300">
-                  <span className="block text-[10px] text-[#3d6600]/60 uppercase font-black tracking-widest mb-3">Mục tiêu hấp thụ</span>
-                  <div className="flex items-baseline gap-2">
-                    <strong className="text-3xl text-[#3d6600] font-black">{metrics.targetCalories}</strong>
-                    <small className="text-[10px] text-[#3d6600]/60 font-black uppercase tracking-tighter">kcal</small>
+                <div className="bg-gradient-to-br from-[#B5E361]/20 to-[#8CB33D]/20 rounded-2xl p-5 border border-[#B5E361]/40 shadow-sm hover:shadow-md hover:border-[#B5E361] transition-all duration-300 flex flex-col justify-between group/card relative overflow-hidden">
+                  <div className="absolute -right-4 -bottom-4 opacity-10 group-hover/card:scale-125 transition-transform duration-500"><Target size={80} /></div>
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <span className="text-xs font-bold text-[#2d5214] tracking-wide">Mục tiêu hấp thụ</span>
                   </div>
-                  <div className="mt-2 text-[10px] bg-[#B5E361] px-3 py-1 rounded-full text-[#3d6600] font-black inline-block shadow-sm">
-                    {getGoalLabel(healthData.goal)}
+                  <div className="relative z-10">
+                    <div className="flex items-baseline gap-1.5 mb-2">
+                      <span className="text-3xl font-black text-[#1f3b00] tracking-tighter">{metrics.targetCalories || 0}</span>
+                      <span className="text-sm font-bold text-[#3d6600]/70">kcal</span>
+                    </div>
+                    <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-white/60 text-[#2d5214] backdrop-blur-sm shadow-sm">
+                      {getGoalLabel(healthData.goal)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -379,16 +417,7 @@ function Profile() {
       case 'Edit':
         return (
           <div className="profile-tab-content edit-profile animate-in space-y-8">
-            <div className="bg-gradient-to-br from-[#B5E361] to-[#8CB33D] p-8 rounded-[2.5rem] mb-8 shadow-xl shadow-green-100 relative overflow-hidden group border-none">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -mr-32 -mt-32 blur-3xl transition-transform duration-700 group-hover:scale-125"></div>
-              <h4 className="font-black text-white mb-2 flex items-center gap-3 relative z-10">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">📝</div>
-                <div>
-                  <span className="block text-xl tracking-tight">Chỉnh sửa hồ sơ của bạn</span>
-                  <span className="text-white/80 text-sm font-medium">Cập nhật dữ liệu sức khỏe chính xác để đạt kết quả tốt nhất</span>
-                </div>
-              </h4>
-            </div>
+
 
             <form
               className="space-y-8"
@@ -684,7 +713,7 @@ function Profile() {
           title="Hồ sơ của tôi"
           icon={UserCircle2}
           actions={
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
               <button
                 className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold shadow-sm transition-colors ${activeTab === 'Personal' ? 'bg-gray-900 text-white' : 'bg-white/70 text-gray-900 ring-1 ring-white/70 backdrop-blur hover:bg-white'
                   }`}
@@ -701,6 +730,23 @@ function Profile() {
                 <Settings className="h-4 w-4" />
                 Cài đặt
               </button>
+              {activeTab === 'Personal' && (
+                <button 
+                  className="btn-primary ml-2 py-2 text-sm shadow-sm" 
+                  onClick={() => setActiveTab('Edit')}
+                >
+                  Chỉnh sửa thông tin
+                </button>
+              )}
+              {activeTab === 'Edit' && (
+                <button
+                  type="button"
+                  className="btn-secondary ml-2 py-2 text-sm shadow-sm"
+                  onClick={() => setActiveTab('Personal')}
+                >
+                  Quay lại
+                </button>
+              )}
             </div>
           }
         />
@@ -710,7 +756,7 @@ function Profile() {
 
         {/* LEFT MAIN AREA */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-3">
             <h3 className="section-title mb-0">
               {activeTab === 'Settings'
                 ? 'Cài đặt tài khoản'
@@ -718,19 +764,6 @@ function Profile() {
                   ? 'Chỉnh sửa thông tin'
                   : 'Thông tin cá nhân'}
             </h3>
-            {activeTab === 'Personal' ? (
-              <button className="btn-primary" onClick={() => setActiveTab('Edit')}>
-                Chỉnh sửa thông tin
-              </button>
-            ) : activeTab === 'Edit' ? (
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => setActiveTab('Personal')}
-              >
-                Quay lại
-              </button>
-            ) : null}
           </div>
 
           <div className="profile-content-area">
@@ -875,6 +908,30 @@ function Profile() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* TOAST MESSAGE */}
+      {toast.show && (
+        <div className="fixed top-6 right-6 z-[10000] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden animate-in slide-in-from-right-8 duration-300 w-72">
+          <style>{`
+            @keyframes toast-progress {
+              from { width: 100%; }
+              to { width: 0%; }
+            }
+          `}</style>
+          <div className="p-4 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0">
+              <span className="text-sm font-bold">✓</span>
+            </div>
+            <p className="text-sm font-bold text-gray-800">{toast.message}</p>
+          </div>
+          <div className="h-1 bg-gray-100 w-full">
+            <div
+              className="h-full bg-green-500"
+              style={{ animation: 'toast-progress 5s linear forwards' }}
+            />
           </div>
         </div>
       )}

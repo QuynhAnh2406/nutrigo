@@ -195,6 +195,31 @@ exports.changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Mật khẩu cũ không chính xác.' });
         }
 
+        // --- CHECK RECENT PASSWORDS ---
+        // 1. Check against current password
+        const isSameAsCurrent = await bcrypt.compare(newPassword, user.password_hash).catch(() => false);
+        if (isSameAsCurrent || newPassword === user.password_hash) {
+            return res.status(400).json({ success: false, message: 'Mật khẩu trong 3 lần đổi liên tiếp không được giống nhau' });
+        }
+
+        // 2. Fetch last 2 passwords from history (catch error in case table doesn't exist yet)
+        try {
+            const historyRes = await db.query(
+                'SELECT password_hash FROM password_history WHERE user_id = $1 ORDER BY created_at DESC LIMIT 2',
+                [userId]
+            );
+            for (const row of historyRes.rows) {
+                const isSameAsHistory = await bcrypt.compare(newPassword, row.password_hash).catch(() => false);
+                if (isSameAsHistory || newPassword === row.password_hash) {
+                    return res.status(400).json({ success: false, message: 'Mật khẩu trong 3 lần đổi liên tiếp không được giống nhau' });
+                }
+            }
+        } catch (dbErr) {
+            // Ignore error if password_history table does not exist yet (schema not applied)
+            console.error("Lỗi khi kiểm tra lịch sử mật khẩu (có thể table password_history chưa được tạo): ", dbErr.message);
+        }
+        // ------------------------------
+
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(newPassword, salt);
 

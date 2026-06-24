@@ -249,6 +249,61 @@ CREATE TRIGGER update_recipes_updated_at
 -- LỆNH ĐỂ XÓA DỮ LIỆU ĐANG DÙNG THỬ (TEST DATA)
 -- (Chỉ chạy các lệnh này nếu bạn muốn reset lại các công thức và lịch ăn uống do người dùng tạo ra)
 -- ==========================================
+-- ==========================================
+-- BẢNG PASSWORD_HISTORY (Lịch sử mật khẩu)
+-- ==========================================
+CREATE TABLE password_history (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Hàm kiểm tra và lưu lịch sử mật khẩu (ngăn trùng 3 lần liên tiếp)
+CREATE OR REPLACE FUNCTION check_password_history()
+RETURNS TRIGGER AS $$
+DECLARE
+    hist_hash VARCHAR;
+    match_count INTEGER := 0;
+BEGIN
+    IF NEW.password_hash IS DISTINCT FROM OLD.password_hash THEN
+        -- Đếm số lần trùng trong 2 mật khẩu cũ nhất gần đây
+        -- (Cộng thêm OLD.password_hash hiện tại sẽ là 3 lần)
+        FOR hist_hash IN 
+            SELECT password_hash 
+            FROM password_history 
+            WHERE user_id = OLD.id 
+            ORDER BY created_at DESC 
+            LIMIT 2
+        LOOP
+            IF NEW.password_hash = hist_hash THEN
+                match_count := match_count + 1;
+            END IF;
+        END LOOP;
+        
+        IF NEW.password_hash = OLD.password_hash THEN
+            match_count := match_count + 1;
+        END IF;
+
+        IF match_count > 0 THEN
+            RAISE EXCEPTION 'Mật khẩu trong 3 lần đổi liên tiếp không được giống nhau';
+        END IF;
+
+        -- Lưu mật khẩu cũ vào lịch sử
+        INSERT INTO password_history(user_id, password_hash)
+        VALUES (OLD.id, OLD.password_hash);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger kiểm tra lịch sử mật khẩu
+DROP TRIGGER IF EXISTS trigger_check_password_history ON users;
+CREATE TRIGGER trigger_check_password_history
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION check_password_history();
+
 /*
 TRUNCATE TABLE meal_plans CASCADE;
 TRUNCATE TABLE user_fridge CASCADE;
