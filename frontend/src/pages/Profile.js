@@ -9,7 +9,7 @@ const getGoalLabel = (goal) => {
     case 'Maintain weight': return 'Duy trì cân nặng';
     case 'Gain weight': return 'Tăng cân';
     case 'Build muscle': return 'Tăng cơ';
-    default: return goal || 'Duy trì cân nặng';
+    default: return goal || 'Chưa thiết lập';
   }
 };
 
@@ -73,14 +73,14 @@ function Profile() {
       },
       body: JSON.stringify({
         dateOfBirth: formData.dateOfBirth,
-        gender: formData.gender || 'Male',
+        gender: formData.gender || '',
         height: formData.height,
         weight: formData.weight,
-        activityLevel: formData.activityLevel || 'Sedentary',
-        goal: formData.goal || 'Maintain weight',
+        activityLevel: formData.activityLevel || '',
+        goal: formData.goal || '',
         dietaryPreference: formData.dietaryPreference,
         allergies: formData.allergies,
-        cookingSkill: formData.cookingSkill || 'Beginner',
+        cookingSkill: formData.cookingSkill || '',
         phone: formData.phone,
         email: formData.email,
         avatarUrl: formData.avatarUrl
@@ -196,7 +196,8 @@ function Profile() {
                   </div>
                   <div className="form-group">
                     <label>Giới tính</label>
-                    <select value={healthData.gender || 'Male'} disabled className="bg-gray-50 border-gray-200 custom-select">
+                    <select value={healthData.gender || ''} disabled className="bg-gray-50 border-gray-200 custom-select">
+                      <option value="">Chưa thiết lập</option>
                       <option value="Male">Nam</option>
                       <option value="Female">Nữ</option>
                     </select>
@@ -225,7 +226,8 @@ function Profile() {
                 <div className="form-grid opacity-80 pointer-events-none">
                   <div className="form-group col-span-2">
                     <label>Mục tiêu</label>
-                    <select value={healthData.goal || 'Maintain weight'} disabled className="bg-gray-50 border-gray-200 custom-select">
+                    <select value={healthData.goal || ''} disabled className="bg-gray-50 border-gray-200 custom-select">
+                      <option value="">Chưa thiết lập</option>
                       <option value="Lose weight">Giảm cân</option>
                       <option value="Maintain weight">Duy trì cân nặng</option>
                       <option value="Gain weight">Tăng cân</option>
@@ -234,7 +236,8 @@ function Profile() {
                   </div>
                   <div className="form-group col-span-2">
                     <label>Mức độ vận động</label>
-                    <select value={healthData.activityLevel || 'Sedentary'} disabled className="bg-gray-50 border-gray-200 custom-select">
+                    <select value={healthData.activityLevel || ''} disabled className="bg-gray-50 border-gray-200 custom-select">
+                      <option value="">Chưa thiết lập</option>
                       <option value="Sedentary">Ít vận động (Ít hoặc không tập thể dục)</option>
                       <option value="Light">Nhẹ nhàng (Tập thể dục 1-3 lần/tuần)</option>
                       <option value="Moderate">Vừa phải (Tập thể dục 4-5 lần/tuần)</option>
@@ -253,6 +256,7 @@ function Profile() {
                   <div className="form-group col-span-2">
                     <label>Khả năng nấu nướng</label>
                     <select value={healthData.cookingSkill || ''} disabled className="bg-gray-50 border-gray-200 custom-select">
+                      <option value="">Chưa thiết lập</option>
                       <option value="Beginner">Người mới bắt đầu (Ít hoặc không có kinh nghiệm)</option>
                       <option value="Intermediate">Trung bình (Có thể nấu theo công thức dễ dàng)</option>
                       <option value="Advanced">Nâng cao (Người nấu ăn gia đình có kinh nghiệm)</option>
@@ -313,7 +317,8 @@ function Profile() {
                   </div>
                   <div className="form-group">
                     <label>Giới tính</label>
-                    <select name="gender" value={formData.gender || 'Male'} onChange={handleFormChange} className="custom-select bg-white/80">
+                    <select name="gender" value={formData.gender || ''} onChange={handleFormChange} className="custom-select bg-white/80">
+                      <option value="">Chọn giới tính</option>
                       <option value="Male">Nam</option>
                       <option value="Female">Nữ</option>
                     </select>
@@ -387,7 +392,8 @@ function Profile() {
                 <div className="form-grid">
                   <div className="form-group col-span-2">
                     <label>Mục tiêu sức khỏe</label>
-                    <select name="goal" value={formData.goal || 'Maintain weight'} onChange={handleFormChange} className="custom-select bg-white/80">
+                    <select name="goal" value={formData.goal || ''} onChange={handleFormChange} className="custom-select bg-white/80">
+                      <option value="">Chọn mục tiêu sức khỏe</option>
                       <option value="Lose weight">Giảm cân</option>
                       <option value="Maintain weight">Duy trì cân nặng</option>
                       <option value="Gain weight">Tăng cân</option>
@@ -396,7 +402,8 @@ function Profile() {
                   </div>
                   <div className="form-group col-span-2">
                     <label>Mức độ vận động</label>
-                    <select name="activityLevel" value={formData.activityLevel || 'Sedentary'} onChange={handleFormChange} className="custom-select bg-white/80">
+                    <select name="activityLevel" value={formData.activityLevel || ''} onChange={handleFormChange} className="custom-select bg-white/80">
+                      <option value="">Chọn mức độ vận động</option>
                       <option value="Sedentary">Ít vận động (Ít hoặc không tập thể dục)</option>
                       <option value="Light">Nhẹ nhàng (Tập thể dục 1-3 lần/tuần)</option>
                       <option value="Moderate">Vừa phải (Tập thể dục 4-5 lần/tuần)</option>
@@ -414,7 +421,8 @@ function Profile() {
                   </div>
                   <div className="form-group col-span-2">
                     <label>Khả năng nấu nướng</label>
-                    <select name="cookingSkill" value={formData.cookingSkill || 'Beginner'} onChange={handleFormChange} className="custom-select bg-white/80">
+                    <select name="cookingSkill" value={formData.cookingSkill || ''} onChange={handleFormChange} className="custom-select bg-white/80">
+                      <option value="">Chọn khả năng nấu nướng</option>
                       <option value="Beginner">Người mới bắt đầu (Ít hoặc không có kinh nghiệm)</option>
                       <option value="Intermediate">Trung bình (Có thể nấu theo công thức dễ dàng)</option>
                       <option value="Advanced">Nâng cao (Người nấu ăn gia đình có kinh nghiệm)</option>

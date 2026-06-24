@@ -37,7 +37,7 @@ function Dashboard() {
       case 'Maintain weight': return 'Duy trì cân nặng';
       case 'Gain weight': return 'Tăng cân';
       case 'Build muscle': return 'Tăng cơ';
-      default: return goal || 'Duy trì cân nặng';
+      default: return goal || 'Chưa thiết lập';
     }
   };
 

@@ -79,7 +79,7 @@ function MainLayout() {
                         goal: row.goal || '',
                         dietaryPreference: row.dietary_preference || '',
                         allergies: row.allergies || '',
-                        cookingSkill: row.cooking_skill || 'Beginner',
+                        cookingSkill: row.cooking_skill || '',
                         phone: row.phone || ''
                     });
 
@@ -130,9 +130,12 @@ function MainLayout() {
             else bmiStatus = 'Obese';
 
             // BMR (Mifflin-St Jeor Equation)
-            let bmr = 10 * weight + 6.25 * height - 5 * age;
-            if (gender === 'Male') bmr += 5;
-            else bmr -= 161;
+            let bmr = 0;
+            if (gender === 'Male') {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else if (gender === 'Female') {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
 
             // TDEE
             const activityMultipliers = {
@@ -142,12 +145,16 @@ function MainLayout() {
                 'Active': 1.725,
                 'Very Active': 1.9
             };
-            const tdee = Math.round(bmr * (activityMultipliers[activityLevel] || 1.2));
+            const tdee = (bmr && activityLevel) ? Math.round(bmr * (activityMultipliers[activityLevel] || 1.2)) : 0;
 
             // Target Calories based on Goal
             let targetCalories = tdee;
-            if (healthData.goal === 'Lose weight') targetCalories -= 500;
-            else if (healthData.goal === 'Gain weight') targetCalories += 500;
+            if (tdee > 0 && healthData.goal) {
+                if (healthData.goal === 'Lose weight') targetCalories -= 500;
+                else if (healthData.goal === 'Gain weight') targetCalories += 500;
+            } else {
+                targetCalories = 0;
+            }
 
             setMetrics({ bmi, bmr: Math.round(bmr), tdee, targetCalories, bmiStatus, age });
         };
