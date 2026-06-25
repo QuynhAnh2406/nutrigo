@@ -280,6 +280,10 @@ function Profile() {
                     <input type="number" value={metrics.age || 0} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                   <div className="form-group">
+                    <label>Số điện thoại</label>
+                    <input type="text" value={healthData.phone || 'Chưa thiết lập'} disabled className="bg-gray-50 border-gray-200" />
+                  </div>
+                  <div className="form-group">
                     <label>Giới tính</label>
                     <select value={healthData.gender || ''} disabled className="bg-gray-50 border-gray-200 custom-select">
                       <option value="">Chưa thiết lập</option>
@@ -295,13 +299,9 @@ function Profile() {
                     <label>Cân nặng (kg)</label>
                     <input type="number" value={healthData.weight} disabled className="bg-gray-50 border-gray-200" />
                   </div>
-                  <div className="form-group">
+                  <div className="form-group col-span-2">
                     <label>Địa chỉ Email</label>
                     <input type="email" value={user.email} disabled className="bg-gray-50 border-gray-200" />
-                  </div>
-                  <div className="form-group">
-                    <label>Số điện thoại</label>
-                    <input type="text" value={healthData.phone || 'Chưa thiết lập'} disabled className="bg-gray-50 border-gray-200" />
                   </div>
                 </div>
               </div>
@@ -407,6 +407,18 @@ function Profile() {
                   </div>
 
                   <div className="form-group">
+                    <label>Số điện thoại</label>
+                    <input
+                      type="text"
+                      name="phone"
+                      value={formData.phone || ''}
+                      onChange={handleFormChange}
+                      placeholder="Nhập số điện thoại của bạn"
+                      className="bg-white/80"
+                    />
+                  </div>
+
+                  <div className="form-group">
                     <label>Giới tính</label>
                     <select
                       name="gender"
@@ -440,7 +452,7 @@ function Profile() {
                       className="bg-white/80"
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="form-group col-span-2">
                     <label>Địa chỉ Email</label>
                     <input
                       type="email"
@@ -448,18 +460,6 @@ function Profile() {
                       value={formData.email || ''}
                       onChange={handleFormChange}
                       placeholder="tenbancuaban@example.com"
-                      className="bg-white/80"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Số điện thoại</label>
-                    <input
-                      type="text"
-                      name="phone"
-                      value={formData.phone || ''}
-                      onChange={handleFormChange}
-                      placeholder="Nhập số điện thoại của bạn"
                       className="bg-white/80"
                     />
                   </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Flame, Sparkles, Scale, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { Search, X, Flame, Sparkles, Scale, SlidersHorizontal, RotateCcw, Store, Apple, Coffee, Cookie, Soup } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 function Ingredients({ mode = 'ingredient' }) {
@@ -211,32 +211,35 @@ function Ingredients({ mode = 'ingredient' }) {
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('food')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'food'
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedCategory === 'food'
                               ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
-                          🍲Đồ ăn
+                          <Soup className="h-3.5 w-3.5" />
+                          <span>Đồ ăn</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('drink')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'drink'
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedCategory === 'drink'
                               ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
-                          🥤Đồ uống
+                          <Coffee className="h-3.5 w-3.5" />
+                          <span>Đồ uống</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('snack')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'snack'
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedCategory === 'snack'
                               ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
-                          🍪Ăn vặt
+                          <Cookie className="h-3.5 w-3.5" />
+                          <span>Ăn vặt</span>
                         </button>
                       </div>
                     </div>
@@ -336,11 +339,36 @@ function Ingredients({ mode = 'ingredient' }) {
                 {/* Top Badges */}
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex flex-wrap gap-1.5">
-                    <span className="px-2.5 py-1 rounded-xl text-xs font-black tracking-wide bg-gray-50 text-gray-500 border border-gray-100/80 shadow-sm">
-                      {(ing.type || 'ingredient') === 'brand' ? `🏬 ${ing.brand_name || 'Khác'}` : '🍏 Nguyên liệu'}
+                    <span className="px-2.5 py-1 rounded-xl text-xs font-black tracking-wide bg-gray-50 text-gray-500 border border-gray-100/80 shadow-sm flex items-center gap-1">
+                      {(ing.type || 'ingredient') === 'brand' ? (
+                        <>
+                          <Store className="h-3.5 w-3.5 text-gray-400" />
+                          <span>{ing.brand_name || 'Khác'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Apple className="h-3.5 w-3.5 text-green-500" />
+                          <span>Nguyên liệu</span>
+                        </>
+                      )}
                     </span>
-                    <span className="px-2.5 py-1 rounded-xl text-xs font-black tracking-wide bg-[#B5E361]/10 text-[#2d5214] border border-[#B5E361]/20 shadow-sm">
-                      {ing.category === 'drink' ? '🥤 Đồ uống' : ing.category === 'snack' ? '🍪 Ăn vặt' : '🍲 Đồ ăn'}
+                    <span className="px-2.5 py-1 rounded-xl text-xs font-black tracking-wide bg-[#B5E361]/10 text-[#2d5214] border border-[#B5E361]/20 shadow-sm flex items-center gap-1">
+                      {ing.category === 'drink' ? (
+                        <>
+                          <Coffee className="h-3.5 w-3.5 text-[#5c8b1a]" />
+                          <span>Đồ uống</span>
+                        </>
+                      ) : ing.category === 'snack' ? (
+                        <>
+                          <Cookie className="h-3.5 w-3.5 text-[#5c8b1a]" />
+                          <span>Ăn vặt</span>
+                        </>
+                      ) : (
+                        <>
+                          <Soup className="h-3.5 w-3.5 text-[#5c8b1a]" />
+                          <span>Đồ ăn</span>
+                        </>
+                      )}
                     </span>
                   </div>
                 </div>
@@ -417,7 +445,7 @@ function Ingredients({ mode = 'ingredient' }) {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center text-center py-16 bg-white rounded-[24px] border border-gray-100/80 shadow-sm">
-          <span className="text-3xl mb-3">🔍</span>
+          <Search className="h-10 w-10 text-gray-300 mb-3" />
           <h4 className="font-extrabold text-gray-800 text-base mb-1">Không tìm thấy nguyên liệu nào</h4>
           <p className="text-xs text-gray-400 font-semibold max-w-xs leading-relaxed">
             Hãy thử tìm bằng từ khóa khác!
@@ -473,9 +501,9 @@ function Ingredients({ mode = 'ingredient' }) {
                   onChange={handleInputChange}
                   className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15 bg-white cursor-pointer"
                 >
-                  <option value="food">🍲Đồ ăn(Cơm, mì, thịt, rau...)</option>
-                  <option value="drink">🥤Đồ uống(Trà sữa, cafe, nước ngọt...)</option>
-                  <option value="snack">🍪Đồ ăn vặt(Khoai tây chiên, bánh kẹo...)</option>
+                  <option value="food">Đồ ăn (Cơm, mì, thịt, rau...)</option>
+                  <option value="drink">Đồ uống (Trà sữa, cafe, nước ngọt...)</option>
+                  <option value="snack">Đồ ăn vặt (Khoai tây chiên, bánh kẹo...)</option>
                 </select>
               </div>
               {mode === 'brand' && (

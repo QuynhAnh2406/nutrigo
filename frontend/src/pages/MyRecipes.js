@@ -4,7 +4,7 @@ import RecipeCard from '../components/RecipeCard';
 import MealDetailModal from '../components/MealDetailModal';
 import AddToMealPlanModal from '../components/AddToMealPlanModal';
 import PageHeader from '../components/PageHeader';
-import { BookOpen, Plus, Search, SlidersHorizontal, RotateCcw, Trash2, Check } from 'lucide-react';
+import { BookOpen, Plus, Search, SlidersHorizontal, RotateCcw, Trash2, Check, Coffee, Soup, Cookie, Moon, Apple } from 'lucide-react';
 
 function MyRecipes() {
   const navigate = useNavigate();
@@ -178,30 +178,30 @@ function MyRecipes() {
                         <button
                           type="button"
                           onClick={() => setSelectedMealType('breakfast')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedMealType === 'breakfast' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedMealType === 'breakfast' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                         >
-                          🍳 Sáng
+                          <Coffee className="h-3.5 w-3.5" /> Sáng
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedMealType('lunch')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedMealType === 'lunch' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedMealType === 'lunch' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                         >
-                          🍲 Trưa
+                          <Soup className="h-3.5 w-3.5" /> Trưa
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedMealType('snack')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedMealType === 'snack' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedMealType === 'snack' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                         >
-                          🍪 Phụ
+                          <Cookie className="h-3.5 w-3.5" /> Phụ
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedMealType('dinner')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedMealType === 'dinner' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedMealType === 'dinner' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                         >
-                          🌃 Tối
+                          <Moon className="h-3.5 w-3.5" /> Tối
                         </button>
                       </div>
                     </div>
@@ -220,30 +220,30 @@ function MyRecipes() {
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('food')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'food' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedCategory === 'food' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                         >
-                          🍲 Đồ ăn
+                          <Soup className="h-3.5 w-3.5" /> Đồ ăn
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('drink')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'drink' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedCategory === 'drink' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                         >
-                          🥤 Đồ uống
+                          <Coffee className="h-3.5 w-3.5" /> Đồ uống
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('snack')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'snack' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedCategory === 'snack' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                         >
-                          🍪 Ăn vặt
+                          <Cookie className="h-3.5 w-3.5" /> Ăn vặt
                         </button>
                         <button
                           type="button"
                           onClick={() => setSelectedCategory('fruit')}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${selectedCategory === 'fruit' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${selectedCategory === 'fruit' ? 'bg-[#B5E361] text-[#1f3b00]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
                         >
-                          🍎 Hoa quả
+                          <Apple className="h-3.5 w-3.5" /> Hoa quả
                         </button>
                         <button
                           type="button"
@@ -305,7 +305,7 @@ function MyRecipes() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center text-center py-16 bg-white rounded-[24px] border border-gray-100/80 shadow-sm">
-            <span className="text-3xl mb-3">🍳</span>
+            <BookOpen className="h-10 w-10 text-gray-300 mb-3" />
             <h4 className="font-extrabold text-gray-800 text-base mb-1">Chưa có công thức nào</h4>
             <p className="text-xs text-gray-400 font-semibold max-w-xs leading-relaxed mb-4">
               Bạn chưa có công thức nào. Hãy tự tạo công thức của riêng bạn ngay bây giờ!

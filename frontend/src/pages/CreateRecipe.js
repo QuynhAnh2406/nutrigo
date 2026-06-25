@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { Sparkles, ArrowLeft, ChefHat, Trash2, Plus } from 'lucide-react';
+import { Sparkles, ArrowLeft, ChefHat, Trash2, Plus, Target, Camera, Tag, Soup, Coffee, Cookie } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 function CreateRecipe() {
@@ -369,9 +369,9 @@ function CreateRecipe() {
                     <label className="text-sm font-bold text-gray-700 pl-1">Loại món</label>
                     <div className="flex flex-wrap gap-2">
                       {[
-                        { value: 'food', label: 'Đồ ăn', icon: '🍲' },
-                        { value: 'drink', label: 'Đồ uống', icon: '🥤' },
-                        { value: 'snack', label: 'Ăn vặt', icon: '🍪' },
+                        { value: 'food', label: 'Đồ ăn', icon: Soup },
+                        { value: 'drink', label: 'Đồ uống', icon: Coffee },
+                        { value: 'snack', label: 'Ăn vặt', icon: Cookie },
                         { value: 'other', label: 'Khác', icon: null }
                       ].map(option => (
                         <button
@@ -383,7 +383,7 @@ function CreateRecipe() {
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
-                          {option.icon && <span className="text-base">{option.icon}</span>}
+                          {option.icon && <option.icon className="h-4 w-4" />}
                           {option.label}
                         </button>
                       ))}
@@ -624,27 +624,27 @@ function CreateRecipe() {
           <div className="bg-[#F4FBE7] rounded-[24px] p-6 border border-[#B5E361]/25 sticky top-8 flex flex-col gap-4">
             <h3 className="font-extrabold text-[#1f3b00] text-base m-0 flex items-center gap-1.5">
               <Sparkles className="h-5 w-5 text-amber-500 animate-pulse" />
-              Công thức lý tưởng 🍏
+              Công thức lý tưởng
             </h3>
             <div className="text-[#2d5200]/90 text-xs font-semibold leading-relaxed space-y-3.5">
               <p>Chào mừng bạn đến với góc sáng tạo ẩm thực lành mạnh! Một công thức lý tưởng sẽ hỗ trợ bạn và cộng đồng duy trì lối sống lành mạnh.</p>
 
-              <div className="flex gap-2">
-                <span className="text-base select-none">🎯</span>
+              <div className="flex gap-2.5 items-start">
+                <Target className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
                 <p><strong>Tính chính xác cao:</strong> Hãy nhập đúng tên và định lượng của từng nguyên liệu để lượng calo được tính chuẩn nhất.</p>
               </div>
 
-              <div className="flex gap-2">
-                <span className="text-base select-none">📷</span>
+              <div className="flex gap-2.5 items-start">
+                <Camera className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
                 <p><strong>Hình ảnh hấp dẫn:</strong> Một hình ảnh rõ ràng và đẹp mắt sẽ tạo cảm hứng nấu ăn nhiều hơn cho mọi người.</p>
               </div>
 
-              <div className="flex gap-2">
-                <span className="text-base select-none">🏷️</span>
+              <div className="flex gap-2.5 items-start">
+                <Tag className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
                 <p><strong>Gắn tag phù hợp:</strong> Chọn đúng bữa ăn và nhóm thực phẩm giúp bộ lọc nâng cao sắp xếp chính xác.</p>
               </div>
 
-              <p className="font-bold pt-1 border-t border-[#B5E361]/20">Nutrigo chúc bạn có những trải nghiệm nấu ăn thật vui và bổ ích! 🍳✨</p>
+              <p className="font-bold pt-1 border-t border-[#B5E361]/20">Nutrigo chúc bạn có những trải nghiệm nấu ăn thật vui và bổ ích! ✨</p>
             </div>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Flame, Wheat, Dumbbell, Apple } from 'lucide-react';
 
 function RightPanel({ items }) {
   const translateType = (type) => {
@@ -21,7 +22,9 @@ function RightPanel({ items }) {
           items.map((item, index) => (
             <div className="side-card" style={{ flexDirection: 'column', gap: '10px' }} key={index}>
               <div style={{ display: 'flex', gap: '15px' }}>
-                <div className="side-card-img" style={{ backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>🥑</div>
+                <div className="side-card-img" style={{ backgroundColor: '#f9fbe7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8CB33D' }}>
+                  <Apple size={28} />
+                </div>
                 <div className="side-card-info">
                   <h5>{item.name}</h5>
                   <div className="side-card-meta" style={{ marginTop: '5px' }}>
@@ -31,10 +34,10 @@ function RightPanel({ items }) {
                 </div>
               </div>
               <div className="side-card-stats">
-                <span>🔥 {item.calories} kcal</span>
-                <span>🌾 {item.carbs}g Carbs</span>
-                <span>🥩 {item.protein}g Protein</span>
-                <span>🥑 {item.fats}g Fat</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Flame size={12} style={{ color: '#f97316' }} /> {item.calories} kcal</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Wheat size={12} style={{ color: '#d97706' }} /> {item.carbs}g Carbs</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Dumbbell size={12} style={{ color: '#3b82f6' }} /> {item.protein}g Protein</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><Apple size={12} style={{ color: '#10b981' }} /> {item.fats}g Fat</span>
               </div>
             </div>
           ))

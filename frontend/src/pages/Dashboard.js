@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowRight, Sparkles, LayoutDashboard } from 'lucide-react';
+import { ArrowRight, Sparkles, LayoutDashboard, Clock, Target, Zap, Flame, Scale } from 'lucide-react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 
@@ -141,8 +141,9 @@ function Dashboard() {
           title={time.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           subtitle="Bắt đầu ngày mới tràn đầy năng lượng cùng Nutrigo!"
           actions={
-            <div className="rounded-full bg-white/55 px-4 py-2 text-sm font-extrabold text-[#1f3b00] ring-1 ring-white/60 backdrop-blur">
-              🕒 {time.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            <div className="rounded-full bg-white/55 px-4 py-2 text-sm font-extrabold text-[#1f3b00] ring-1 ring-white/60 backdrop-blur flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-[#3d6600]" />
+              <span>{time.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
             </div>
           }
         >
@@ -189,7 +190,9 @@ function Dashboard() {
           <div className="relative z-10 flex flex-col h-full justify-between">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner">🎯</div>
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner">
+                  <Target className="text-white w-6 h-6" />
+                </div>
                 <span className="text-white font-black uppercase tracking-[0.2em] text-xs">Mục tiêu hàng ngày</span>
               </div>
               <h3 className="text-white text-6xl font-black mt-6 flex items-baseline gap-3">
@@ -216,21 +219,27 @@ function Dashboard() {
         {/* SECONDARY METRICS GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-1 gap-4 w-full lg:w-[280px]">
           <div className="bg-white border border-gray-100 p-5 rounded-[2rem] shadow-sm flex items-center gap-4 hover:border-[#B5E361]/50 transition-all">
-            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-xl">⚡</div>
+            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center">
+              <Zap className="w-6 h-6 text-green-600" />
+            </div>
             <div>
               <span className="block text-[10px] text-gray-400 font-black uppercase tracking-wider">TDEE</span>
               <strong className="text-xl text-gray-900">{metrics.tdee || '--'} <small className="text-[10px] opacity-40">kcal</small></strong>
             </div>
           </div>
           <div className="bg-white border border-gray-100 p-5 rounded-[2rem] shadow-sm flex items-center gap-4 hover:border-orange-200 transition-all">
-            <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center text-xl">🔥</div>
+            <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center">
+              <Flame className="w-6 h-6 text-orange-600" />
+            </div>
             <div>
               <span className="block text-[10px] text-gray-400 font-black uppercase tracking-wider">BMR</span>
               <strong className="text-xl text-gray-900">{metrics.bmr || '--'} <small className="text-[10px] opacity-40">kcal</small></strong>
             </div>
           </div>
           <div className="bg-white border border-gray-100 p-5 rounded-[2rem] shadow-sm flex items-center gap-4 hover:border-blue-200 transition-all">
-            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl">⚖️</div>
+            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+              <Scale className="w-6 h-6 text-blue-600" />
+            </div>
             <div>
               <span className="block text-[10px] text-gray-400 font-black uppercase tracking-wider">BMI</span>
               <div className="flex items-center gap-2">
