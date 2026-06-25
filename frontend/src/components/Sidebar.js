@@ -32,6 +32,13 @@ function Sidebar({ user }) {
         window.location.href = '/login';
     };
 
+    const handleNavLinkClick = (path) => (e) => {
+        if (window.location.pathname === path) {
+            e.preventDefault();
+            window.location.href = path;
+        }
+    };
+
     return (
         <div className="sidebar" style={{ position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', inset: 0, opacity: 0.4, pointerEvents: 'none', zIndex: 0 }}>
@@ -45,13 +52,13 @@ function Sidebar({ user }) {
                 <span style={{ fontSize: '24px', fontWeight: '700', letterSpacing: '-0.025em', color: '#ffffff' }}>Nutrigo</span>
             </div>
             <ul className="nav-menu" style={{ position: 'relative', zIndex: 1 }}>
-                <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <NavLink to="/dashboard" onClick={handleNavLinkClick('/dashboard')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <LayoutDashboard className="nav-icon" size={20} /> Trang chủ
                 </NavLink>
-                <NavLink to="/meal-plan" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <NavLink to="/meal-plan" onClick={handleNavLinkClick('/meal-plan')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <CalendarDays className="nav-icon" size={20} /> Lịch ăn uống
                 </NavLink>
-                <NavLink to="/my-recipes" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <NavLink to="/my-recipes" onClick={handleNavLinkClick('/my-recipes')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <BookOpen className="nav-icon" size={20} /> Công thức của tôi
                 </NavLink>
                 <div className="nav-group">
@@ -69,13 +76,13 @@ function Sidebar({ user }) {
                     {isNutritionOpen && (
                         <div className="sub-nav-menu">
                             <div className="sub-nav-item">
-                                <NavLink to="/ingredients" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ fontSize: '0.95em', padding: '0.6rem 1rem', minHeight: 'auto', marginBottom: 0, justifyContent: 'space-between' }}>
+                                <NavLink to="/ingredients" onClick={handleNavLinkClick('/ingredients')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ fontSize: '0.95em', padding: '0.6rem 1rem', minHeight: 'auto', marginBottom: 0, justifyContent: 'space-between' }}>
                                     <span>Nguyên liệu</span>
                                     <Apple size={16} className="nav-icon" />
                                 </NavLink>
                             </div>
                             <div className="sub-nav-item">
-                                <NavLink to="/brands" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ fontSize: '0.95em', padding: '0.6rem 1rem', minHeight: 'auto', marginBottom: 0, justifyContent: 'space-between' }}>
+                                <NavLink to="/brands" onClick={handleNavLinkClick('/brands')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} style={{ fontSize: '0.95em', padding: '0.6rem 1rem', minHeight: 'auto', marginBottom: 0, justifyContent: 'space-between' }}>
                                     <span>Thương hiệu</span>
                                     <Store size={16} className="nav-icon" />
                                 </NavLink>

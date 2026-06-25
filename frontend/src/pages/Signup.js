@@ -38,17 +38,7 @@ export default function Signup() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        localStorage.setItem('token', data.token);
-        try {
-          const userToSave = { ...data.user };
-          if (userToSave.avatar && userToSave.avatar.startsWith('data:image/')) {
-            userToSave.avatar = '';
-          }
-          localStorage.setItem('user', JSON.stringify(userToSave));
-        } catch (err) {
-          console.warn('Failed to save user to localStorage:', err);
-        }
-        navigate('/dashboard');
+        navigate('/login', { state: { signupSuccess: true, email: email } });
       } else {
         setError(data.message || 'Đăng ký không thành công. Vui lòng thử lại.');
       }

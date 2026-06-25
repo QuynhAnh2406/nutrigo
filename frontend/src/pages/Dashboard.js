@@ -51,6 +51,14 @@ function Dashboard() {
     }
   };
 
+  const getBmiPercentage = (bmi) => {
+    if (!bmi) return 0;
+    const val = parseFloat(bmi);
+    const minBmi = 15;
+    const maxBmi = 35;
+    return Math.min(Math.max(((val - minBmi) / (maxBmi - minBmi)) * 100, 0), 100);
+  };
+
   const [weeklyPlan, setWeeklyPlan] = useState([]);
 
   // Fetch data from backend
@@ -237,18 +245,62 @@ function Dashboard() {
       </div>
       
       <div className="bmi-scale-wrapper mb-8 p-6 bg-white rounded-2xl border border-gray-100">
-          <h4 className="font-bold mb-4">Thang đo BMI</h4>
-          <div className="w-full h-4 rounded-full bg-gradient-to-r from-blue-400 via-green-400 to-red-500 relative">
-              <div 
-                  className="absolute top-[-8px] w-1 h-8 bg-black rounded" 
-                  style={{ left: `${Math.min(Math.max((metrics.bmi - 15) * 4, 0), 100)}%` }}
-              ></div>
-          </div>
-          <div className="flex justify-between text-xs text-gray-500 mt-2">
-              <span>15</span>
-              <span>18.5 (Bình thường)</span>
-              <span>25 (Thừa cân)</span>
-              <span>40</span>
+          <h4 className="font-bold mb-2">Thang đo BMI</h4>
+          
+          <div className="relative mb-2 mt-8 pt-8 pb-4">
+              {/* Tooltip containing the BMI value */}
+              {metrics.bmi && (
+                  <div 
+                      className="absolute top-0 -translate-x-1/2 flex flex-col items-center transition-all duration-300"
+                      style={{ left: `${getBmiPercentage(metrics.bmi)}%` }}
+                  >
+                      <span className="bg-gray-900 text-white text-xs font-black px-2.5 py-1 rounded-xl shadow-md whitespace-nowrap animate-bounce">
+                          Chỉ số: {metrics.bmi}
+                      </span>
+                      {/* Downward triangle/arrow */}
+                      <div className="w-2 h-2 bg-gray-900 rotate-45 -mt-1"></div>
+                  </div>
+              )}
+
+              {/* The multi-colored bar */}
+              <div className="w-full h-4 rounded-full flex overflow-hidden bg-gray-100 relative">
+                  <div style={{ width: '17.5%' }} className="bg-blue-300 h-full" title="Gầy (< 18.5)"></div>
+                  <div style={{ width: '32.5%' }} className="bg-green-400 h-full" title="Bình thường (18.5 - 24.9)"></div>
+                  <div style={{ width: '25%' }} className="bg-orange-300 h-full" title="Thừa cân (25.0 - 29.9)"></div>
+                  <div style={{ width: '25%' }} className="bg-red-400 h-full" title="Béo phì (>= 30.0)"></div>
+
+                  {/* The pointer pin inside or overlaying the bar */}
+                  {metrics.bmi && (
+                      <div 
+                          className="absolute top-[-6px] bottom-[-6px] w-[3px] bg-gray-900 rounded transition-all duration-300"
+                          style={{ left: `calc(${getBmiPercentage(metrics.bmi)}% - 1.5px)` }}
+                      ></div>
+                  )}
+              </div>
+
+              {/* Labels aligned on the number line */}
+              <div className="relative text-[10px] text-gray-500 font-bold mt-3 h-8">
+                  <div className="absolute -translate-x-1/2 text-center" style={{ left: '0%' }}>
+                      <span className="block font-black text-gray-700">15</span>
+                      <span className="text-[8px] text-gray-400 font-medium">Rất gầy</span>
+                  </div>
+                  <div className="absolute -translate-x-1/2 text-center" style={{ left: '17.5%' }}>
+                      <span className="block font-black text-gray-700">18.5</span>
+                      <span className="text-[8px] text-gray-400 font-medium">Bình thường</span>
+                  </div>
+                  <div className="absolute -translate-x-1/2 text-center" style={{ left: '50%' }}>
+                      <span className="block font-black text-gray-700">25</span>
+                      <span className="text-[8px] text-gray-400 font-medium">Thừa cân</span>
+                  </div>
+                  <div className="absolute -translate-x-1/2 text-center" style={{ left: '75%' }}>
+                      <span className="block font-black text-gray-700">30</span>
+                      <span className="text-[8px] text-gray-400 font-medium">Béo phì</span>
+                  </div>
+                  <div className="absolute -translate-x-1/2 text-center" style={{ left: '100%' }}>
+                      <span className="block font-black text-gray-700">35+</span>
+                      <span className="text-[8px] text-gray-400 font-medium">Nguy hiểm</span>
+                  </div>
+              </div>
           </div>
       </div>
 

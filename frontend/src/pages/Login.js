@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Leaf } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 const quotes = [
   "Sức khỏe là vốn quý nhất.",
@@ -30,8 +30,10 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [quote, setQuote] = useState('');
 
@@ -40,9 +42,21 @@ export default function Login() {
     setQuote(quotes[randomIndex]);
   }, []);
 
+  useEffect(() => {
+    if (location.state?.signupSuccess) {
+      setSuccessMessage('Đăng ký tài khoản thành công! Vui lòng đăng nhập để tiếp tục.');
+      if (location.state.email) {
+        setEmail(location.state.email);
+      }
+      // Clear location state to prevent repeating the message on reload
+      navigate('/login', { replace: true, state: {} });
+    }
+  }, [location, navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
     setIsLoading(true);
 
     try {
@@ -127,6 +141,12 @@ export default function Login() {
 
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Chào mừng quay trở lại! 👋</h2>
           <p className="text-gray-500 mb-6">Vui lòng nhập thông tin của bạn để truy cập trang chủ.</p>
+
+          {successMessage && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-700 rounded-xl text-sm font-medium">
+              {successMessage}
+            </div>
+          )}
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-medium">
