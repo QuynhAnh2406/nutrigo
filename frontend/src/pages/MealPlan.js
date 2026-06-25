@@ -144,6 +144,14 @@ function MealPlan() {
         if (data.success) {
           fetchSelectedPlanData();
           fetchMonthlyMeals();
+          
+          const dateString = selectedDate.toLocaleDateString('vi-VN');
+          setToastMessage({
+            type: 'delete',
+            target: `Toàn bộ món ăn ngày ${dateString}`
+          });
+          setTimeout(() => setToastMessage(null), 5000);
+          
           setClearMode(null);
         } else {
           alert("Xóa thất bại!");
@@ -165,6 +173,14 @@ function MealPlan() {
         if (data.success) {
           fetchSelectedPlanData();
           fetchMonthlyMeals();
+          
+          const dateString = selectedDate.toLocaleDateString('vi-VN');
+          setToastMessage({
+            type: 'delete',
+            target: `Các món ${mealTypeLabels[clearMode.session]} ngày ${dateString}`
+          });
+          setTimeout(() => setToastMessage(null), 5000);
+          
           setClearMode(null);
         } else {
           alert("Xóa thất bại!");
@@ -181,7 +197,7 @@ function MealPlan() {
   const confirmDeleteMeal = async () => {
     if (!mealToDelete) return;
     try {
-      await fetch('http://localhost:5002/api/mealplan/update', {
+      const res = await fetch('http://localhost:5002/api/mealplan/update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,10 +210,19 @@ function MealPlan() {
           action: 'delete'
         })
       });
-      fetchSelectedPlanData();
-      fetchMonthlyMeals();
-      setMealToDelete(null);
-      setSelectedRecipeDetail(null);
+      if (res.ok) {
+        fetchSelectedPlanData();
+        fetchMonthlyMeals();
+        
+        setToastMessage({
+          type: 'delete',
+          target: `Món ${mealToDelete.name || ''}`
+        });
+        setTimeout(() => setToastMessage(null), 5000);
+        
+        setMealToDelete(null);
+        setSelectedRecipeDetail(null);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -587,7 +612,7 @@ function MealPlan() {
 
               setTimeout(() => {
                 setToastMessage(null);
-              }, 3000);
+              }, 5000);
             }
           }}
         />
@@ -596,14 +621,27 @@ function MealPlan() {
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-6 right-6 z-[150] bg-white border border-[#B5E361]/50 shadow-xl rounded-2xl p-4 flex items-center gap-3 animate-in slide-in-from-right-8 fade-in duration-300">
-          <div className="w-8 h-8 bg-[#EAF7D5] rounded-full flex items-center justify-center shrink-0">
-            <Check size={16} className="text-[#3d6600]" strokeWidth={3} />
-          </div>
-          <p className="text-sm font-semibold text-gray-600 pr-2">
-            <span className="text-[#1f3b00] font-black uppercase tracking-wide">{toastMessage.name}</span> đã thêm vào{' '}
-            <span className="text-[#1f3b00] font-black uppercase bg-[#B5E361]/30 px-2 py-0.5 rounded-md border border-[#B5E361]/40">{toastMessage.mealTypeLabel}</span>{' '}
-            ngày <span className="text-[#1f3b00] font-black bg-[#EAF7D5] px-2 py-0.5 rounded-md border border-[#B5E361]/30">{toastMessage.dateString}</span>
-          </p>
+          {toastMessage.type === 'delete' ? (
+            <>
+              <div className="w-8 h-8 bg-red-50 rounded-full flex items-center justify-center shrink-0">
+                <Trash2 size={16} className="text-red-500" strokeWidth={2.5} />
+              </div>
+              <p className="text-sm font-semibold text-gray-600 pr-2">
+                Đã xóa <span className="text-[#1f3b00] font-black">{toastMessage.target}</span> thành công!
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="w-8 h-8 bg-[#EAF7D5] rounded-full flex items-center justify-center shrink-0">
+                <Check size={16} className="text-[#3d6600]" strokeWidth={3} />
+              </div>
+              <p className="text-sm font-semibold text-gray-600 pr-2">
+                <span className="text-[#1f3b00] font-black">{toastMessage.name}</span> đã thêm vào{' '}
+                <span className="text-[#1f3b00] font-black bg-[#B5E361]/30 px-2 py-0.5 rounded-md border border-[#B5E361]/40">{toastMessage.mealTypeLabel}</span>{' '}
+                ngày <span className="text-[#1f3b00] font-black bg-[#EAF7D5] px-2 py-0.5 rounded-md border border-[#B5E361]/30">{toastMessage.dateString}</span>
+              </p>
+            </>
+          )}
         </div>
       )}
 
