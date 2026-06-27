@@ -508,9 +508,17 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                             {recipe.name}
                           </h3>
                           <div className="flex flex-wrap gap-1.5 mt-auto">
-                            <span className="bg-[#c5e87a] text-[#3d6600] px-2.5 py-1 rounded-xl text-[10px] font-extrabold capitalize shadow-sm inline-block">
-                              {{ 'food': 'Món ăn', 'drink': 'Đồ uống', 'snack': 'Ăn vặt', 'breakfast': 'Bữa sáng', 'lunch': 'Bữa trưa', 'dinner': 'Bữa tối' }[recipe.meal_type] || { 'food': 'Món ăn', 'drink': 'Đồ uống', 'snack': 'Ăn vặt', 'breakfast': 'Bữa sáng', 'lunch': 'Bữa trưa', 'dinner': 'Bữa tối' }[recipe.category] || recipe.meal_type || recipe.category || 'Món ăn'}
-                            </span>
+                            {(() => {
+                              const rawMealType = recipe.mealType || recipe.meal_types || recipe.meal_type;
+                              const mealTypesArray = rawMealType ? rawMealType.split(',').filter(m => m.trim() !== '') : [];
+                              const catMap = { 'food': 'Món ăn', 'drink': 'Đồ uống', 'snack': 'Ăn vặt', 'breakfast': 'Bữa sáng', 'lunch': 'Bữa trưa', 'dinner': 'Bữa tối' };
+                              let tagsToRender = mealTypesArray.length > 0 ? mealTypesArray.map(m => catMap[m.trim()] || m) : [catMap[recipe.category] || recipe.category || 'Món ăn'];
+                              return tagsToRender.map((tag, idx) => (
+                                <span key={idx} className="bg-[#c5e87a] text-[#3d6600] px-2.5 py-1 rounded-xl text-[10px] font-extrabold capitalize shadow-sm inline-block">
+                                  {tag}
+                                </span>
+                              ));
+                            })()}
                           </div>
                         </div>
                       </div>

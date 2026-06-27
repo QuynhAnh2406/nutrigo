@@ -169,7 +169,7 @@ function Ingredients({ mode = 'ingredient' }) {
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-600 z-10" />
               <input
                 type="text"
-                placeholder="Tìm kiếm nguyên liệu (VD: Ức gà, Trứng...)"
+                placeholder={mode === 'ingredient' ? "Tìm kiếm nguyên liệu (VD: Ức gà, Trứng...)" : "Tìm kiếm thương hiệu, đồ ăn (VD: KFC, Pizza...)"}
                 className="w-full rounded-2xl border border-white/70 bg-white/70 py-3 pl-12 pr-4 text-sm font-semibold text-gray-900 placeholder:text-gray-500 outline-none ring-0 backdrop-blur focus:border-white"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -194,7 +194,7 @@ function Ingredients({ mode = 'ingredient' }) {
                 <div className="absolute right-0 top-full mt-2 z-50 w-80 bg-white rounded-[22px] border border-gray-150 shadow-xl p-5 animate-in fade-in-50 zoom-in-95 duration-200">
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
-                      <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">
+                      <span className="text-[13px] text-gray-500 font-bold mb-1">
                         Phân loại chi tiết
                       </span>
                       <div className="flex flex-wrap gap-2">
@@ -202,7 +202,7 @@ function Ingredients({ mode = 'ingredient' }) {
                           type="button"
                           onClick={() => setSelectedCategory('All')}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${selectedCategory === 'All'
-                              ? 'bg-gray-900 text-white'
+                              ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
@@ -244,15 +244,15 @@ function Ingredients({ mode = 'ingredient' }) {
                       </div>
                     </div>
                     <div className="flex flex-col gap-2 pt-3 border-t border-dashed border-gray-100">
-                      <span className="text-[10px] text-gray-400 font-black uppercase tracking-wider">
-                        Khoảng Năng lượng (Calo)
+                      <span className="text-[13px] text-gray-500 font-bold mb-1">
+                        Khoảng năng lượng (Calo)
                       </span>
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
                           onClick={() => setCalorieRange('All')}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${calorieRange === 'All'
-                              ? 'bg-gray-900 text-white'
+                              ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
@@ -262,7 +262,7 @@ function Ingredients({ mode = 'ingredient' }) {
                           type="button"
                           onClick={() => setCalorieRange('<100')}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${calorieRange === '<100'
-                              ? 'bg-orange-500 text-white'
+                              ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
@@ -272,7 +272,7 @@ function Ingredients({ mode = 'ingredient' }) {
                           type="button"
                           onClick={() => setCalorieRange('100-300')}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${calorieRange === '100-300'
-                              ? 'bg-orange-500 text-white'
+                              ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
@@ -282,7 +282,7 @@ function Ingredients({ mode = 'ingredient' }) {
                           type="button"
                           onClick={() => setCalorieRange('300-500')}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${calorieRange === '300-500'
-                              ? 'bg-orange-500 text-white'
+                              ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
@@ -292,7 +292,7 @@ function Ingredients({ mode = 'ingredient' }) {
                           type="button"
                           onClick={() => setCalorieRange('>500')}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${calorieRange === '>500'
-                              ? 'bg-orange-500 text-white'
+                              ? 'bg-[#B5E361] text-[#1f3b00]'
                               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                             }`}
                         >
@@ -348,7 +348,7 @@ function Ingredients({ mode = 'ingredient' }) {
                       ) : (
                         <>
                           <Apple className="h-3.5 w-3.5 text-green-500" />
-                          <span>Nguyên liệu</span>
+                          <span>{mode === 'ingredient' ? 'Nguyên liệu' : 'Thương hiệu'}</span>
                         </>
                       )}
                     </span>
@@ -404,13 +404,14 @@ function Ingredients({ mode = 'ingredient' }) {
               </div>
 
               {/* Hover Overlay: Nutrition Info (Light sleek mode) */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#f2f8db]/95 to-[#fcfdf7]/95 backdrop-blur-md p-5 opacity-0 translate-y-8 scale-95 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-500 ease-out flex flex-col justify-center pointer-events-none z-20">
-                <h4 className="font-extrabold text-[#112308] text-[15px] tracking-wide text-center mb-3 pb-2 border-b border-[#112308]/5">
-                  Thành phần dinh dưỡng
+              <div className="absolute inset-0 bg-gradient-to-br from-[#f2f8db]/95 to-[#fcfdf7]/95 backdrop-blur-md px-5 pt-7 pb-4 opacity-0 translate-y-8 scale-95 group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 transition-all duration-500 ease-out flex flex-col justify-center pointer-events-none z-20">
+                <h4 className="font-extrabold text-[#112308] text-[14px] leading-snug tracking-wide text-center mb-2 pb-2 border-b border-[#112308]/5">
+                  <span className="block text-[13px] opacity-80 mb-0.5">Thành phần dinh dưỡng</span>
+                  <span className="block text-[#659A1D] text-[16px] font-black">{ing.name}</span>
                   <span className="block text-[11px] font-bold text-gray-500 mt-0.5">Cho {ing.serving_unit || '100g'}</span>
                 </h4>
                 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-[13px] font-bold text-gray-600 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.4)]"></span> Đạm
@@ -446,7 +447,7 @@ function Ingredients({ mode = 'ingredient' }) {
       ) : (
         <div className="flex flex-col items-center justify-center text-center py-16 bg-white rounded-[24px] border border-gray-100/80 shadow-sm">
           <Search className="h-10 w-10 text-gray-300 mb-3" />
-          <h4 className="font-extrabold text-gray-800 text-base mb-1">Không tìm thấy nguyên liệu nào</h4>
+          <h4 className="font-extrabold text-gray-800 text-base mb-1">Không tìm thấy {mode === 'ingredient' ? 'nguyên liệu' : 'món ăn'} nào</h4>
           <p className="text-xs text-gray-400 font-semibold max-w-xs leading-relaxed">
             Hãy thử tìm bằng từ khóa khác!
           </p>

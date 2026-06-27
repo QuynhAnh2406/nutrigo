@@ -58,16 +58,13 @@ CREATE TABLE recipes (
     description TEXT,
     image_url TEXT,
     prep_time VARCHAR(50),
-    difficulty VARCHAR(50),
     calories INTEGER,
     carbs NUMERIC(6,2),
     protein NUMERIC(6,2),
     fat NUMERIC(6,2),
-    recipe_instructions TEXT, -- Dùng cho text thuần hoặc fallback
     is_recipe BOOLEAN DEFAULT FALSE,
-    meal_type VARCHAR(50),
+    meal_types VARCHAR(50),
     category VARCHAR(50) DEFAULT 'food',
-    health_level VARCHAR(50) DEFAULT 'medium',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

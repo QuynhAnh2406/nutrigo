@@ -32,7 +32,7 @@ exports.getRecipes = async (req, res) => {
       recipe.image = recipe.image_url;
       recipe.prepTime = recipe.prep_time;
       recipe.macros = { carbs: recipe.carbs, protein: recipe.protein, fat: recipe.fat };
-      recipe.mealType = recipe.meal_type;
+      recipe.mealType = recipe.meal_types;
       recipe.category = recipe.category || 'food';
       recipe.healthLevel = recipe.health_level || 'medium';
       recipe.timeAgo = 'Vừa xong';
@@ -87,7 +87,7 @@ exports.getRecipeById = async (req, res) => {
     recipe.image = recipe.image_url;
     recipe.prepTime = recipe.prep_time;
     recipe.macros = { carbs: recipe.carbs, protein: recipe.protein, fat: recipe.fat };
-    recipe.mealType = recipe.meal_type;
+    recipe.mealType = recipe.meal_types;
     recipe.category = recipe.category || 'food';
     recipe.healthLevel = recipe.health_level || 'medium';
     recipe.timeAgo = 'Vừa xong'; // Mock time
@@ -121,7 +121,7 @@ exports.getRecipeById = async (req, res) => {
 
 
 exports.createRecipe = async (req, res) => {
-  const { foodName, description, image, prepTime, difficulty, ingredients, instructions, isRecipe, mealType, category, healthLevel } = req.body;
+  const { foodName, description, image, prepTime, ingredients, instructions, isRecipe, mealType, category } = req.body;
   const userId = getUserId(req);
 
   if (!foodName || !ingredients || !instructions) {
@@ -143,18 +143,17 @@ exports.createRecipe = async (req, res) => {
 
     // 1. Insert recipe
     const recipeRes = await client.query(`
-      INSERT INTO recipes (user_id, food_name, description, image_url, prep_time, difficulty, calories, carbs, protein, fat, is_recipe, meal_type, category, health_level)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *
+      INSERT INTO recipes (user_id, food_name, description, image_url, prep_time, calories, carbs, protein, fat, is_recipe, meal_types, category)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *
     `, [
       userId, foodName, description, 
       image || 'https://images.unsplash.com/photo-1498837167922-41cfa6f500ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      prepTime || 'Unknown', difficulty || 'Medium', 
+      prepTime || 'Unknown', 
       Math.round(totalCal) > 0 ? Math.round(totalCal) : 300, 
       30, 20, 10, // Mock macros
       isRecipe !== undefined ? isRecipe : true,
       mealType || null,
-      category || 'food',
-      healthLevel || 'medium'
+      category || 'food'
     ]);
 
     const recipeId = recipeRes.rows[0].id;

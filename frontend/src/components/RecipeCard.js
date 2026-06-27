@@ -28,8 +28,14 @@ function RecipeCard({ recipe, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
     'lunch': 'Bữa trưa',
     'dinner': 'Bữa tối'
   };
-  const mealCategory = categoryMap[recipe.meal_type] || categoryMap[recipe.category] || recipe.meal_type || recipe.category || 'Món ăn';
-
+  const rawMealType = recipe.mealType || recipe.meal_types || recipe.meal_type;
+  const mealTypesArray = rawMealType ? rawMealType.split(',').filter(m => m.trim() !== '') : [];
+  let tagsToRender = [];
+  if (mealTypesArray.length > 0) {
+    tagsToRender = mealTypesArray.map(m => categoryMap[m.trim()] || m);
+  } else {
+    tagsToRender = [categoryMap[recipe.category] || recipe.category || 'Món ăn'];
+  }
 
   return (
     <div className="relative bg-[#faf7f2] rounded-[24px] p-3.5 sm:p-4 flex flex-col gap-3 border border-[#f0ebe1] hover:shadow-[0_10px_30px_rgb(0,0,0,0.05)] hover:border-[#e2dccf] transition-all duration-300 cursor-pointer group h-full">
@@ -83,28 +89,30 @@ function RecipeCard({ recipe, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
       )}
 
       {/* Top Section: Image + Title + Tags */}
-      <div className="flex gap-3 items-start relative z-10" onClick={() => onOpenDetail(recipe)}>
+      <div className="flex flex-col gap-3 relative z-10" onClick={() => onOpenDetail(recipe)}>
         {/* Image Container */}
-        <div className="w-[85px] h-[85px] shrink-0 rounded-[18px] overflow-hidden bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] shadow-sm">
+        <div className="w-full h-[140px] shrink-0 rounded-[18px] overflow-hidden bg-gradient-to-br from-[#F4FBE7] to-[#EAF7D5] shadow-sm relative">
           {recipe.image ? (
             <img src={recipe.image} alt={recipe.foodName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-               <ChefHat size={24} className="text-[#8CB33D]" />
-               <span className="text-[8px] font-black tracking-widest text-[#8CB33D] uppercase">Nutrigo</span>
+               <ChefHat size={32} className="text-[#8CB33D]" />
+               <span className="text-[10px] font-black tracking-widest text-[#8CB33D] uppercase">Nutrigo</span>
             </div>
           )}
         </div>
         
         {/* Title and Tags Container */}
-        <div className="flex-1 flex flex-col py-0.5 h-[85px] pr-8">
-           <h3 className="text-[15px] sm:text-base font-extrabold text-[#2d3748] leading-tight line-clamp-2 mb-2">
+        <div className="w-full flex items-start justify-between gap-2">
+           <h3 className="text-[15px] sm:text-base font-extrabold text-[#2d3748] leading-tight line-clamp-2">
              {recipe.foodName}
            </h3>
-           <div className="flex flex-wrap gap-1.5 mt-auto">
-             <span className="bg-[#c5e87a] text-[#3d6600] px-2.5 py-1 rounded-xl text-[10px] font-extrabold capitalize shadow-sm inline-block">
-               {mealCategory}
-             </span>
+           <div className="flex gap-1.5 flex-wrap justify-end shrink-0 max-w-[55%]">
+             {tagsToRender.map((tag, idx) => (
+               <span key={idx} className="shrink-0 bg-[#c5e87a] text-[#3d6600] px-2.5 py-1 rounded-xl text-[10px] font-extrabold capitalize shadow-sm">
+                 {tag}
+               </span>
+             ))}
            </div>
         </div>
       </div>
@@ -116,9 +124,9 @@ function RecipeCard({ recipe, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
             e.stopPropagation();
             onAddToPlan(recipe);
           }}
-          className="w-full bg-white group-hover:bg-[#c5e87a] border border-[#e4e1d6] group-hover:border-[#c5e87a] text-[#6d795a] group-hover:text-[#3d6600] font-bold text-sm py-2 rounded-xl transition-all shadow-sm relative z-20 mt-1"
+          className="w-full bg-white hover:bg-[#c5e87a] border border-[#e4e1d6] hover:border-[#c5e87a] text-[#6d795a] hover:text-[#3d6600] font-bold text-sm py-2 rounded-xl transition-all shadow-sm relative z-20 mt-1"
         >
-          Add to Meal Plan
+          Thêm vào lịch ăn uống
         </button>
       )}
 

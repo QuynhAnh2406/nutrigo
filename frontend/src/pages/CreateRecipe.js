@@ -22,7 +22,8 @@ function CreateRecipe() {
     image: '',
     prepTime: '',
     servings: 1,
-    category: 'food'
+    category: 'food',
+    mealType: []
   });
 
   const [ingredients, setIngredients] = useState([
@@ -156,7 +157,7 @@ function CreateRecipe() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (currentStep !== 3) {
+    if (currentStep !== 4) {
       nextStep();
       return;
     }
@@ -180,7 +181,8 @@ function CreateRecipe() {
       ingredients: formattedIngredients,
       instructions: instructions.filter(inst => inst.trim() !== ''),
       calories: totalCaloriesCount,
-      isRecipe: true
+      isRecipe: true,
+      mealType: formData.mealType && formData.mealType.length > 0 ? formData.mealType.join(',') : null
     };
 
     if (!formData.foodName.trim()) return;
@@ -247,13 +249,14 @@ function CreateRecipe() {
               <div className="absolute left-6 right-6 top-5 h-1.5 bg-gray-100 -z-10 rounded-full translate-y-[-50%]"></div>
               <div
                 className="absolute left-6 top-5 h-1.5 bg-[#B5E361] -z-10 rounded-full translate-y-[-50%] transition-all duration-500 ease-out"
-                style={{ width: currentStep === 1 ? '0%' : currentStep === 2 ? 'calc(50% - 1.5rem)' : 'calc(100% - 3rem)' }}
+                style={{ width: currentStep === 1 ? '0%' : currentStep === 2 ? '33.33%' : currentStep === 3 ? '66.66%' : '100%' }}
               ></div>
 
               {[
                 { step: 1, label: 'Thông tin' },
                 { step: 2, label: 'Nguyên liệu' },
-                { step: 3, label: 'Cách làm' }
+                { step: 3, label: 'Cách làm' },
+                { step: 4, label: 'Xác nhận' }
               ].map(({ step, label }) => (
                 <div key={step} className={`flex flex-col items-center gap-2 bg-white px-2 sm:px-4 ${currentStep >= step ? 'opacity-100' : 'opacity-40'}`}>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-sm transition-all duration-500 ring-4 ring-white ${currentStep >= step ? 'bg-[#B5E361] text-[#1f3b00] shadow-md shadow-[#B5E361]/30 scale-110' : 'bg-gray-100 text-gray-400'}`}>
@@ -363,8 +366,8 @@ function CreateRecipe() {
                   </div>
                 </div>
 
-                {/* Categories */}
-                <div className="flex flex-col space-y-6 w-full">
+                {/* Categories & Suggested Meals */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
                   <div className="form-group flex flex-col gap-2">
                     <label className="text-sm font-bold text-gray-700 pl-1">Loại món</label>
                     <div className="flex flex-wrap gap-2">
@@ -387,6 +390,40 @@ function CreateRecipe() {
                           {option.label}
                         </button>
                       ))}
+                    </div>
+                  </div>
+
+                  <div className="form-group flex flex-col gap-2">
+                    <label className="text-sm font-bold text-gray-700 pl-1">Gợi ý bữa ăn</label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { value: 'breakfast', label: 'Bữa sáng' },
+                        { value: 'lunch', label: 'Bữa trưa' },
+                        { value: 'dinner', label: 'Bữa tối' },
+                        { value: 'snack', label: 'Bữa phụ' }
+                      ].map(option => {
+                        const isSelected = (formData.mealType || []).includes(option.value);
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => {
+                              const current = formData.mealType || [];
+                              const updated = isSelected 
+                                  ? current.filter(m => m !== option.value)
+                                  : [...current, option.value];
+                              setFormData({ ...formData, mealType: updated });
+                            }}
+                            className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 active:scale-95 ${
+                              isSelected
+                                ? 'bg-[#1f3b00] text-white shadow-md'
+                                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -575,6 +612,86 @@ function CreateRecipe() {
 
             </div>
 
+            {/* Bước 4: Xác nhận */}
+            <div className={currentStep === 4 ? 'space-y-6 animate-in slide-in-from-right-4 duration-300 fade-in' : 'hidden'}>
+              <div className="flex flex-col gap-6">
+                
+                {/* Thông tin chung */}
+                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-4">
+                  <h3 className="text-base font-extrabold text-[#1f3b00] border-b border-gray-200 pb-2">Thông tin chung</h3>
+                  <div className="flex gap-4 items-start">
+                    {formData.image ? (
+                      <img src={formData.image} alt="Preview" className="w-24 h-24 object-cover rounded-xl shadow-sm shrink-0" />
+                    ) : (
+                      <div className="w-24 h-24 bg-gray-200 rounded-xl flex items-center justify-center shrink-0">
+                        <ChefHat className="text-gray-400" />
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-1.5">
+                      <h4 className="font-bold text-gray-800 text-lg">{formData.foodName || 'Chưa nhập tên món'}</h4>
+                      <p className="text-sm text-gray-500">{formData.description || 'Chưa nhập mô tả'}</p>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        <span className="bg-white border border-gray-200 px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-600">
+                          🕒 {prepTimeValue || 0} {prepTimeUnit}
+                        </span>
+                        <span className="bg-white border border-gray-200 px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-600">
+                          🍽️ {formData.servings || 1} khẩu phần
+                        </span>
+                        <span className="bg-[#EAF7D5] border border-[#B5E361]/50 px-2.5 py-1 rounded-lg text-xs font-bold text-[#3d6600] capitalize">
+                          {formData.category}
+                        </span>
+                        {formData.mealType && formData.mealType.length > 0 && formData.mealType.map(m => (
+                          <span key={m} className="bg-[#EAF7D5] border border-[#B5E361]/50 px-2.5 py-1 rounded-lg text-xs font-bold text-[#3d6600] capitalize">
+                            {{ 'breakfast': 'Bữa sáng', 'lunch': 'Bữa trưa', 'dinner': 'Bữa tối', 'snack': 'Bữa phụ' }[m]}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nguyên liệu */}
+                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-4">
+                  <div className="flex justify-between items-end border-b border-gray-200 pb-2">
+                    <h3 className="text-base font-extrabold text-[#1f3b00]">Nguyên liệu</h3>
+                    <span className="text-sm font-bold text-orange-500">Tổng: {totalCaloriesCount} kcal</span>
+                  </div>
+                  <ul className="space-y-2">
+                    {ingredients.filter(ing => ing.name).length > 0 ? (
+                      ingredients.filter(ing => ing.name).map((ing, idx) => (
+                        <li key={idx} className="flex justify-between items-center text-sm">
+                          <span className="font-semibold text-gray-700">• {ing.name}</span>
+                          <span className="text-gray-500 font-medium">{ing.weight_g}g</span>
+                        </li>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400 italic">Chưa thêm nguyên liệu nào</p>
+                    )}
+                  </ul>
+                </div>
+
+                {/* Cách làm */}
+                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col gap-4">
+                  <h3 className="text-base font-extrabold text-[#1f3b00] border-b border-gray-200 pb-2">Các bước chế biến</h3>
+                  <div className="space-y-3">
+                    {instructions.filter(inst => inst.trim()).length > 0 ? (
+                      instructions.filter(inst => inst.trim()).map((inst, idx) => (
+                        <div key={idx} className="flex gap-3 items-start">
+                          <span className="w-6 h-6 shrink-0 rounded-full bg-[#B5E361] text-[#1f3b00] text-xs font-black flex items-center justify-center mt-0.5">
+                            {idx + 1}
+                          </span>
+                          <p className="text-sm text-gray-700 font-medium leading-relaxed">{inst}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400 italic">Chưa thêm bước chế biến nào</p>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
             {/* Form actions */}
             <div className="flex gap-4 pt-6 mt-4 border-t border-gray-100">
               {currentStep > 1 ? (
@@ -595,7 +712,7 @@ function CreateRecipe() {
                 </button>
               )}
 
-              {currentStep < 3 ? (
+              {currentStep < 4 ? (
                 <button
                   key="next-btn"
                   type="button"

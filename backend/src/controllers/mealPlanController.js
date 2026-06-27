@@ -335,7 +335,7 @@ exports.getUserRecipes = async (req, res) => {
   try {
     // 1. Fetch own recipes
     const { rows: ownRecipes } = await db.query(`
-      SELECT id, food_name as name, calories, carbs, protein, fat, description, image_url, prep_time, category, meal_type, 'my_recipe' as source
+      SELECT id, food_name as name, calories, carbs, protein, fat, description, image_url, prep_time, category, meal_types as meal_type, 'my_recipe' as source
       FROM recipes 
       WHERE user_id = $1 AND is_recipe = TRUE
       ORDER BY created_at DESC
@@ -430,7 +430,7 @@ exports.addMealWithRecipe = async (req, res) => {
     } else if (!recipeId || saveToMyRecipe || (recipeId && !updateExistingRecipe)) {
       // Create new recipe (or clone if recipeId exists but updateExistingRecipe is false)
       const recipeRes = await client.query(`
-        INSERT INTO recipes (user_id, food_name, calories, protein, carbs, fat, description, prep_time, image_url, is_recipe, meal_type, category)
+        INSERT INTO recipes (user_id, food_name, calories, protein, carbs, fat, description, prep_time, image_url, is_recipe, meal_types, category)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING id
       `, [
