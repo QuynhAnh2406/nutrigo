@@ -124,15 +124,6 @@ function MyRecipes() {
           subtitle="Nơi lưu giữ và sáng tạo những bữa ăn tuyệt vời mang đậm phong cách cá nhân."
           icon={BookOpen}
           badge={`${filteredRecipes.length} công thức`}
-          actions={
-            <button
-              className="inline-flex items-center gap-2 rounded-2xl bg-gray-900 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-white shadow-sm transition-all hover:bg-black hover:scale-105 active:scale-95"
-              onClick={handleCreateRecipe}
-            >
-              <Plus className="h-4 w-4" />
-              Tạo công thức mới
-            </button>
-          }
         >
           <div className="relative w-full flex gap-3">
             <div className="relative flex-1">
@@ -153,7 +144,7 @@ function MyRecipes() {
                 className={`h-full px-4 rounded-2xl border transition-all flex items-center gap-2 text-xs sm:text-sm font-extrabold ${showAdvancedFilter ? 'bg-[#B5E361] border-[#B5E361] text-[#1f3b00]' : 'border-white/70 bg-white/70 text-gray-700 hover:bg-white hover:border-white'}`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
-                <span className="hidden sm:inline">Bộ lọc nâng cao</span>
+                <span className="hidden sm:inline">Bộ lọc</span>
                 {(selectedMealType !== 'All' || selectedCategory !== 'All') && (
                   <span className="w-2 h-2 rounded-full bg-red-500"></span>
                 )}
@@ -275,6 +266,14 @@ function MyRecipes() {
                 </div>
               )}
             </div>
+
+            <button
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/70 bg-white/70 px-4 py-3 h-full text-xs sm:text-sm font-extrabold text-gray-700 shadow-sm transition-all hover:bg-white hover:border-white hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+              onClick={handleCreateRecipe}
+            >
+              <Plus className="h-4 w-4 shrink-0" strokeWidth={3} />
+              <span className="hidden sm:inline">Tạo công thức</span>
+            </button>
           </div>
         </PageHeader>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
 
 export default function MonthlyCalendar({
@@ -8,36 +8,7 @@ export default function MonthlyCalendar({
   onDateSelect, // Function(Date)
   daysWithMeals = [] // Array of 'YYYY-MM-DD' strings
 }) {
-  const [inputYear, setInputYear] = useState(currentMonth.getFullYear().toString());
-  const [showPicker, setShowPicker] = useState(false);
-  const pickerRef = useRef(null);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
-        setShowPicker(false);
-      }
-    }
-    if (showPicker) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showPicker]);
-
-  useEffect(() => {
-    setInputYear(currentMonth.getFullYear().toString());
-  }, [currentMonth]);
-
-  const handleYearChange = (e) => {
-    const val = e.target.value;
-    setInputYear(val);
-    const y = parseInt(val, 10);
-    if (y >= 1900 && y <= 2100) {
-      onMonthChange(new Date(y, currentMonth.getMonth(), 1));
-    }
-  };
+  const inputRef = useRef(null);
 
   const getDaysInMonth = (date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -115,72 +86,32 @@ export default function MonthlyCalendar({
         <button onClick={prevMonth} className="p-2 text-gray-400 hover:text-[#1f3b00] hover:bg-[#F4FBE7] rounded-xl transition-all">
           <ChevronLeft size={20} strokeWidth={2} />
         </button>
-        <div className="relative" ref={pickerRef}>
-          <button 
-            onClick={() => setShowPicker(!showPicker)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-gray-100/80 transition-colors group"
-          >
-            <span className="text-xl font-extrabold text-[#1f3b00] group-hover:text-[#659A1D] transition-colors">
-              Tháng {currentMonth.getMonth() + 1}, {currentMonth.getFullYear()}
-            </span>
-            <ChevronDown size={18} className={`text-gray-400 group-hover:text-[#659A1D] transition-all duration-300 ${showPicker ? 'rotate-180' : ''}`} />
-          </button>
-          
-          {showPicker && (
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[220px] bg-gradient-to-br from-[#8CB33D] to-[#6a8c24] rounded-[20px] shadow-[0_15px_35px_rgba(140,179,61,0.4)] p-3 z-50 animate-in fade-in zoom-in-95 duration-200 border border-white/20">
-              <div className="flex flex-col gap-3">
-                {/* Year Input */}
-                <div className="flex items-center justify-between bg-black/10 rounded-xl px-1 py-1">
-                  <button 
-                    onClick={() => {
-                      const y = parseInt(inputYear) - 1;
-                      setInputYear(y.toString());
-                      onMonthChange(new Date(y, currentMonth.getMonth(), 1));
-                    }}
-                    className="p-1.5 hover:bg-white/20 rounded-lg text-white transition-all"
-                  ><ChevronLeft size={16} strokeWidth={3}/></button>
-                  <input 
-                    type="number"
-                    className="w-14 text-center font-black text-lg text-white bg-transparent outline-none hide-arrows py-0 placeholder-white/50"
-                    value={inputYear}
-                    onChange={handleYearChange}
-                    onBlur={() => setInputYear(currentMonth.getFullYear().toString())}
-                  />
-                  <button 
-                    onClick={() => {
-                      const y = parseInt(inputYear) + 1;
-                      setInputYear(y.toString());
-                      onMonthChange(new Date(y, currentMonth.getMonth(), 1));
-                    }}
-                    className="p-1.5 hover:bg-white/20 rounded-lg text-white transition-all"
-                  ><ChevronRight size={16} strokeWidth={3}/></button>
-                </div>
-
-                {/* Month Grid */}
-                <div className="grid grid-cols-4 gap-1.5">
-                  {Array.from({length: 12}, (_, i) => i + 1).map(m => {
-                    const isCurrent = m === currentMonth.getMonth() + 1;
-                    return (
-                      <button
-                        key={m}
-                        onClick={() => {
-                          onMonthChange(new Date(currentMonth.getFullYear(), m - 1, 1));
-                          setShowPicker(false);
-                        }}
-                        className={`py-1.5 rounded-lg text-sm font-black transition-all duration-300 ${
-                          isCurrent 
-                            ? 'bg-white text-[#5c7a1d] shadow-[0_4px_10px_rgba(0,0,0,0.15)] scale-105' 
-                            : 'bg-transparent text-white/90 hover:bg-white/20 hover:text-white'
-                        }`}
-                      >
-                        T{m}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
+        <div 
+          className="relative flex items-center px-3 py-1.5 rounded-xl hover:bg-gray-100/80 transition-colors group cursor-pointer"
+          onClick={() => {
+            try {
+              inputRef.current?.showPicker();
+            } catch (e) {
+              console.warn("showPicker is not supported in this browser");
+            }
+          }}
+        >
+          <span className="text-xl font-extrabold text-[#1f3b00] group-hover:text-[#659A1D] transition-colors pointer-events-none">
+            Tháng {currentMonth.getMonth() + 1}, {currentMonth.getFullYear()}
+          </span>
+          <ChevronDown size={18} className="text-gray-400 group-hover:text-[#659A1D] transition-colors ml-1.5 pointer-events-none" />
+          <input
+            ref={inputRef}
+            type="month"
+            value={`${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`}
+            onChange={(e) => {
+              if (e.target.value) {
+                const [y, m] = e.target.value.split('-');
+                onMonthChange(new Date(y, m - 1, 1));
+              }
+            }}
+            className="absolute inset-0 w-0 h-0 opacity-0 overflow-hidden"
+          />
         </div>
         <button onClick={nextMonth} className="p-2 text-gray-400 hover:text-[#1f3b00] hover:bg-[#F4FBE7] rounded-xl transition-all">
           <ChevronRight size={20} strokeWidth={2} />
