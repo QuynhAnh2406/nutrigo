@@ -28,26 +28,37 @@ INSERT INTO recipes (id, user_id, food_name, description, image_url, prep_time, 
 VALUES
 (1, 1, 'Phở Bò Chín', 'Món ăn truyền thống thơm ngon, nước dùng ngọt thanh từ xương ống bò, thịt bò chín mềm.', 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=600', '45 phút', 'Medium', 450, 58.00, 28.00, 12.00, true, 'breakfast', 'food', 'medium'),
 (2, 1, 'Salad Ức Gà Sốt Oliu', 'Salad ức gà áp chảo thơm lừng cùng rau củ giòn mát, thích hợp cho người ăn kiêng giảm mỡ.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600', '15 phút', 'Easy', 350, 12.00, 32.00, 18.00, true, 'lunch', 'food', 'excellent'),
-(3, 1, 'Cháo Yến Mạch Ức Gà', 'Món cháo ấm nóng tốt cho dạ dày, giàu chất xơ từ yến mạch và protein dồi dào từ ức gà.', 'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=600', '20 phút', 'Easy', 320, 35.00, 25.00, 6.00, true, 'breakfast', 'food', 'excellent'),
-(4, 1, 'Cá Hồi Áp Chảo Măng Tây', 'Cá hồi áp chảo thơm ngon giàu Omega-3, ăn kèm măng tây xào tỏi giòn ngọt.', 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600', '25 phút', 'Medium', 420, 10.00, 35.00, 26.00, true, 'dinner', 'food', 'excellent'),
-(5, 1, 'Đậu Phụ Nhồi Thịt Sốt Cà Chua', 'Món ăn gia đình truyền thống, đậu phụ mềm béo nhồi thịt nạc heo sốt cà chua đậm vị.', 'https://images.unsplash.com/photo-1598103442097-8b743e2b90c3?w=600', '30 phút', 'Easy', 280, 15.00, 18.00, 16.00, true, 'lunch', 'food', 'medium'),
-(6, 1, 'Tôm Rim Ăn Kèm Cơm Gạo Lứt', 'Tôm sú ngọt thịt rim nhạt, dùng kèm cơm gạo lứt dẻo bùi tốt cho sức khỏe.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74?w=600', '25 phút', 'Easy', 390, 45.00, 30.00, 8.00, true, 'lunch', 'food', 'excellent'),
-(7, 1, 'Bò Xào Bông Cải Xanh', 'Thịt bò phi lê xào bông cải xanh giòn ngon, cung cấp hàm lượng sắt và vitamin C cực cao.', '/images/cach_lam_bong_cai_xao_thit_09_3daeefe4c4.jpg', '20 phút', 'Easy', 380, 14.00, 28.00, 22.00, true, 'lunch', 'food', 'excellent'),
-(8, 1, 'Sinh Tố Bơ Chuối Hạt Chia', 'Sinh tố bổ dưỡng giàu chất béo tốt từ bơ, kali từ chuối và năng lượng bền bỉ từ hạt chia.', '/images/dang-xinh-da-dep-voi-sinh-to-bo-chuoi-thom-ngon-202201071430267959.jpg', '10 phút', 'Easy', 310, 38.00, 7.00, 16.00, true, 'snack', 'food', 'excellent'),
-(9, 1, 'Trứng Cuộn Cải Bó Xôi', 'Bữa sáng nhanh gọn, giàu dinh dưỡng từ trứng gà ta và rau cải bó xôi dồi dào chất xơ.', '/images/thanh-pham-484.jpg', '15 phút', 'Easy', 210, 4.00, 16.00, 15.00, true, 'breakfast', 'food', 'excellent'),
-(10, 1, 'Canh Bí Đỏ Thịt Bằm', 'Canh bí đỏ nấu thịt nạc heo băm ngọt mát, bổ não và dễ tiêu hoá cho cả gia đình.', '/images/5c31fbb924eecdb094ff', '20 phút', 'Easy', 180, 11.00, 16.00, 8.00, true, 'dinner', 'food', 'medium'),
-(11, 1, 'Ức Gà Nướng Mật Ong Kèm Khoai Lang', 'Ức gà nướng thơm ngọt sốt mật ong dùng kèm khoai lang luộc/nướng, bữa ăn chuẩn Eat Clean.', '/images/maxresdefault.jpg', '35 phút', 'Medium', 410, 32.00, 42.00, 10.00, true, 'lunch', 'food', 'excellent'),
-(12, 1, 'Salad Cá Ngừ Táo Tây', 'Sự kết hợp tươi mát độc đáo giữa cá ngừ ngâm dầu dồi dào protein và táo tây giòn ngọt.', '/images/images', '15 phút', 'Easy', 270, 18.00, 24.00, 10.00, true, 'dinner', 'food', 'excellent'),
-(13, 1, 'Cơm Chiên Dương Châu Eat Clean', 'Cơm gạo lứt chiên cùng trứng gà, hạt bắp non và cà rốt giàu màu sắc, hạn chế tối đa dầu mỡ.', '/images/cach-lam-com-chien-duong-chau-thom-ngon-800.jpg', '20 phút', 'Easy', 420, 55.00, 18.00, 10.00, true, 'lunch,dinner', 'food', 'excellent'),
-(14, 1, 'Ức Gà Xào Nấm Đùi Gà', 'Ức gà mềm ngọt xào cùng nấm đùi gà dai giòn và tỏi băm thơm phức, món ngon giàu protein.', '/images/uc-ga-xao-nam-5.jpg', '15 phút', 'Easy', 290, 8.00, 35.00, 11.00, true, 'lunch,dinner', 'food', 'excellent'),
-(15, 1, 'Bún Bò Trộn Nam Bộ Healthy', 'Bún tươi ăn kèm thịt bò phi lê xào tỏi thơm phức, rau sống thanh mát và đậu phộng rang bùi.', '/images/hq720.jpg', '25 phút', 'Medium', 430, 52.00, 28.00, 10.00, true, 'lunch,dinner', 'food', 'excellent'),
-(16, 1, 'Cá Thu Sốt Cà Chua', 'Cá thu rim đậm đà trong sốt cà chua tươi mát dồi dào lycopene, cung cấp chất béo tốt Omega-3.', '/images/cach-lam-ca-thu-sot-ca-chua-thom-ngon-dam-da-202201041637272825.jpg', '30 phút', 'Easy', 320, 10.00, 25.00, 18.00, true, 'lunch,dinner', 'food', 'medium'),
-(17, 1, 'Canh Rong Biển Đậu Phụ Thịt Bằm', 'Món canh thanh mát chuẩn vị Hàn Quốc, kết hợp rong biển bổ dưỡng, đậu phụ mềm béo và thịt nạc heo.', '/images/8-cach-nau-canh-rong-bien-ngon-tuyet-khong-bi-tanh-don-gian-tai-nha-202203141520399056.jpg', '15 phút', 'Easy', 170, 8.00, 16.00, 9.00, true, 'lunch,dinner', 'food', 'excellent'),
-(18, 1, 'Cá Rô Phi Hấp Sả Gừng', 'Phi lê cá rô phi hấp cách thủy sả gừng cay ấm, giữ trọn vẹn vị ngọt tự nhiên không dầu mỡ.', '/images/image8_202504171345284671.jpg', '25 phút', 'Easy', 220, 2.00, 32.00, 5.00, true, 'lunch,dinner', 'food', 'excellent'),
-(19, 1, 'Bánh Mì Ức Gà Phô Mai', 'Bánh mì sandwich nướng kẹp ức gà xé sợi, xà lách tươi mát cùng một lát phô mai béo ngậy.', '/images/images', '15 phút', 'Easy', 380, 35.00, 26.00, 12.00, true, 'breakfast,snack', 'food', 'medium'),
-(20, 1, 'Canh Bí Xanh Nấu Tôm', 'Canh bí xanh nấu tôm thẻ ngọt mát tự nhiên, ít calo giúp thanh lọc giải nhiệt cơ thể cực tốt.', '/images/hai_cach_lam_canh_tom_nau_bi_thumb_f585e40ac6.jpg', '15 phút', 'Easy', 120, 6.00, 18.00, 2.00, true, 'lunch,dinner', 'food', 'excellent'),
-(21, 1, 'Yến Mạch Sữa Chua Trái Cây', 'Bữa sáng nhanh gọn với yến mạch ngâm sữa chua không đường mát lạnh kèm chuối chín và táo tây.', '/images/Saladyenmachsuachuahoaqua -845x500.jpg', '5 phút', 'Easy', 280, 45.00, 10.00, 6.00, true, 'breakfast,snack', 'food', 'excellent'),
-(22, 1, 'Nấm Đùi Gà Xào Cải Thìa', 'Món xào thanh đạm bổ dưỡng, nấm đùi gà dai bùi xào với cải thìa xanh giòn giàu vitamin.', '/images/hq720.jpg', '15 phút', 'Easy', 140, 10.00, 6.00, 8.00, true, 'lunch,dinner', 'food', 'excellent');
+(3, 1, 'Cháo Yến Mạch Ức Gà', 'Món cháo ấm nóng tốt cho dạ dày, giàu chất xơ từ yến mạch và protein dồi dào từ ức gà.', 'https://cdn.bestme.vn/images/bestme/cach-nau-chao-yen-mach-giam-can-5.jpg', '20 phút', 'Easy', 320, 35.00, 25.00, 6.00, true, 'breakfast', 'food', 'excellent'),
+(4, 1, 'Cá Hồi Áp Chảo Măng Tây', 'Cá hồi áp chảo thơm ngon giàu Omega-3, ăn kèm măng tây xào tỏi giòn ngọt.', 'https://media-cdn-v2.laodong.vn/storage/newsportal/2026/6/15/1719239/Ca-Hoi.jpg', '25 phút', 'Medium', 420, 10.00, 35.00, 26.00, true, 'dinner', 'food', 'excellent'),
+(5, 1, 'Đậu Phụ Nhồi Thịt Sốt Cà Chua', 'Món ăn gia đình truyền thống, đậu phụ mềm béo nhồi thịt nạc heo sốt cà chua đậm vị.', 'https://cdn2.fptshop.com.vn/unsafe/Uploads/images/tin-tuc/163830/Originals/dau-nhoi-thit-1.jpg', '30 phút', 'Easy', 280, 15.00, 18.00, 16.00, true, 'lunch', 'food', 'medium'),
+(6, 1, 'Tôm Rim Ăn Kèm Cơm Gạo Lứt', 'Tôm sú ngọt thịt rim nhạt, dùng kèm cơm gạo lứt dẻo bùi tốt cho sức khỏe.', 'https://tuongviethoasen.vn/application/media/kien_thuc_nau_an/mon_healthy/com_gao_lut_nau_tom/com_gao_lut.jpg', '25 phút', 'Easy', 390, 45.00, 30.00, 8.00, true, 'lunch', 'food', 'excellent'),
+(7, 1, 'Bò Xào Bông Cải Xanh', 'Thịt bò phi lê xào bông cải xanh giòn ngon, cung cấp hàm lượng sắt và vitamin C cực cao.', 'https://cdn2.fptshop.com.vn/unsafe/cach_lam_bong_cai_xao_thit_09_3daeefe4c4.jpg', '20 phút', 'Easy', 380, 14.00, 28.00, 22.00, true, 'lunch', 'food', 'excellent'),
+(8, 1, 'Sinh Tố Bơ Chuối Hạt Chia', 'Sinh tố bổ dưỡng giàu chất béo tốt từ bơ, kali từ chuối và năng lượng bền bỉ từ hạt chia.', 'https://cdn.tgdd.vn/Files/2019/04/22/1162314/dang-xinh-da-dep-voi-sinh-to-bo-chuoi-thom-ngon-202201071430267959.jpg', '10 phút', 'Easy', 310, 38.00, 7.00, 16.00, true, 'snack', 'food', 'excellent'),
+(9, 1, 'Trứng Cuộn Cải Bó Xôi', 'Bữa sáng nhanh gọn, giàu dinh dưỡng từ trứng gà ta và rau cải bó xôi dồi dào chất xơ.', 'https://cdn.tgdd.vn/2021/02/CookRecipe/GalleryStep/thanh-pham-484.jpg', '15 phút', 'Easy', 210, 4.00, 16.00, 15.00, true, 'breakfast', 'food', 'excellent'),
+(10, 1, 'Canh Bí Đỏ Thịt Bằm', 'Canh bí đỏ nấu thịt nạc heo băm ngọt mát, bổ não và dễ tiêu hoá cho cả gia đình.', 'https://zalo-article-photo.zadn.vn/5c31fbb924eecdb094ff', '20 phút', 'Easy', 180, 11.00, 16.00, 8.00, true, 'dinner', 'food', 'medium'),
+(11, 1, 'Ức Gà Nướng Mật Ong Kèm Khoai Lang', 'Ức gà nướng thơm ngọt sốt mật ong dùng kèm khoai lang luộc/nướng, bữa ăn chuẩn Eat Clean.', 'https://i.ytimg.com/vi/zSvRJuL_YYg/maxresdefault.jpg', '35 phút', 'Medium', 410, 32.00, 42.00, 10.00, true, 'lunch', 'food', 'excellent'),
+(12, 1, 'Salad Cá Ngừ Táo Tây', 'Sự kết hợp tươi mát độc đáo giữa cá ngừ ngâm dầu dồi dào protein và táo tây giòn ngọt.', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAj2Ub5DD9R4n86uubC20vai5BpkopFkbGFyb3-cvJUgTW4hHZdFAOIeY&s=10', '15 phút', 'Easy', 270, 18.00, 24.00, 10.00, true, 'dinner', 'food', 'excellent'),
+(13, 1, 'Cơm Chiên Dương Châu Eat Clean', 'Cơm gạo lứt chiên cùng trứng gà, hạt bắp non và cà rốt giàu màu sắc, hạn chế tối đa dầu mỡ.', 'https://cdn.netspace.edu.vn/images/2018/10/25/cach-lam-com-chien-duong-chau-thom-ngon-800.jpg', '20 phút', 'Easy', 420, 55.00, 18.00, 10.00, true, 'lunch,dinner', 'food', 'excellent'),
+(14, 1, 'Ức Gà Xào Nấm Đùi Gà', 'Ức gà mềm ngọt xào cùng nấm đùi gà dai giòn và tỏi băm thơm phức, món ngon giàu protein.', 'https://file.hstatic.net/200000700229/file/uc-ga-xao-nam-5.jpg', '15 phút', 'Easy', 290, 8.00, 35.00, 11.00, true, 'lunch,dinner', 'food', 'excellent'),
+(15, 1, 'Bún Bò Trộn Nam Bộ Healthy', 'Bún tươi ăn kèm thịt bò phi lê xào tỏi thơm phức, rau sống thanh mát và đậu phộng rang bùi.', 'https://i.ytimg.com/vi/0XkeQ47fnrw/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAf0YSW8Caqt0L3cyQgXALn_W0-hw', '25 phút', 'Medium', 430, 52.00, 28.00, 10.00, true, 'lunch,dinner', 'food', 'excellent'),
+(16, 1, 'Cá Thu Sốt Cà Chua', 'Cá thu rim đậm đà trong sốt cà chua tươi mát dồi dào lycopene, cung cấp chất béo tốt Omega-3.', 'https://cdn.tgdd.vn/Files/2020/06/01/1259945/cach-lam-ca-thu-sot-ca-chua-thom-ngon-dam-da-202201041637272825.jpg', '30 phút', 'Easy', 320, 10.00, 25.00, 18.00, true, 'lunch,dinner', 'food', 'medium'),
+(17, 1, 'Canh Rong Biển Đậu Phụ Thịt Bằm', 'Món canh thanh mát chuẩn vị Hàn Quốc, kết hợp rong biển bổ dưỡng, đậu phụ mềm béo và thịt nạc heo.', 'https://cdn.tgdd.vn/2021/05/CookProduct/S1482949-1200x676.jpg', '15 phút', 'Easy', 170, 8.00, 16.00, 9.00, true, 'lunch,dinner', 'food', 'excellent'),
+(18, 1, 'Cá Rô Phi Hấp Sả Gừng', 'Phi lê cá rô phi hấp cách thủy sả gừng cay ấm, giữ trọn vẹn vị ngọt tự nhiên không dầu mỡ.', 'https://cdnv2.tgdd.vn/bhx-static/bhx/News/Images/2025/04/17/1577002/image8_202504171345284671.jpg', '25 phút', 'Easy', 220, 2.00, 32.00, 5.00, true, 'lunch,dinner', 'food', 'excellent'),
+(19, 1, 'Bánh Mì Ức Gà Phô Mai', 'Bánh mì sandwich nướng kẹp ức gà xé sợi, xà lách tươi mát cùng một lát phô mai béo ngậy.', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3OxPIjRfNiCDHsbv_IC_bd0_rQOmEWppQYtqry14EE9CJRQu-IKGYLY83&s=10', '15 phút', 'Easy', 380, 35.00, 26.00, 12.00, true, 'breakfast,snack', 'food', 'medium'),
+(20, 1, 'Canh Bí Xanh Nấu Tôm', 'Canh bí xanh nấu tôm thẻ ngọt mát tự nhiên, ít calo giúp thanh lọc giải nhiệt cơ thể cực tốt.', 'https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/hai_cach_lam_canh_tom_nau_bi_thumb_f585e40ac6.jpg', '15 phút', 'Easy', 120, 6.00, 18.00, 2.00, true, 'lunch,dinner', 'food', 'excellent'),
+(21, 1, 'Yến Mạch Sữa Chua Trái Cây', 'Bữa sáng nhanh gọn với yến mạch ngâm sữa chua không đường mát lạnh kèm chuối chín và táo tây.', 'https://cdn.tgdd.vn//News/1461478//Saladyenmachsuachuahoaqua%C2%A0-845x500.jpg', '5 phút', 'Easy', 280, 45.00, 10.00, 6.00, true, 'breakfast,snack', 'food', 'excellent'),
+(22, 1, 'Nấm Đùi Gà Xào Cải Thìa', 'Món xào thanh đạm bổ dưỡng, nấm đùi gà dai bùi xào với cải thìa xanh giòn giàu vitamin.', 'https://i.ytimg.com/vi/jOO2OANIxgY/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLC-yxQqob2Dk69Pmt16FzovhzKRQg', '15 phút', 'Easy', 140, 10.00, 6.00, 8.00, true, 'lunch,dinner', 'food', 'excellent'),
+(23, 1, 'Cháo Gạo Lứt Thịt Bằm', 'Cháo gạo lứt thơm ngon, dễ tiêu hóa, kết hợp thịt heo nạc băm giàu protein và hành lá ấm nồng.', 'https://tiki.vn/blog/wp-content/uploads/2023/12/chao-gao-lut.jpeg', '20 phút', 'Easy', 250, 35.00, 18.00, 4.00, true, 'breakfast', 'food', 'excellent'),
+(24, 1, 'Bánh Mì Đen Kẹp Bơ Trứng', 'Sự kết hợp hoàn hảo giữa bánh mì đen giòn thơm, bơ sáp béo ngậy và trứng ốp la lòng đào dồi dào chất béo tốt.', 'https://cdn.tgdd.vn/Files/2020/07/21/1272477/cach-lam-sandwich-trai-bo-vua-ngon-vua-giau-nang-luong-cho-ngay-dai-202007211448472914.jpg', '10 phút', 'Easy', 310, 22.00, 14.00, 18.00, true, 'breakfast', 'food', 'excellent'),
+(25, 1, 'Khoai Lang Luộc Kèm Trứng Ốp', 'Bữa sáng Eat Clean siêu nhanh gọn, tinh bột hấp thu chậm từ khoai lang cùng đạm dồi dào từ trứng.', 'https://www.lorca.vn/wp-content/uploads/2022/11/Japanese-double-baked-sweet-potato.webp', '15 phút', 'Easy', 240, 24.00, 13.00, 10.00, true, 'breakfast', 'food', 'excellent'),
+(26, 1, 'Yến Mạch Ngâm Qua Đêm Hạt Điều', 'Yến mạch ngâm sữa tươi không đường qua đêm mềm mịn, rắc hạt điều giòn bùi và mật ong ngọt thanh.', 'https://file.hstatic.net/200000700229/file/lam-sua-hat-dieu-yen-mach-1.jpg', '5 phút', 'Easy', 320, 42.00, 11.00, 12.00, true, 'breakfast,snack', 'food', 'excellent'),
+(27, 1, 'Súp Ức Gà Nấm Ngô Ngọt', 'Súp gà ấm nóng, ngọt thanh từ ngô ngọt, nấm hương thơm lừng và ức gà xé sợi giàu dinh dưỡng.', 'https://cdnv2.tgdd.vn/bhx-static/bhx/production/2026/1/image/News/Images/2021/08/05/1373270/image6_202601152104088780.jpg', '25 phút', 'Easy', 210, 18.00, 22.00, 5.00, true, 'breakfast', 'food', 'excellent'),
+(28, 1, 'Ức Gà Áp Chảo Sốt Teriyaki', 'Ức gà áp chảo chín mềm mọng nước, quyện trong sốt Teriyaki ngọt dịu đậm vị.', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4OksoRor4WFW-1wkVOJxnJyFsDjCWYZdARhDoCZ1BE6vOGSBwwaFYcMlR&s=10', '20 phút', 'Easy', 290, 8.00, 35.00, 12.00, true, 'lunch,dinner', 'food', 'medium'),
+(29, 1, 'Thịt Bò Né Bông Thiên Lý', 'Thịt bò phi lê xào tái nhanh tay với hoa thiên lý giòn ngọt, món ăn giàu sắt bổ máu và thanh nhiệt.', 'https://banhtrangphucuong.vn/wp-content/uploads/2022/10/Thit-bo-xao-hoa-thien-ly.jpg', '15 phút', 'Easy', 280, 8.00, 26.00, 16.00, true, 'lunch,dinner', 'food', 'excellent'),
+(30, 1, 'Cá Thu Kho Thơm Healthy', 'Cá thu rim nhạt cùng thơm (dứa) chua ngọt, giàu Omega-3 tốt cho tim mạch.', 'https://i.ytimg.com/vi/NtRg2vvxIeU/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCgaG2oCN2JZN_07LzDvnD7yjh0xQ', '35 phút', 'Medium', 340, 12.00, 28.00, 20.00, true, 'lunch,dinner', 'food', 'medium'),
+(31, 1, 'Đậu Hũ Sốt Nấm Hương', 'Đậu hũ non mềm mượt sốt cùng nấm hương tươi ngon ngọt thơm đạm thực vật.', 'https://file.hstatic.net/1000394081/file/thanh-pham-mon-dau-hu-sot-nam_65c8f3b639f14c06b31fcdfe6fcbd885.jpg', '15 phút', 'Easy', 160, 10.00, 12.00, 8.00, true, 'lunch,dinner', 'food', 'excellent'),
+(32, 1, 'Salad Cá Hồi Cam Sành', 'Rau mầm tươi giòn kết hợp cá hồi áp chảo thơm lừng và nước sốt cam sành chua ngọt giải nhiệt.', 'https://media-cdn-v2.laodong.vn/storage/newsportal/2022/3/20/1025410/Salad-Ca-Hoi-Bi-Ngoi.jpg', '20 phút', 'Easy', 330, 14.00, 24.00, 20.00, true, 'lunch,dinner', 'food', 'excellent'),
+(33, 1, 'Sữa Hạt Điều Macca Nguyên Chất', 'Sữa hạt dinh dưỡng nguyên chất tự nấu, vị béo ngậy thơm lừng tự nhiên giàu dinh dưỡng.', 'https://cdn.tgdd.vn/2023/03/CookDish/huong-dan-lam-sua-hat-macca-bang-may-lam-sua-hat-cuc-bo-duong-avt-1200x676.jpg', '30 phút', 'Easy', 150, 8.00, 4.00, 12.00, true, 'snack', 'drink', 'excellent');
 
 -- Thiết lập lại sequence cho bảng recipes
 SELECT setval('recipes_id_seq', (SELECT MAX(id) FROM recipes));
@@ -176,7 +187,62 @@ VALUES
 -- Nấm Đùi Gà Xào Cải Thìa (ID = 22)
 (22, 20, 'Nấm đùi gà', '100g', 100.00, 35.00),
 (22, 88, 'Rau cải thìa', '150g', 150.00, 19.50),
-(22, 21, 'Dầu oliu', '8g', 8.00, 70.72);
+(22, 21, 'Dầu oliu', '8g', 8.00, 70.72),
+
+-- Cháo Gạo Lứt Thịt Bằm (ID = 23)
+(23, 2, 'Gạo lứt', '50g', 50.00, 172.50),
+(23, 8, 'Thịt lợn nạc', '50g', 50.00, 69.50),
+(23, 21, 'Dầu oliu', '1g', 1.00, 8.84),
+
+-- Bánh Mì Đen Kẹp Bơ Trứng (ID = 24)
+(24, NULL, 'Bánh mì đen', '60g', 60.00, 150.00),
+(24, 25, 'Quả bơ', '50g', 50.00, 80.00),
+(24, 11, 'Trứng gà', '50g', 50.00, 77.50),
+
+-- Khoai Lang Luộc Kèm Trứng Ốp (ID = 25)
+(25, 3, 'Khoai lang', '150g', 150.00, 129.00),
+(25, 11, 'Trứng gà', '50g', 50.00, 77.50),
+(25, 21, 'Dầu oliu', '3g', 3.00, 26.52),
+
+-- Yến Mạch Ngâm Qua Đêm Hạt Điều (ID = 26)
+(26, 4, 'Yến mạch', '40g', 40.00, 155.60),
+(26, 24, 'Sữa tươi không đường', '100g', 100.00, 62.00),
+(26, 71, 'Hạt điều', '15g', 15.00, 82.95),
+(26, NULL, 'Mật ong', '5g', 5.00, 15.20),
+
+-- Súp Ức Gà Nấm Ngô Ngọt (ID = 27)
+(27, 6, 'Ức gà (không da)', '80g', 80.00, 132.00),
+(27, 20, 'Nấm đùi gà', '30g', 30.00, 10.50),
+(27, NULL, 'Ngô ngọt', '50g', 50.00, 43.00),
+
+-- Ức Gà Áp Chảo Sốt Teriyaki (ID = 28)
+(28, 6, 'Ức gà (không da)', '150g', 150.00, 247.50),
+(28, 21, 'Dầu oliu', '4g', 4.00, 35.36),
+
+-- Thịt Bò Né Bông Thiên Lý (ID = 29)
+(29, 50, 'Thịt bò phi lê', '100g', 100.00, 195.00),
+(29, 63, 'Bông cải xanh', '100g', 100.00, 34.00),
+(29, 21, 'Dầu oliu', '5g', 5.00, 44.20),
+
+-- Cá Thu Kho Thơm Healthy (ID = 30)
+(30, 34, 'Cá thu', '120g', 120.00, 246.00),
+(30, NULL, 'Quả thơm (dứa)', '50g', 50.00, 25.00),
+(30, 21, 'Dầu oliu', '5g', 5.00, 44.20),
+
+-- Đậu Hũ Sốt Nấm Hương (ID = 31)
+(31, 12, 'Đậu phụ', '150g', 150.00, 114.00),
+(31, 20, 'Nấm đùi gà', '50g', 50.00, 17.50),
+(31, 21, 'Dầu oliu', '3g', 3.00, 26.52),
+
+-- Salad Cá Hồi Cam Sành (ID = 32)
+(32, 9, 'Cá hồi tươi', '100g', 100.00, 208.00),
+(32, 66, 'Cam', '50g', 50.00, 23.50),
+(32, 17, 'Xà lách', '100g', 100.00, 15.00),
+(32, 21, 'Dầu oliu', '8g', 8.00, 70.72),
+
+-- Sữa Hạt Điều Macca Nguyên Chất (ID = 33)
+(33, 71, 'Hạt điều', '20g', 20.00, 110.60),
+(33, 14, 'Hạnh nhân', '10g', 10.00, 57.90);
 
 -- 5. CÁC BƯỚC HƯỚNG DẪN NẤU ĂN
 INSERT INTO recipe_instruction_steps (recipe_id, step_number, instruction)
@@ -311,7 +377,65 @@ VALUES
 (22, 1, 'Nấm đùi gà làm sạch thái lát xéo mỏng. Cải thìa rửa sạch tách bẹ xanh.'),
 (22, 2, 'Trần sơ cải thìa trong nước sôi kèm xíu muối rồi ngâm ngay vào nước lạnh để giữ độ giòn xanh.'),
 (22, 3, 'Phi tỏi thơm với dầu oliu trong chảo lớn, trút nấm đùi gà vào xào chín săn trên lửa vừa.'),
-(22, 4, 'Cho bẹ cải thìa vào chảo xào nhanh tay trên lửa lớn khoảng 2 phút, nêm nếm gia vị vừa miệng rồi múc ra đĩa.');
+(22, 4, 'Cho bẹ cải thìa vào chảo xào nhanh tay trên lửa lớn khoảng 2 phút, nêm nếm gia vị vừa miệng rồi múc ra đĩa.'),
+
+-- Cháo Gạo Lứt Thịt Bằm (ID = 23)
+(23, 1, 'Vo gạo lứt sạch, cho vào nồi ninh cùng lượng nước gấp 4-5 lần gạo cho đến khi chín nhừ.'),
+(23, 2, 'Thịt lợn nạc băm nhuyễn, phi thơm hành băm với dầu oliu rồi xào chín thịt băm.'),
+(23, 3, 'Khi cháo chín nhừ, trút thịt heo đã xào vào đảo đều, nấu thêm 5 phút, nêm gia vị vừa ăn rồi rắc hành lá cắt nhỏ.'),
+
+-- Bánh Mì Đen Kẹp Bơ Trứng (ID = 24)
+(24, 1, 'Áp chảo lát bánh mì đen cho giòn nhẹ.'),
+(24, 2, 'Cắt đôi quả bơ, dầm nhuyễn bơ sáp với một chút xíu muối và tiêu.'),
+(24, 3, 'Ốp la trứng gà chín lòng đào hoặc chín kỹ tùy khẩu vị.'),
+(24, 4, 'Phết bơ dầm lên bánh mì đen, đặt trứng ốp la lên trên và thưởng thức.'),
+
+-- Khoai Lang Luộc Kèm Trứng Ốp (ID = 25)
+(25, 1, 'Khoai lang rửa sạch, cắt khúc luộc hoặc hấp chín mềm.'),
+(25, 2, 'Ốp la trứng gà với dầu oliu.'),
+(25, 3, 'Xếp khoai lang luộc cùng trứng ốp la ra đĩa, ăn nóng kèm muối tiêu.'),
+
+-- Yến Mạch Ngâm Qua Đêm Hạt Điều (ID = 26)
+(26, 1, 'Cho yến mạch vào lọ thủy tinh sạch, rót sữa tươi không đường vào khuấy đều.'),
+(26, 2, 'Đậy kín nắp lọ và bảo quản trong ngăn mát tủ lạnh từ 6-8 tiếng (qua đêm).'),
+(26, 3, 'Sáng hôm sau lấy ra, rắc hạt điều giòn bùi lên trên và rưới thêm mật ong trước khi ăn.'),
+
+-- Súp Ức Gà Nấm Ngô Ngọt (ID = 27)
+(27, 1, 'Luộc chín ức gà, vớt ra xé sợi nhỏ. Giữ lại nước luộc gà.'),
+(27, 2, 'Nấm rửa sạch thái lát mỏng. Ngô ngọt tách hạt.'),
+(27, 3, 'Đun sôi nước luộc gà, cho ngô ngọt và nấm vào đun 10 phút, tiếp tục trút gà xé vào đun sôi lại.'),
+(27, 4, 'Hòa chút bột năng với nước lọc rót vào nồi khuấy đều tạo độ sánh nhẹ, nêm gia vị vừa ăn và đập thêm lòng trắng trứng khuấy vân hoa.'),
+
+-- Ức Gà Áp Chảo Sốt Teriyaki (ID = 28)
+(28, 1, 'Ức gà khía caro nông trên bề mặt, ướp với gia vị cơ bản.'),
+(28, 2, 'Phi dầu oliu nóng chảo, áp chảo ức gà mỗi mặt khoảng 5-6 phút cho chín vàng mọng.'),
+(28, 3, 'Rưới sốt Teriyaki vào chảo đảo đều cho ngấm quanh ức gà rồi thái miếng vừa ăn.'),
+
+-- Thịt Bò Né Bông Thiên Lý (ID = 29)
+(29, 1, 'Thịt bò thái lát mỏng, ướp tỏi băm, muối, tiêu và xíu dầu oliu.'),
+(29, 2, 'Hoa thiên lý rửa sạch để ráo.'),
+(29, 3, 'Phi thơm tỏi, xào thịt bò trên lửa lớn cho vừa chín tới rồi trút riêng ra đĩa.'),
+(29, 4, 'Xào nhanh bông thiên lý trong chảo nóng, trút thịt bò vào đảo đều 30 giây rồi múc ra đĩa.'),
+
+-- Cá Thu Kho Thơm Healthy (ID = 30)
+(30, 1, 'Cá thu rửa sạch cắt khúc, ướp gia vị nhạt.'),
+(30, 2, 'Thơm thái miếng vừa ăn.'),
+(30, 3, 'Xếp thơm xuống đáy nồi, đặt cá thu lên trên, chế nước sâm sấp mặt cá và kho trên lửa nhỏ cho đến khi nước cạn sánh.'),
+
+-- Đậu Hũ Sốt Nấm Hương (ID = 31)
+(31, 1, 'Đậu hũ non cắt khối vuông vừa ăn. Nấm hương ngâm nở thái đôi.'),
+(31, 2, 'Phi thơm hành tỏi băm với dầu oliu, cho nấm vào xào thơm.'),
+(31, 3, 'Cho nước tương, gia vị và xíu nước lọc đun sôi, thả nhẹ đậu hũ vào om lửa nhỏ 10 phút cho ngấm gia vị.'),
+
+-- Salad Cá Hồi Cam Sành (ID = 32)
+(32, 1, 'Cá hồi cắt miếng vuông áp chảo vừa chín tới.'),
+(32, 2, 'Cam sành gọt vỏ lấy tép cam nguyên vẹn.'),
+(32, 3, 'Trộn đều xà lách, rau mầm, tép cam và cá hồi với sốt dầu giấm oliu nhẹ nhàng.'),
+
+-- Sữa Hạt Điều Macca Nguyên Chất (ID = 33)
+(33, 1, 'Ngâm hạt điều và hạnh nhân trong nước ấm khoảng 2 tiếng rồi rửa sạch.'),
+(33, 2, 'Cho hạt đã ngâm vào máy xay sinh tố cùng 800ml nước lọc ấm, xay mịn nhuyễn.'),
+(33, 3, 'Lọc sữa qua túi lọc vải để lấy phần sữa mịn, có thể thêm xíu muối hồng và mật ong tùy thích.');
 
 -- 6. THIẾT LẬP KẾ HOẠCH ĂN UỐNG (MEAL PLANS) CHO TUẦN HIỆN TẠI (Lấy mốc CURRENT_DATE là Thứ Bảy)
 INSERT INTO meal_plans (user_id, day_name, meal_type, recipe_id, meal_date)
