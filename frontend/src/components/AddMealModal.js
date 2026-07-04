@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChefHat, X, Flame, Search, Plus, Check, Trash2, Wheat, Fish, Droplet, ArrowLeft } from 'lucide-react';
 
 function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialRecipe }) {
@@ -123,7 +123,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
     return map[dayName] || dayName;
   };
 
-  const handleSelectRecipe = async (recipe) => {
+  const handleSelectRecipe = useCallback(async (recipe) => {
     if (recipe.isBrand) {
       setIsLoading(true);
       const brandData = recipe.brandData;
@@ -220,7 +220,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
     setUpdateExistingRecipe(false); // Default to not updating original
     setActiveTab('create');
     setCurrentStep(1);
-  };
+  }, [day, category, mealDate, onConfirm, onClose]);
 
   useEffect(() => {
     if (initialRecipe && !isLoading) {
@@ -245,7 +245,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
       };
       fetchFullRecipe();
     }
-  }, [initialRecipe, isLoading]);
+  }, [initialRecipe, isLoading, handleSelectRecipe]);
 
   const removeIngredient = (index) => {
     setSelectedIngredients(selectedIngredients.filter((_, i) => i !== index));
