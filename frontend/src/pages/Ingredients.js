@@ -5,27 +5,12 @@ import PageHeader from '../components/PageHeader';
 function Ingredients({ mode = 'ingredient' }) {
   const [ingredients, setIngredients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [calorieRange, setCalorieRange] = useState('All');
   const brandSearchQuery = '';
   const popoverContainerRef = useRef(null);
   const portionWeight = 100;
-
-  const [formData, setFormData] = useState({
-    name: '',
-    calories: '',
-    protein: '',
-    carbs: '',
-    fat: '',
-    fiber: '',
-    type: mode,
-    serving_unit: mode === 'brand' ? '1 phần' : '100g',
-    category: 'food',
-    brand_name: ''
-  });
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -58,65 +43,6 @@ function Ingredients({ mode = 'ingredient' }) {
   useEffect(() => {
     fetchIngredients();
   }, []);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
-    setLoading(true);
-    try {
-      const res = await fetch('http://localhost:5002/api/ingredients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          calories_per_100g: parseFloat(formData.calories) || 0,
-          protein_per_100g: parseFloat(formData.protein) || 0,
-          carbs_per_100g: parseFloat(formData.carbs) || 0,
-          fat_per_100g: parseFloat(formData.fat) || 0,
-          fiber_per_100g: parseFloat(formData.fiber) || 0,
-          type: formData.type || 'ingredient',
-          serving_unit: formData.type === 'brand' ? (formData.serving_unit || '1 phần') : '100g',
-          category: formData.category || 'food',
-          brand_name: formData.type === 'brand' ? (formData.brand_name || '') : null
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setIsModalOpen(false);
-        setFormData({
-          name: '',
-          calories: '',
-          protein: '',
-          carbs: '',
-          fat: '',
-          fiber: '',
-          type: mode,
-          serving_unit: mode === 'brand' ? '1 phần' : '100g',
-          category: 'food',
-          brand_name: ''
-        });
-        fetchIngredients();
-      } else {
-        alert(data.message || 'Lỗi khi thêm nguyên liệu.');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Không thể kết nối tới server.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const removeAccents = (str) => {
     if (!str) return '';
@@ -454,171 +380,6 @@ function Ingredients({ mode = 'ingredient' }) {
         </div>
       )}
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-[24px] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-300 flex flex-col">
-            <div className="flex justify-between items-center mb-5 border-b border-gray-50 pb-3">
-              <h3 className="font-extrabold text-gray-900 text-base flex items-center gap-1.5">
-                <Sparkles className="h-5 w-5 text-amber-500" />
-                Thêm {mode === 'ingredient' ? 'nguyên liệu' : 'món ăn'} mới
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div className="form-group flex flex-col gap-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Tên thực phẩm / món ăn</label>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Ví dụ: Trà sữa Phúc Long, Salad gà..."
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15"
-                  required
-                />
-              </div>
-              <div className="form-group flex flex-col gap-1 hidden">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Phân loại</label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleInputChange}
-                  className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15 bg-white cursor-pointer"
-                >
-                  <option value={mode}>{mode === 'ingredient' ? 'Nguyên liệu cơ bản' : 'Thương hiệu / Đồ ăn ngoài'}</option>
-                </select>
-              </div>
-              <div className="form-group flex flex-col gap-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Nhóm thực phẩm chi tiết</label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15 bg-white cursor-pointer"
-                >
-                  <option value="food">Đồ ăn (Cơm, mì, thịt, rau...)</option>
-                  <option value="drink">Đồ uống (Trà sữa, cafe, nước ngọt...)</option>
-                  <option value="snack">Đồ ăn vặt (Khoai tây chiên, bánh kẹo...)</option>
-                </select>
-              </div>
-              {mode === 'brand' && (
-                <>
-                  <div className="form-group flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Tên thương hiệu / Cửa hàng</label>
-                    <input
-                      type="text"
-                      name="brand_name"
-                      placeholder="Ví dụ: KFC, Highlands, Phúc Long..."
-                      value={formData.brand_name}
-                      onChange={handleInputChange}
-                      className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15"
-                      required
-                    />
-                  </div>
-                  <div className="form-group flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Đơn vị khẩu phần(VD: 1 cốc, 1 cái, 1 miếng)</label>
-                    <input
-                      type="text"
-                      name="serving_unit"
-                      placeholder="Nhập đơn vị tính (VD: 1 ly, 1 miếng...)"
-                      value={formData.serving_unit === '100g' ? '' : formData.serving_unit}
-                      onChange={handleInputChange}
-                      className="px-3.5 py-2.5 rounded-xl border border-gray-150 outline-none text-sm font-semibold focus:border-[#B5E361] focus:ring-2 focus:ring-[#B5E361]/15"
-                      required
-                    />
-                  </div>
-                </>
-              )}
-              <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 flex flex-col gap-3">
-                <span className="block text-[10px] text-gray-400 font-black uppercase tracking-wider">Giá trị dinh dưỡng trên 100 g</span>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="form-group flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase">Calo(kcal)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      name="calories"
-                      placeholder="0"
-                      value={formData.calories}
-                      onChange={handleInputChange}
-                      className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none focus:border-[#B5E361]"
-                    />
-                  </div>
-                  <div className="form-group flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase">Đạm(Protein g)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      name="protein"
-                      placeholder="0"
-                      value={formData.protein}
-                      onChange={handleInputChange}
-                      className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none focus:border-[#B5E361]"
-                    />
-                  </div>
-                  <div className="form-group flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase">Tinh bột(Carbs g)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      name="carbs"
-                      placeholder="0"
-                      value={formData.carbs}
-                      onChange={handleInputChange}
-                      className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none focus:border-[#B5E361]"
-                    />
-                  </div>
-                  <div className="form-group flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase">Chất béo(Fat g)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      name="fat"
-                      placeholder="0"
-                      value={formData.fat}
-                      onChange={handleInputChange}
-                      className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none focus:border-[#B5E361]"
-                    />
-                  </div>
-                  <div className="form-group flex flex-col gap-1 col-span-2">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase">Chất xơ(Fiber g)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      name="fiber"
-                      placeholder="0"
-                      value={formData.fiber}
-                      onChange={handleInputChange}
-                      className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none focus:border-[#B5E361]"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl font-extrabold text-sm text-gray-700 transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 py-2.5 bg-gradient-to-r from-[#B5E361] to-[#8CB33D] text-[#1f3b00] hover:scale-[1.02] active:scale-[0.98] rounded-xl font-extrabold text-sm transition-all shadow-sm"
-                >
-                  {loading ? 'Đang lưu...' : 'Lưu lại'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
       )}
 
     </div>

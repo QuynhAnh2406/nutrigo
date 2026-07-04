@@ -55,40 +55,4 @@ exports.getIngredients = async (req, res) => {
   }
 };
 
-exports.addIngredient = async (req, res) => {
-  const { name, calories_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g, type, serving_unit, category, brand_name, image_url } = req.body;
-  
-  if (!name || !name.trim()) {
-    return res.status(400).json({ success: false, message: 'Tên nguyên liệu không được để trống!' });
-  }
 
-  try {
-    const check = await db.query('SELECT 1 FROM ingredients WHERE LOWER(name) = LOWER($1)', [name.trim()]);
-    if (check.rows.length > 0) {
-      return res.status(400).json({ success: false, message: 'Nguyên liệu này đã tồn tại!' });
-    }
-
-    const result = await db.query(`
-      INSERT INTO ingredients (name, calories_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g, type, serving_unit, category, brand_name, image_url)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-      RETURNING *
-    `, [
-      name.trim(), 
-      parseFloat(calories_per_100g) || 0, 
-      parseFloat(protein_per_100g) || 0, 
-      parseFloat(carbs_per_100g) || 0, 
-      parseFloat(fat_per_100g) || 0, 
-      parseFloat(fiber_per_100g) || 0,
-      type || 'ingredient',
-      serving_unit || '100g',
-      category || 'food',
-      brand_name && brand_name.trim() ? brand_name.trim() : null,
-      image_url && image_url.trim() ? image_url.trim() : null
-    ]);
-    
-    res.status(201).json({ success: true, data: result.rows[0] });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Lỗi server khi thêm nguyên liệu!' });
-  }
-};

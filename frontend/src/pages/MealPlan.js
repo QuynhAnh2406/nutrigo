@@ -116,6 +116,10 @@ function MealPlan() {
     fetchMonthlyMeals();
   }, [fetchMonthlyMeals]);
 
+  useEffect(() => {
+    setActiveSession(null);
+  }, [selectedDate]);
+
   const handleClearClick = () => {
     if (activeSession) {
       setClearMode({ type: 'session', session: activeSession });

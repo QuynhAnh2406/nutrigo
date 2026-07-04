@@ -96,16 +96,6 @@ CREATE TABLE recipe_instruction_steps (
 );
 
 -- ==========================================
--- BẢNG USER_FRIDGE (Tủ lạnh của người dùng - Nguyên liệu có sẵn)
--- ==========================================
-CREATE TABLE user_fridge (
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    ingredient_name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, ingredient_name)
-);
-
--- ==========================================
 -- BẢNG MEAL_PLANS (Lịch ăn uống hàng tuần)
 -- ==========================================
 CREATE TABLE meal_plans (
@@ -203,21 +193,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ==========================================
--- PROCEDURES (Thủ tục)
--- ==========================================
-
--- Thủ tục thêm nguyên liệu vào tủ lạnh của người dùng
-CREATE OR REPLACE PROCEDURE add_to_fridge(p_user_id INTEGER, p_ingredient_name VARCHAR)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    INSERT INTO user_fridge (user_id, ingredient_name)
-    VALUES (p_user_id, p_ingredient_name)
-    ON CONFLICT (user_id, ingredient_name) DO NOTHING;
-END;
-$$;
-
--- ==========================================
 -- TRIGGERS (Trình kích hoạt)
 -- ==========================================
 
@@ -303,7 +278,6 @@ CREATE TRIGGER trigger_check_password_history
 
 /*
 TRUNCATE TABLE meal_plans CASCADE;
-TRUNCATE TABLE user_fridge CASCADE;
 TRUNCATE TABLE recipe_instruction_steps CASCADE;
 TRUNCATE TABLE recipe_ingredients CASCADE;
 -- Lệnh dưới đây sẽ xóa mọi món ăn của user tạo, ngoại trừ các dữ liệu gốc (KFC, Pizza, gạo tẻ...) nếu chúng được coi là is_recipe = FALSE hoặc là data nền.

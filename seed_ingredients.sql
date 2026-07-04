@@ -1,3 +1,13 @@
+-- =========================================================================
+-- SCRIPT KHỞI TẠO CƠ SỞ DỮ LIỆU NGUYÊN LIỆU & THƯƠNG HIỆU CHO NUTRIGO
+-- =========================================================================
+
+BEGIN;
+
+-- Xóa dữ liệu cũ của bảng ingredients
+TRUNCATE TABLE ingredients RESTART IDENTITY CASCADE;
+
+-- TẠO CƠ SỞ DỮ LIỆU NGUYÊN LIỆU (Tất cả 250 nguyên liệu & thương hiệu)
 INSERT INTO ingredients (id, name, calories_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, fiber_per_100g, type, serving_unit, category, brand_name, image_url)
 VALUES
 -- Nhóm tinh bột
@@ -7,7 +17,6 @@ VALUES
 (4, 'Yến mạch', 389.00, 16.90, 66.30, 6.90, 10.60, 'ingredient', '100g', 'food', NULL, NULL),
 (5, 'Bánh phở (gạo)', 142.00, 3.20, 32.00, 0.10, 0.50, 'ingredient', '100g', 'food', NULL, NULL),
 
-
 -- Nhóm đạm động vật
 (6, 'Ức gà (không da)', 165.00, 31.00, 0.00, 3.60, 0.00, 'ingredient', '100g', 'food', NULL, NULL),
 (7, 'Thịt bò thăn', 250.00, 26.00, 0.00, 15.00, 0.00, 'ingredient', '100g', 'food', NULL, NULL),
@@ -16,12 +25,10 @@ VALUES
 (10, 'Tôm sú', 99.00, 24.00, 0.20, 0.30, 0.00, 'ingredient', '100g', 'food', NULL, NULL),
 (11, 'Trứng gà', 155.00, 13.00, 1.10, 11.00, 0.00, 'ingredient', '100g', 'food', NULL, NULL),
 
-
 -- Nhóm đạm thực vật & hạt
 (12, 'Đậu phụ', 76.00, 8.00, 1.90, 4.80, 0.30, 'ingredient', '100g', 'food', NULL, NULL),
 (13, 'Hạt chia', 486.00, 16.50, 42.10, 30.70, 34.40, 'ingredient', '100g', 'food', NULL, NULL),
 (14, 'Hạnh nhân', 579.00, 21.20, 21.70, 49.90, 12.50, 'ingredient', '100g', 'food', NULL, NULL),
-
 
 -- Nhóm rau củ & dầu ăn
 (15, 'Súp lơ xanh', 34.00, 2.80, 7.00, 0.40, 2.60, 'ingredient', '100g', 'food', NULL, NULL),
@@ -33,7 +40,6 @@ VALUES
 (21, 'Dầu oliu', 884.00, 0.00, 0.00, 100.00, 0.00, 'ingredient', '100g', 'food', NULL, NULL),
 (22, 'Măng tây', 20.00, 2.20, 3.88, 0.12, 2.10, 'ingredient', '100g', 'food', NULL, NULL),
 
-
 -- Nhóm sữa & trái cây
 (23, 'Sữa chua không đường', 61.00, 3.50, 4.70, 3.30, 0.00, 'ingredient', '100g', 'food', NULL, NULL),
 (24, 'Sữa tươi không đường', 62.00, 3.20, 4.80, 3.30, 0.00, 'ingredient', '100g', 'food', NULL, NULL),
@@ -42,32 +48,23 @@ VALUES
 (27, 'Quả táo', 52.00, 0.30, 13.80, 0.20, 2.40, 'ingredient', '100g', 'food', NULL, NULL),
 
 (28,'Cá trứng',152,14.0,0,10.5,0,'ingredient','100g','food',NULL,NULL),
-
 (29,'Ức gà',165,31.0,0,3.6,0,'ingredient','100g','food',NULL,NULL),
-
 (30,'Thịt bò xay',254,17.2,0,20.0,0,'ingredient','100g','food',NULL,NULL),
-
 (31,'Cá chim trắng',96,18.4,0,2.2,0,'ingredient','100g','food',NULL,NULL),
-
 (32,'Tôm thẻ',85,20.3,0.2,0.5,0,'ingredient','100g','food',NULL,NULL),
-
 (33,'Cá cơm',169,18.0,0,14.0,0,'ingredient','100g','food',NULL,NULL),
-
 
 -- ======================
 -- NGUYÊN LIỆU 34-37
 -- ======================
-
 (34,'Cá thu',205,18.6,0,14,0,'ingredient','100g','food',NULL,NULL),
 (35,'Cá ngừ',132,28.2,0,1.3,0,'ingredient','100g','food',NULL,NULL),
 (36,'Cá basa',124,17,0,5.2,0,'ingredient','100g','food',NULL,NULL),
 (37,'Cá rô phi',128,26,0,2.7,0,'ingredient','100g','food',NULL,NULL),
 
-
 -- ======================
 -- NGUYÊN LIỆU 47+
 -- ======================
-
 (47,'Thịt gà đùi',209,26,0,11,0,'ingredient','100g','food',NULL,NULL),
 (48,'Thịt gà cánh',203,30.5,0,8.1,0,'ingredient','100g','food',NULL,NULL),
 (49,'Thịt bò nạc',217,26.1,0,12,0,'ingredient','100g','food',NULL,NULL),
@@ -147,12 +144,9 @@ VALUES
 
 (99,'Mộc nhĩ khô',284,9.3,65.0,0.5,29.9,'ingredient','100g','food',NULL,NULL),
 
-
-
 -- ======================
 -- BRAND 100+
 -- ======================
-
 (100,'Gà rán Original KFC',290,19,12,18,0,'brand','1 miếng','food','KFC',NULL),
 (101,'Burger Zinger KFC',480,22,42,25,2,'brand','1 cái','food','KFC',NULL),
 
@@ -351,7 +345,6 @@ VALUES
 -- =====================
 -- McDonald's
 -- =====================
-
 (205,'Cheeseburger McDonalds',295,13,30,13,1.5,'brand','1 cái','food','McDonalds',NULL),
 (206,'Quarter Pounder McDonalds',260,14,27,11,1,'brand','1 cái','food','McDonalds',NULL),
 (207,'Apple Pie McDonalds',310,4,42,14,2,'brand','1 cái','snack','McDonalds',NULL),
@@ -360,7 +353,6 @@ VALUES
 -- =====================
 -- Starbucks
 -- =====================
-
 (209,'Caramel Macchiato Starbucks',190,6,30,5,0,'brand','1 ly','drink','Starbucks',NULL),
 (210,'Americano Starbucks',5,0.5,1,0,0,'brand','1 ly','drink','Starbucks',NULL),
 (211,'Chocolate Frappuccino Starbucks',250,4,40,8,1,'brand','1 ly','drink','Starbucks',NULL),
@@ -369,7 +361,6 @@ VALUES
 -- =====================
 -- Highlands
 -- =====================
-
 (213,'Trà sen vàng Highlands',150,0,36,0,0,'brand','1 ly','drink','Highlands',NULL),
 (214,'Cà phê phin sữa Highlands',185,5,30,5,0,'brand','1 ly','drink','Highlands',NULL),
 (215,'Bánh mì que Highlands',290,9,45,8,2,'brand','1 cái','food','Highlands',NULL),
@@ -377,7 +368,6 @@ VALUES
 -- =====================
 -- Phúc Long
 -- =====================
-
 (216,'Trà ô long sữa Phúc Long',170,2,35,3,0,'brand','1 ly','drink','Phúc Long',NULL),
 (217,'Trà vải Phúc Long',120,0,30,0,0,'brand','1 ly','drink','Phúc Long',NULL),
 (218,'Cà phê đen Phúc Long',10,0,2,0,0,'brand','1 ly','drink','Phúc Long',NULL),
@@ -385,7 +375,6 @@ VALUES
 -- =====================
 -- Katinat
 -- =====================
-
 (219,'Cà phê sữa Katinat',190,4,28,6,0,'brand','1 ly','drink','Katinat',NULL),
 (220,'Bơ già dừa non Katinat',340,6,34,3,30,'brand','1 ly','drink','Katinat',NULL),
 (221,'Hồng trà sữa Katinat',350,3,55,12,0,'brand','1 ly','drink','Katinat',NULL),
@@ -393,7 +382,6 @@ VALUES
 -- =====================
 -- Gong Cha
 -- =====================
-
 (222,'Matcha latte Gong Cha',220,5,35,6,1,'brand','1 ly','drink','Gong Cha',NULL),
 (223,'Sữa tươi trân châu đường đen Gong Cha',370,3,60,11,1,'brand','1 ly','drink','Gong Cha',NULL),
 (224,'Trà Alisan Gong Cha',90,0,22,0,0,'brand','1 ly','drink','Gong Cha',NULL),
@@ -401,7 +389,6 @@ VALUES
 -- =====================
 -- Lotteria
 -- =====================
-
 (225,'Burger tôm Lotteria',420,15,40,22,1,'brand','1 cái','food','Lotteria',NULL),
 (226,'Khoai lắc Lotteria',330,4,45,15,2,'brand','1 phần','snack','Lotteria',NULL),
 (227,'Cơm gà Lotteria',190,8,30,4,1,'brand','1 phần','food','Lotteria',NULL),
@@ -409,7 +396,6 @@ VALUES
 -- =====================
 -- Pizza Hut
 -- =====================
-
 (228,'Pizza phô mai Pizza Hut',270,12,32,11,1,'brand','1 miếng','food','Pizza Hut',NULL),
 (229,'Pizza hải sản Pizza Hut',260,13,30,10,1,'brand','1 miếng','food','Pizza Hut',NULL),
 (230,'Gà nướng Pizza Hut',230,20,5,14,0,'brand','1 phần','food','Pizza Hut',NULL),
@@ -417,7 +403,6 @@ VALUES
 -- =====================
 -- Oishi / Snack
 -- =====================
-
 (231,'Snack Oishi vị bò nướng',510,7,55,27,2,'brand','1 gói','snack','Oishi',NULL),
 (232,'Snack Oishi vị rong biển',500,6,60,25,3,'brand','1 gói','snack','Oishi',NULL),
 (233,'Bánh que Pocky',480,7,70,18,2,'brand','1 hộp','snack','Pocky',NULL),
@@ -425,7 +410,6 @@ VALUES
 -- =====================
 -- Kinh Đô
 -- =====================
-
 (234,'Bánh Solite Kinh Đô',430,6,60,18,1,'brand','1 cái','snack','Kinh Đô',NULL),
 (235,'Bánh AFC Kinh Đô',500,8,68,22,4,'brand','1 gói','snack','Kinh Đô',NULL),
 (236,'Bánh Oreo Kinh Đô',480,5,71,20,3,'brand','1 gói','snack','Kinh Đô',NULL),
@@ -433,14 +417,12 @@ VALUES
 -- =====================
 -- Acecook / Mì
 -- =====================
-
 (237,'Mì Hảo Hảo bò hầm',450,9,63,17,3,'brand','1 gói','food','Acecook',NULL),
 (238,'Mì Đệ Nhất',430,8,62,16,2,'brand','1 gói','food','Acecook',NULL),
 
 -- =====================
 -- Coca / Pepsi
 -- =====================
-
 (239,'Coca Cola lon',42,0,10.6,0,0,'brand','1 lon','drink','Coca Cola',NULL),
 (240,'Sprite',40,0,10,0,0,'brand','1 lon','drink','Coca Cola',NULL),
 (241,'Pepsi lon',43,0,11,0,0,'brand','1 lon','drink','Pepsi',NULL),
@@ -448,7 +430,6 @@ VALUES
 -- =====================
 -- Trà đóng chai
 -- =====================
-
 (242,'C2 trà xanh',30,0,7,0,0,'brand','1 chai','drink','C2',NULL),
 (243,'Number One',45,0,11,0,0,'brand','1 chai','drink','Number One',NULL),
 (244,'Tea Plus',20,0,5,0,0,'brand','1 chai','drink','Tea+',NULL),
@@ -456,7 +437,6 @@ VALUES
 -- =====================
 -- Khác
 -- =====================
-
 (245,'Yakult',55,3,12,0.1,0,'brand','1 chai','drink','Yakult',NULL),
 (246,'Milo hộp',80,3,12,2,0,'brand','1 hộp','drink','Milo',NULL),
 (247,'Nutri Boost',70,3,10,2,0,'brand','1 hộp','drink','Nutifood',NULL),
@@ -464,4 +444,7 @@ VALUES
 (249,'Cá viên chiên CP',220,10,15,14,0,'brand','1 phần','food','CP',NULL),
 (250,'Chả cá surimi',140,12,8,7,0,'brand','1 phần','food','CP',NULL);
 
+-- Thiết lập lại sequence cho bảng ingredients
+SELECT setval('ingredients_id_seq', (SELECT MAX(id) FROM ingredients));
 
+COMMIT;

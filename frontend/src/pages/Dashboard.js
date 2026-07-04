@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowRight, Sparkles, LayoutDashboard, Clock, Target, Zap, Flame, Scale } from 'lucide-react';
+import { ArrowRight, Sparkles, LayoutDashboard, Clock, Target, Zap, Flame, Scale, X, Coffee, Utensils, Cookie, UtensilsCrossed } from 'lucide-react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 
@@ -60,6 +60,29 @@ function Dashboard() {
   };
 
   const [weeklyPlan, setWeeklyPlan] = useState([]);
+  const [calorieHistory, setCalorieHistory] = useState({});
+  const [selectedDayDetail, setSelectedDayDetail] = useState(null);
+
+  const handleDayClick = async (date) => {
+    try {
+      const localDate = new Date(date);
+      localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+      const dateStr = localDate.toISOString().split('T')[0];
+      
+      const res = await fetch(`http://localhost:5002/api/mealplan/day?date=${dateStr}`, {
+        headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedDayDetail({
+          date: date,
+          meals: data.data
+        });
+      }
+    } catch (e) {
+      console.error("Failed to fetch day meals", e);
+    }
+  };
 
   // Fetch data from backend
   useEffect(() => {
@@ -71,12 +94,30 @@ function Dashboard() {
         const monday = new Date(today.setDate(diff));
         const weekStartStr = monday.toISOString().split('T')[0];
 
+        // 1. Fetch weekly plan
         const res = await fetch(`http://localhost:5002/api/mealplan?weekStart=${weekStartStr}`, {
           headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
         });
         const mealPlanData = await res.json();
-        
         if (mealPlanData.success) setWeeklyPlan(mealPlanData.data);
+
+        // 2. Fetch 7-day calorie history (6 days ago to today)
+        const sixDaysAgo = new Date();
+        sixDaysAgo.setDate(sixDaysAgo.getDate() - 6);
+        const startStr = sixDaysAgo.toISOString().split('T')[0];
+        const endStr = new Date().toISOString().split('T')[0];
+
+        const historyRes = await fetch(`http://localhost:5002/api/mealplan/history?startDate=${startStr}&endDate=${endStr}`, {
+          headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+        });
+        const historyData = await historyRes.json();
+        if (historyData.success) {
+          const historyMap = {};
+          historyData.data.forEach(item => {
+            historyMap[item.meal_date_str] = Math.round(Number(item.total_calories || 0));
+          });
+          setCalorieHistory(historyMap);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -97,6 +138,13 @@ function Dashboard() {
   }, []);
 
   const getTodayCalories = () => {
+    const localDate = new Date();
+    localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+    const todayStr = localDate.toISOString().split('T')[0];
+    if (calorieHistory[todayStr] !== undefined) {
+      return calorieHistory[todayStr];
+    }
+    // Fallback to local sum
     const todayDayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()];
     const todayPlan = weeklyPlan.find(d => d.day === todayDayName);
     let total = 0;
@@ -116,17 +164,16 @@ function Dashboard() {
   const targetCalories = metrics.targetCalories || 2000;
   const progressPercent = Math.min((todayCalories / targetCalories) * 100, 100);
 
-  const pastCalories = useMemo(() => {
-    return Array.from({ length: 6 }, () => Math.floor(Math.random() * 500) + 1800);
-  }, []);
-
   const days = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
+    const localDate = new Date(d);
+    localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+    const dateStr = localDate.toISOString().split('T')[0];
     days.push({
       date: d,
-      calories: i === 0 ? todayCalories : pastCalories[6 - i]
+      calories: calorieHistory[dateStr] || 0
     });
   }
 
@@ -317,7 +364,11 @@ function Dashboard() {
 
       <div className="grid grid-cols-7 gap-3 mb-10">
         {days.map((day, idx) => (
-          <div key={idx} className={`p-4 rounded-2xl border text-center flex flex-col gap-2 cursor-pointer transition-all duration-300 hover:scale-105 ${idx === 6 ? 'bg-gradient-to-br from-[#EAF5DA] to-[#B5E361] border-[#B5E361]/40 text-[#1f3b00] shadow-sm' : 'bg-white border-gray-100 shadow-sm'}`}>
+          <div 
+            key={idx} 
+            onClick={() => handleDayClick(day.date)}
+            className={`p-4 rounded-2xl border text-center flex flex-col gap-2 cursor-pointer transition-all duration-300 hover:scale-105 ${idx === 6 ? 'bg-gradient-to-br from-[#EAF5DA] to-[#B5E361] border-[#B5E361]/40 text-[#1f3b00] shadow-sm' : 'bg-white border-gray-100 shadow-sm'}`}
+          >
             <span className={`text-xs ${idx === 6 ? 'text-[#3d6600]/80 font-black' : 'text-gray-400 font-bold'}`}>{day.date.toLocaleDateString('vi-VN', { weekday: 'short' })}</span>
             <span className="text-lg font-black">{day.date.getDate()}</span>
             {day.calories > 0 ? (
@@ -329,6 +380,128 @@ function Dashboard() {
         ))}
       </div>
 
+      {selectedDayDetail && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[32px] border border-[#e4e1d6] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fcfdfa] to-[#f5fbf0]">
+              <div>
+                <h4 className="text-xl font-extrabold text-[#1f3b00]">
+                  Chi tiết ngày {selectedDayDetail.date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                </h4>
+                <p className="text-xs text-green-700 font-bold mt-0.5">
+                  {selectedDayDetail.date.toLocaleDateString('vi-VN', { weekday: 'long' })}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedDayDetail(null)}
+                className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-800 transition-colors"
+              >
+                <X size={20} strokeWidth={2.5} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {selectedDayDetail.meals.length === 0 ? (
+                <div className="text-center py-12 flex flex-col items-center justify-center gap-3">
+                  <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100">
+                    <UtensilsCrossed size={28} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-800">Chưa có món ăn nào</p>
+                    <p className="text-xs text-gray-400 font-medium mt-1">Lịch ăn uống của ngày này đang trống.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {selectedDayDetail.meals.map((meal, idx) => {
+                    const getMealIcon = (type) => {
+                      switch (type) {
+                        case 'breakfast': return <Coffee className="text-[#8CB33D]" size={16} strokeWidth={2.5} />;
+                        case 'lunch': return <Utensils className="text-orange-500" size={16} strokeWidth={2.5} />;
+                        case 'snack': return <Cookie className="text-yellow-600" size={16} strokeWidth={2.5} />;
+                        case 'dinner': return <UtensilsCrossed className="text-blue-500" size={16} strokeWidth={2.5} />;
+                        default: return <Utensils className="text-gray-500" size={16} strokeWidth={2.5} />;
+                      }
+                    };
+                    
+                    const mealTypeLabels = {
+                      'breakfast': 'Bữa sáng',
+                      'lunch': 'Bữa trưa',
+                      'snack': 'Bữa phụ',
+                      'dinner': 'Bữa tối'
+                    };
+
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-3.5 bg-gradient-to-r from-white to-[#fcfdfa] border border-[#f0f5e6] rounded-[22px] shadow-sm hover:border-[#B5E361]/60 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-sm shrink-0 bg-gray-50 border border-gray-100">
+                            {meal.image_url ? (
+                              <img src={meal.image_url} alt={meal.food_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                                <Utensils size={20} />
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase text-gray-500 bg-gray-100/70 px-2 py-0.5 rounded-md mb-1.5">
+                              {getMealIcon(meal.meal_type)}
+                              {mealTypeLabels[meal.meal_type] || meal.meal_type}
+                            </span>
+                            <h5 className="font-extrabold text-sm text-[#2d3748] leading-tight">
+                              {meal.food_name}
+                            </h5>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="text-sm font-black text-[#8CB33D] block">{meal.calories} kcal</span>
+                          <span className="text-[10px] text-gray-400 font-bold block mt-0.5">
+                            {Math.round(meal.carbs)}g C | {Math.round(meal.protein)}g P | {Math.round(meal.fat)}g F
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer (Total details) */}
+            {selectedDayDetail.meals.length > 0 && (
+              <div className="p-6 border-t border-gray-100 bg-[#fbfdf8]">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-gray-500">TỔNG DINH DƯỠNG TRONG NGÀY</span>
+                  <span className="text-lg font-black text-[#1f3b00]">
+                    {selectedDayDetail.meals.reduce((sum, m) => sum + Number(m.calories || 0), 0)} kcal
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-white p-2 rounded-xl border border-gray-100">
+                    <span className="text-[10px] text-gray-400 font-bold block">Carb</span>
+                    <span className="text-xs font-black text-orange-500">
+                      {selectedDayDetail.meals.reduce((sum, m) => sum + Math.round(Number(m.carbs || 0)), 0)}g
+                    </span>
+                  </div>
+                  <div className="bg-white p-2 rounded-xl border border-gray-100">
+                    <span className="text-[10px] text-gray-400 font-bold block">Protein</span>
+                    <span className="text-xs font-black text-blue-500">
+                      {selectedDayDetail.meals.reduce((sum, m) => sum + Math.round(Number(m.protein || 0)), 0)}g
+                    </span>
+                  </div>
+                  <div className="bg-white p-2 rounded-xl border border-gray-100">
+                    <span className="text-[10px] text-gray-400 font-bold block">Béo</span>
+                    <span className="text-xs font-black text-red-500">
+                      {selectedDayDetail.meals.reduce((sum, m) => sum + Math.round(Number(m.fat || 0)), 0)}g
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

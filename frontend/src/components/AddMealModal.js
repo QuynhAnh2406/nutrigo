@@ -123,24 +123,57 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
     return map[dayName] || dayName;
   };
 
-  const handleSelectRecipe = (recipe) => {
+  const handleSelectRecipe = async (recipe) => {
     if (recipe.isBrand) {
-      setDishName(recipe.name);
-      setDescription(recipe.description);
-      setCookTime(5); // Liền tay = 5 phút
-      setImageUrl(recipe.image_url);
-      setSelectedIngredients([{
+      setIsLoading(true);
+      const brandData = recipe.brandData;
+      const recipeData = {
+        id: null,
         name: recipe.name,
-        weight_g: 100, // Or whatever equivalent representing 1 serving
-        calories_per_100g: parseFloat(recipe.brandData.calories_per_100g || 0),
-        protein_per_100g: parseFloat(recipe.brandData.protein_per_100g || 0),
-        carbs_per_100g: parseFloat(recipe.brandData.carbs_per_100g || 0),
-        fat_per_100g: parseFloat(recipe.brandData.fat_per_100g || 0),
-        showDropdown: false
-      }]);
-      setEditingRecipeId(null);
-      setUpdateExistingRecipe(false);
-      setActiveTab('create');
+        description: recipe.description || `Thương hiệu mua ngoài: ${brandData.brand_name || 'Khác'}`,
+        prepTime: '5 phút',
+        imageUrl: recipe.image_url || '',
+        ingredients: [{
+          name: recipe.name,
+          weight_g: 100, // Default 1 portion weight
+          calories_per_100g: parseFloat(brandData.calories_per_100g || 0),
+          protein_per_100g: parseFloat(brandData.protein_per_100g || 0),
+          carbs_per_100g: parseFloat(brandData.carbs_per_100g || 0),
+          fat_per_100g: parseFloat(brandData.fat_per_100g || 0)
+        }],
+        instructions: [],
+        category: recipe.category || 'food'
+      };
+
+      try {
+        const res = await fetch('http://localhost:5002/api/mealplan/add-with-recipe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + localStorage.getItem('token')
+          },
+          body: JSON.stringify({
+            day,
+            mealType: category,
+            recipeData: recipeData,
+            saveToMyRecipe: false,
+            updateExistingRecipe: false,
+            mealDate
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          onConfirm({ name: recipe.name, mealType: category, mealDate });
+          onClose();
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Có lỗi xảy ra khi thêm món ăn thương hiệu');
+      } finally {
+        setIsLoading(false);
+      }
       return;
     }
 

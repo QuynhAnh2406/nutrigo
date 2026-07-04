@@ -355,7 +355,7 @@ exports.getUserRecipes = async (req, res) => {
     // 4. Fetch ingredients for each recipe
     for (let recipe of combined) {
       const { rows: ingredients } = await db.query(`
-        SELECT pi.ingredient_name as name, pi.weight_g, i.calories_per_100g, i.protein_per_100g, i.carbs_per_100g, i.fat_per_100g
+        SELECT pi.ingredient_name as name, pi.amount, pi.weight_g, i.calories_per_100g, i.protein_per_100g, i.carbs_per_100g, i.fat_per_100g
         FROM recipe_ingredients pi
         LEFT JOIN ingredients i ON pi.ingredient_name = i.name
         WHERE pi.recipe_id = $1
@@ -386,6 +386,65 @@ exports.addMealWithRecipe = async (req, res) => {
     const totalCarbs = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.carbs_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
     const totalFat = recipeData.ingredients.reduce((sum, ing) => sum + (Number(ing.fat_per_100g || 0) * Number(ing.weight_g || 0) / 100), 0);
 
+    let hasChanges = false;
+    if (recipeId) {
+      const origRecipeRes = await client.query('SELECT * FROM recipes WHERE id = $1', [recipeId]);
+      const origRecipe = origRecipeRes.rows[0];
+      if (origRecipe) {
+        // Compare basic info
+        const nameMatches = (origRecipe.food_name || '').trim() === (recipeData.name || '').trim();
+        const getMins = (str) => parseInt(str) || 0;
+        const timeMatches = getMins(origRecipe.prep_time) === getMins(recipeData.prepTime);
+        const descMatches = (origRecipe.description || '').trim() === (recipeData.description || '').trim();
+        const categoryMatches = (origRecipe.category || '').trim() === (recipeData.category || '').trim();
+        
+        if (!nameMatches || !timeMatches || !descMatches || !categoryMatches) {
+          hasChanges = true;
+        } else {
+          // Compare ingredients
+          const origIngRes = await client.query('SELECT ingredient_name as name, weight_g FROM recipe_ingredients WHERE recipe_id = $1', [recipeId]);
+          const origIngs = origIngRes.rows;
+          const newIngs = recipeData.ingredients || [];
+          
+          if (origIngs.length !== newIngs.length) {
+            hasChanges = true;
+          } else {
+            const sortFn = (a, b) => (a.name || '').localeCompare(b.name || '');
+            const sortedOrig = [...origIngs].sort(sortFn);
+            const sortedNew = [...newIngs].sort(sortFn);
+            
+            for (let i = 0; i < sortedOrig.length; i++) {
+              if ((sortedOrig[i].name || '').trim().toLowerCase() !== (sortedNew[i].name || '').trim().toLowerCase() ||
+                  Math.abs(Number(sortedOrig[i].weight_g || 0) - Number(sortedNew[i].weight_g || 0)) > 0.1) {
+                hasChanges = true;
+                break;
+              }
+            }
+          }
+        }
+        
+        if (!hasChanges) {
+          // Compare instructions
+          const origInstRes = await client.query('SELECT instruction FROM recipe_instruction_steps WHERE recipe_id = $1 ORDER BY step_number ASC', [recipeId]);
+          const origInsts = origInstRes.rows.map(r => (r.instruction || '').trim());
+          const newInsts = (recipeData.instructions || []).map(i => (i || '').trim());
+          
+          if (origInsts.length !== newInsts.length) {
+            hasChanges = true;
+          } else {
+            for (let i = 0; i < origInsts.length; i++) {
+              if (origInsts[i] !== newInsts[i]) {
+                hasChanges = true;
+                break;
+              }
+            }
+          }
+        }
+      } else {
+        hasChanges = true;
+      }
+    }
+
     if (recipeId && updateExistingRecipe) {
       // Update existing recipe
       await client.query(`
@@ -411,10 +470,21 @@ exports.addMealWithRecipe = async (req, res) => {
       
       for (let ing of recipeData.ingredients) {
         const ingCals = (Number(ing.calories_per_100g || 0) * Number(ing.weight_g || 0) / 100);
+        let ingredientId = null;
+        try {
+          const ingIdRes = await client.query('SELECT id FROM ingredients WHERE name = $1', [ing.name]);
+          if (ingIdRes.rows.length > 0) {
+            ingredientId = ingIdRes.rows[0].id;
+          }
+        } catch (e) {
+          console.error("Failed to find ingredient id", e);
+        }
+        const amountStr = ing.weight_g ? `${ing.weight_g}g` : null;
+
         await client.query(`
-          INSERT INTO recipe_ingredients (recipe_id, ingredient_name, weight_g, calories)
-          VALUES ($1, $2, $3, $4)
-        `, [recipeId, ing.name, Number(ing.weight_g || 0), ingCals]);
+          INSERT INTO recipe_ingredients (recipe_id, ingredient_id, ingredient_name, amount, weight_g, calories)
+          VALUES ($1, $2, $3, $4, $5, $6)
+        `, [recipeId, ingredientId, ing.name, amountStr, Number(ing.weight_g || 0), ingCals]);
       }
 
       // Delete old instructions and insert new ones
@@ -427,6 +497,9 @@ exports.addMealWithRecipe = async (req, res) => {
           `, [recipeId, i + 1, recipeData.instructions[i]]);
         }
       }
+    } else if (recipeId && !updateExistingRecipe && !saveToMyRecipe && !hasChanges) {
+      // No changes detected and user doesn't want to save/update. Use the existing recipe ID directly.
+      console.log(`Using existing recipe ID ${recipeId} directly without cloning (no changes).`);
     } else if (!recipeId || saveToMyRecipe || (recipeId && !updateExistingRecipe)) {
       // Create new recipe (or clone if recipeId exists but updateExistingRecipe is false)
       const recipeRes = await client.query(`
@@ -454,10 +527,21 @@ exports.addMealWithRecipe = async (req, res) => {
       // Insert ingredients
       for (let ing of recipeData.ingredients) {
         const ingCals = (Number(ing.calories_per_100g || 0) * Number(ing.weight_g || 0) / 100);
+        let ingredientId = null;
+        try {
+          const ingIdRes = await client.query('SELECT id FROM ingredients WHERE name = $1', [ing.name]);
+          if (ingIdRes.rows.length > 0) {
+            ingredientId = ingIdRes.rows[0].id;
+          }
+        } catch (e) {
+          console.error("Failed to find ingredient id", e);
+        }
+        const amountStr = ing.weight_g ? `${ing.weight_g}g` : null;
+
         await client.query(`
-          INSERT INTO recipe_ingredients (recipe_id, ingredient_name, weight_g, calories)
-          VALUES ($1, $2, $3, $4)
-        `, [recipeId, ing.name, Number(ing.weight_g || 0), ingCals]);
+          INSERT INTO recipe_ingredients (recipe_id, ingredient_id, ingredient_name, amount, weight_g, calories)
+          VALUES ($1, $2, $3, $4, $5, $6)
+        `, [recipeId, ingredientId, ing.name, amountStr, Number(ing.weight_g || 0), ingCals]);
       }
 
       // Insert instructions
@@ -491,5 +575,48 @@ exports.addMealWithRecipe = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   } finally {
     client.release();
+  }
+};
+
+exports.getCalorieHistory = async (req, res) => {
+  const userId = await getUserId(req);
+  const { startDate, endDate } = req.query; // YYYY-MM-DD format
+  try {
+    const { rows } = await db.query(`
+      SELECT TO_CHAR(mp.meal_date, 'YYYY-MM-DD') as meal_date_str, SUM(r.calories) as total_calories
+      FROM meal_plans mp
+      JOIN recipes r ON mp.recipe_id = r.id
+      WHERE mp.user_id = $1 AND mp.meal_date >= $2 AND mp.meal_date <= $3
+      GROUP BY mp.meal_date
+    `, [userId, startDate, endDate]);
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.getDayPlan = async (req, res) => {
+  const userId = await getUserId(req);
+  const { date } = req.query; // YYYY-MM-DD format
+  try {
+    const { rows } = await db.query(`
+      SELECT mp.id as meal_plan_id, mp.meal_type, r.id as recipe_id, r.food_name, r.calories, r.image_url, r.protein, r.carbs, r.fat
+      FROM meal_plans mp
+      JOIN recipes r ON mp.recipe_id = r.id
+      WHERE mp.user_id = $1 AND mp.meal_date = $2
+      ORDER BY 
+        CASE mp.meal_type
+          WHEN 'breakfast' THEN 1
+          WHEN 'lunch' THEN 2
+          WHEN 'snack' THEN 3
+          WHEN 'dinner' THEN 4
+          ELSE 5
+        END
+    `, [userId, date]);
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };

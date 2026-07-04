@@ -11,6 +11,8 @@ router.post('/autofill', mealPlanController.autoFillWeek);
 router.get('/ingredients', mealPlanController.getIngredients);
 router.get('/user-recipes', mealPlanController.getUserRecipes);
 router.post('/add-with-recipe', mealPlanController.addMealWithRecipe);
+router.get('/history', mealPlanController.getCalorieHistory);
+router.get('/day', mealPlanController.getDayPlan);
 router.post('/clear-day', mealPlanController.clearDay);
 
 module.exports = router;
