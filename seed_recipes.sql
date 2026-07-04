@@ -8,11 +8,11 @@ BEGIN;
 -- Xóa dữ liệu cũ để tránh trùng lặp hoặc lỗi khóa ngoại
 TRUNCATE TABLE meal_plans, recipe_instruction_steps, recipe_ingredients, recipes, user_health_data, users RESTART IDENTITY CASCADE;
 
--- 1. TẠO TÀI KHOẢN NGƯỜI DÙNG MẪU (Mật khẩu hash bên dưới tương ứng với '20236032')
+-- 1. TẠO TÀI KHOẢN NGƯỜI DÙNG MẪU (Mật khẩu hash bên dưới tương ứng với '123456')
 INSERT INTO users (id, email, password_hash, full_name, avatar_url, is_premium)
 VALUES 
-(1, 'huetest@gmail.com', '$2b$10$URvrmU.wzcv.TMeEhQatDeBuQMBlJO/ssTWhDWFZG55CGeMPVPWMe', 'Huế Test', 'https://api.dicebear.com/7.x/adventurer/svg?seed=hue', true),
-(2, 'testnutrigo@gmail.com', '$2b$10$URvrmU.wzcv.TMeEhQatDeBuQMBlJO/ssTWhDWFZG55CGeMPVPWMe', 'Test Nutrigo', 'https://api.dicebear.com/7.x/adventurer/svg?seed=nutrigo', true);
+(1, 'huetest@gmail.com', '$2b$10$HAT7nQykl3ps2g9iBTiab.ckD37Ut/Dn1WfLaylxCfA6r/p3GXGi2', 'Huế Test', 'https://api.dicebear.com/7.x/adventurer/svg?seed=hue', true),
+(2, 'testnutrigo@gmail.com', '$2b$10$HAT7nQykl3ps2g9iBTiab.ckD37Ut/Dn1WfLaylxCfA6r/p3GXGi2', 'Test Nutrigo', 'https://api.dicebear.com/7.x/adventurer/svg?seed=nutrigo', true);
 
 -- Thiết lập lại sequence cho bảng users
 SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
