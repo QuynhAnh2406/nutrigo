@@ -336,7 +336,7 @@ function MealDetailModal({ meal, onClose, onDelete, onSaveSuccess, initialIsEdit
               <div className="flex flex-col items-center justify-center px-4 sm:px-6 shrink-0">
                 <div className="flex items-center gap-1.5 text-gray-400 mb-1.5">
                   <Droplet size={16} className="text-[#e11d48]" />
-                  <span className="text-[11px] sm:text-[13px] font-bold">Béo</span>
+                  <span className="text-[11px] sm:text-[13px] font-bold">Fat</span>
                 </div>
                 <div className="flex items-baseline gap-0.5">
                   <span className="text-base sm:text-xl font-black text-[#1f2937] leading-none">{Math.round(meal.macros?.fat || 0)}</span>

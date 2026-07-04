@@ -152,7 +152,7 @@ function RecipeCard({ recipe, onOpenDetail, onAddToPlan, onEdit, onDelete }) {
         </div>
         <div className="flex flex-col items-center justify-center border-l border-gray-100">
           <div className="flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] text-gray-400 font-medium mb-0.5">
-            <Droplet size={12} strokeWidth={2.5} className="text-red-500" /> Béo
+            <Droplet size={12} strokeWidth={2.5} className="text-red-500" /> Fat
           </div>
           <span className="text-[11px] sm:text-[12px] font-black text-gray-700">{recipe.fat || 0}g</span>
         </div>
