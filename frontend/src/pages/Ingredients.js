@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Flame, Sparkles, Scale, SlidersHorizontal, RotateCcw, Store, Apple, Coffee, Cookie, Soup } from 'lucide-react';
+import { Search, Flame, Scale, SlidersHorizontal, RotateCcw, Store, Apple, Coffee, Cookie, Soup } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 function Ingredients({ mode = 'ingredient' }) {
@@ -378,8 +378,6 @@ function Ingredients({ mode = 'ingredient' }) {
             Hãy thử tìm bằng từ khóa khác!
           </p>
         </div>
-      )}
-
       )}
 
     </div>
