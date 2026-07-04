@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Flame, Check, Sunrise, Sun, Moon, Coffee } from 'lucide-react';
 
+const formatDateLocal = (d) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const date = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${date}`;
+};
+
 function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
   // Start with current date, aligned to Monday
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
@@ -76,7 +83,7 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
 
   const fetchWeeklyPlan = useCallback(async () => {
     try {
-      const weekStartStr = currentWeekStart.toISOString().split('T')[0];
+      const weekStartStr = formatDateLocal(currentWeekStart);
       const res = await fetch(`http://localhost:5002/api/mealplan?weekStart=${weekStartStr}`, {
         headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
       });
@@ -183,7 +190,7 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
     const dayName = dayInfo.name;
     const planForDay = weeklyPlan.find(d => d.day === dayName);
     const existingRecipes = planForDay?.meals?.[mealType] || [];
-    const dateStr = dayInfo.dateObj.toISOString().split('T')[0];
+    const dateStr = formatDateLocal(dayInfo.dateObj);
 
     const isEmpty = existingRecipes.length === 0;
 

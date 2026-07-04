@@ -154,7 +154,9 @@ exports.updatePlan = async (req, res) => {
       `, [mealPlanId, userId]);
     } else if (recipeId && mealDate) {
       const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const dayName = daysOfWeek[new Date(mealDate).getDay()];
+      const dateParts = mealDate.split('-');
+      const d = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
+      const dayName = daysOfWeek[d.getUTCDay()];
 
       // Insert new plan item on a specific calendar date
       await db.query(`

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useOutletContext, useNavigate } from 'react-router-dom';
+import { useOutletContext, useNavigate, useLocation } from 'react-router-dom';
 import { CalendarDays, ChefHat, Flame, Trash2, Plus, Sparkles, Check, Pencil, ArrowLeft, Coffee, Utensils, Cookie, UtensilsCrossed } from 'lucide-react';
 import MonthlyCalendar from '../components/MonthlyCalendar';
 import AddMealModal from '../components/AddMealModal';
@@ -19,6 +19,49 @@ const getWeekStart = (date) => {
 function MealPlan() {
   const navigate = useNavigate();
   const { healthData } = useOutletContext();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state && location.state.prefilledRecipe) {
+      const recipe = location.state.prefilledRecipe;
+      // Clear navigation state so it doesn't open the modal again on refresh
+      window.history.replaceState({}, document.title);
+      
+      // Determine the default mealDate and day
+      const today = new Date();
+      const dayNamesArr = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const dayName = dayNamesArr[today.getDay()];
+      
+      const localDate = new Date();
+      localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+      const mealDateStr = localDate.toISOString().split('T')[0];
+      
+      const mealType = recipe.mealType || 'breakfast';
+
+      const initialRecipeData = {
+        name: recipe.title,
+        description: recipe.description,
+        prep_time: recipe.cookingTime,
+        image_url: recipe.image_url || '',
+        ingredients: recipe.ingredients.map(ing => ({
+          name: ing.name || ing,
+          weight_g: ing.weight || ing.weight_g || 100,
+          calories_per_100g: 0,
+          protein_per_100g: 0,
+          carbs_per_100g: 0,
+          fat_per_100g: 0
+        })),
+        instructions: recipe.steps || []
+      };
+
+      setAddMealConfig({
+        day: dayName,
+        mealType: mealType,
+        mealDate: mealDateStr,
+        editRecipe: initialRecipeData
+      });
+    }
+  }, [location.state]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
 

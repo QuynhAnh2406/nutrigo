@@ -12,6 +12,16 @@ pool.on('connect', () => {
   console.log('Connected to PostgreSQL Database successfully');
 });
 
+// Self-healing schema migration to ensure required columns exist
+pool.query(`
+  ALTER TABLE recipes ADD COLUMN IF NOT EXISTS meal_types VARCHAR(50);
+  ALTER TABLE recipes ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'food';
+`).then(() => {
+  console.log('Database self-healing schema checks completed.');
+}).catch(err => {
+  console.error('Database self-healing schema check failed:', err);
+});
+
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
   process.exit(-1);

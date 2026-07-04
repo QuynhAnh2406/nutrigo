@@ -1,0 +1,167 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../config/db');
+
+router.post('/generate-recipe', async (req, res) => {
+  try {
+    const { ingredients, mealType, category, maxCalories } = req.body;
+    if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
+      return res.status(400).json({ success: false, message: 'Danh sách nguyên liệu không hợp lệ.' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ success: false, message: 'Gemini API Key chưa được thiết lập ở backend.' });
+    }
+
+    const { rows: dbIngredients } = await db.query('SELECT name FROM ingredients');
+    const validDbNames = dbIngredients.map(r => r.name).join(', ');
+
+    let preferencePrompt = '';
+    if (mealType && mealType !== 'All') {
+      const typeVi = mealType === 'breakfast' ? 'bữa sáng' : mealType === 'lunch' ? 'bữa trưa' : mealType === 'dinner' ? 'bữa tối' : 'bữa phụ';
+      preferencePrompt += `\n- Món ăn này BẮT BUỘC phải phù hợp để ăn vào ${typeVi}.`;
+    }
+    if (category && category !== 'All') {
+      const catVi = category === 'food' ? 'món ăn (đồ ăn)' : category === 'drink' ? 'đồ uống' : 'đồ ăn vặt (snack)';
+      preferencePrompt += `\n- Thể loại của món này BẮT BUỘC phải là ${catVi}.`;
+    }
+    if (maxCalories) {
+      preferencePrompt += `\n- Lượng calo (calories) của TẤT CẢ các món ăn gợi ý BẮT BUỘC phải nhỏ hơn hoặc bằng ${maxCalories} kcal.`;
+    }
+
+    const prompt = `Hãy đóng vai làm một đầu bếp chuyên nghiệp. Dưới đây là danh sách các nguyên liệu tôi đang có: ${ingredients.join(', ')}.
+Hãy gợi ý đúng 3 lựa chọn món ăn khác nhau (khác biệt về cách làm hoặc hương vị), ngon, dễ làm, và phù hợp nhất với các nguyên liệu này (bạn có thể thêm một số gia vị hoặc nguyên liệu phụ cực kỳ thông dụng khác).
+- Tất cả các món ăn được gợi ý BẮT BUỘC phải là món ăn lành mạnh (healthy), dinh dưỡng tốt cho sức khỏe, hạn chế tối đa dầu mỡ xấu hoặc chất béo bão hòa dư thừa, và có lượng calo cân đối.
+- Tên nguyên liệu ("name") trong phần "ingredients" của kết quả JSON BẮT BUỘC phải khớp hoàn toàn với một trong các tên nguyên liệu có trong danh sách nguyên liệu chuẩn sau đây: [${validDbNames}]. Vui lòng không tự tạo ra tên nguyên liệu mới ngoài danh sách này.
+- Khối lượng ("weight") của từng nguyên liệu phải là một số nguyên đại diện cho số gram tương ứng (ví dụ: 150, 300, 50).
+${preferencePrompt}
+
+Trả về kết quả dưới dạng JSON duy nhất, có cấu trúc như sau:
+{
+  "recipes": [
+    {
+      "title": "Tên món ăn 1 (Viết hoa chữ cái đầu tiên, ví dụ: Trứng Chiên Cà Chua)",
+      "description": "Mô tả ngắn gọn về hương vị và sự kết hợp của món ăn",
+      "cookingTime": 25,
+      "category": "chỉ được chọn một trong các giá trị sau: 'food' (đồ ăn), 'drink' (đồ uống), 'snack' (ăn vặt), 'fruit' (trái cây), 'other' (khác)",
+      "mealType": "chỉ được chọn một trong các giá trị sau: 'breakfast' (bữa sáng), 'lunch' (bữa trưa), 'dinner' (bữa tối), 'snack' (bữa phụ)",
+      "calories": 350,
+      "carbs": 40,
+      "protein": 25,
+      "fat": 15,
+      "ingredients": [
+        {
+          "name": "Tên nguyên liệu chuẩn, ví dụ: 'Trứng gà'",
+          "weight": 100
+        },
+        {
+          "name": "Tên nguyên liệu chuẩn khác, ví dụ: 'Cà chua'",
+          "weight": 150
+        }
+      ],
+      "steps": ["Mô tả chi tiết bước 1", "Mô tả chi tiết bước 2"]
+    },
+    {
+      "title": "Tên món ăn 2",
+      "description": "Mô tả...",
+      "cookingTime": 20,
+      "category": "food",
+      "mealType": "lunch",
+      "calories": 400,
+      "carbs": 35,
+      "protein": 30,
+      "fat": 12,
+      "ingredients": [
+        {
+          "name": "Ức gà (không da)",
+          "weight": 200
+        }
+      ],
+      "steps": []
+    },
+    {
+      "title": "Tên món ăn 3",
+      "description": "Mô tả...",
+      "cookingTime": 30,
+      "category": "food",
+      "mealType": "dinner",
+      "calories": 380,
+      "carbs": 45,
+      "protein": 20,
+      "fat": 10,
+      "ingredients": [
+        {
+          "name": "Đậu phụ",
+          "weight": 150
+        }
+      ],
+      "steps": []
+    }
+  ]
+}
+Chú ý: 
+- cookingTime, calories, carbs, protein, fat phải bắt buộc là các số nguyên (number), không kèm đơn vị.
+- category và mealType bắt buộc phải chọn đúng giá trị tiếng Anh được liệt kê ở trên (ví dụ: 'food' và 'breakfast').
+- Không viết thêm bất kỳ văn bản giải thích nào khác ngoài chuỗi JSON này.`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          thinkingConfig: {
+            thinkingBudget: 0
+          }
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Gemini API error:', errText);
+      let errMsg = 'Không thể kết nối đến AI Service.';
+      try {
+        const errObj = JSON.parse(errText);
+        if (errObj.error?.message) {
+          errMsg = `AI Service: ${errObj.error.message}`;
+        }
+      } catch (e) {}
+      return res.status(502).json({ success: false, message: errMsg });
+    }
+
+    const result = await response.json();
+    const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!textResponse) {
+      return res.status(500).json({ success: false, message: 'AI không trả về nội dung phù hợp.' });
+    }
+
+    let recipeData;
+    try {
+      recipeData = JSON.parse(textResponse.trim());
+    } catch (parseErr) {
+      console.error('Failed to parse Gemini output:', textResponse);
+      return res.status(500).json({ success: false, message: 'Dữ liệu trả về từ AI không đúng cấu trúc.' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: recipeData
+    });
+
+  } catch (error) {
+    console.error('AI generate error:', error);
+    return res.status(500).json({ success: false, message: 'Đã xảy ra lỗi hệ thống khi gọi AI.' });
+  }
+});
+
+module.exports = router;

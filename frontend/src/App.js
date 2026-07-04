@@ -15,6 +15,7 @@ import Signup from './pages/Signup';
 import Ingredients from './pages/Ingredients';
 import MyRecipes from './pages/MyRecipes';
 import CreateRecipe from './pages/CreateRecipe';
+import AIChef from './pages/AIChef';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/brands" element={<Ingredients mode="brand" />} />
           <Route path="/my-recipes" element={<MyRecipes />} />
           <Route path="/my-recipes/create" element={<CreateRecipe />} />
+          <Route path="/ai-chef" element={<AIChef />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
 
