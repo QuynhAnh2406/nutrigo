@@ -197,6 +197,7 @@ function AIChef() {
           foodName: recipe.title,
           description: recipe.description,
           prepTime: `${recipe.cookingTime} phút`,
+          image: recipe.image_url,
           calories: recipe.calories,
           carbs: recipe.carbs,
           protein: recipe.protein,
@@ -213,9 +214,6 @@ function AIChef() {
       if (data.success) {
         setSaveSuccess(true);
         setSavedRecipeId(data.data.id);
-        setTimeout(() => {
-          navigate('/my-recipes');
-        }, 1500);
       } else {
         setErrorMsg(data.message || 'Không thể lưu công thức nấu ăn. Vui lòng thử lại.');
       }
@@ -251,6 +249,7 @@ function AIChef() {
           foodName: recipe.title,
           description: recipe.description,
           prepTime: `${recipe.cookingTime} phút`,
+          image: recipe.image_url,
           calories: recipe.calories,
           carbs: recipe.carbs,
           protein: recipe.protein,
@@ -545,6 +544,13 @@ function AIChef() {
                   ))}
                 </div>
 
+                {recipe.image_url && (
+                  <div className="w-full h-48 sm:h-64 rounded-2xl overflow-hidden mb-6 shadow-sm border border-amber-100/50 relative group">
+                    <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 pointer-events-none"></div>
+                  </div>
+                )}
+
                 {/* Recipe title and save */}
                 <div className="flex justify-between items-start gap-4 mb-4 flex-wrap">
                   <div>
@@ -642,15 +648,19 @@ function AIChef() {
                   <div className="md:col-span-2">
                     <h4 className="text-sm font-black text-[#112308] mb-3 uppercase tracking-wide">Nguyên liệu cần có</h4>
                     <ul className="space-y-2">
-                      {recipe.ingredients.map((ing, i) => (
+                      {(recipe.fullIngredients || recipe.ingredients).map((ing, i) => (
                         <li key={i} className="flex items-start gap-2 text-xs font-semibold text-gray-600">
                           <div className="w-4 h-4 rounded-md border border-amber-200 bg-amber-50/50 flex items-center justify-center text-[#8CB33D] shrink-0 mt-0.5">
                             <Check size={10} strokeWidth={3} />
                           </div>
                           <span>
-                            {ing.name || ing}
-                            {(ing.weight || ing.weight_g) && (
-                              <span className="text-gray-400 font-bold ml-1">({ing.weight || ing.weight_g}g)</span>
+                            {typeof ing === 'string' ? ing : (
+                              <>
+                                {ing.name}
+                                {(ing.weight || ing.weight_g) && (
+                                  <span className="text-gray-400 font-bold ml-1">({ing.weight || ing.weight_g}g)</span>
+                                )}
+                              </>
                             )}
                           </span>
                         </li>
