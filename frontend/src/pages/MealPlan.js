@@ -338,6 +338,15 @@ function MealPlan() {
         title="Lịch ăn uống"
         subtitle="Lên kế hoạch các bữa ăn trong tuần và tự động tạo danh sách đi chợ."
         icon={CalendarDays}
+        actions={
+          <button
+            onClick={() => navigate('/ai-chef')}
+            className="flex items-center gap-2.5 px-6 py-3.5 sm:py-4 rounded-[20px] bg-white/80 hover:bg-white text-[#1f3b00] border border-white/60 shadow-md hover:shadow-lg font-black text-sm sm:text-[15px] transition-all hover:scale-105"
+          >
+            <Sparkles size={16} className="text-[#8CB33D] animate-pulse" />
+            Bạn không biết ăn gì?
+          </button>
+        }
       />
 
       {/* Main Content with Resizable Splitter */}

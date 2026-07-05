@@ -30,7 +30,7 @@ export default function PageHeader({
       </div>
 
       <div className="relative z-10 p-6 sm:p-8 flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-start gap-5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-5">
           {Icon && (
             <div className="w-14 h-14 bg-white/40 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-[0_4px_15px_rgba(0,0,0,0.05)] shrink-0 border border-white/60 group-hover:scale-110 group-hover:bg-white/60 transition-all duration-500 ease-out relative">
               <div className="absolute inset-0 bg-white blur-[10px] opacity-30 rounded-2xl group-hover:opacity-60 transition-opacity duration-500"></div>
@@ -57,7 +57,7 @@ export default function PageHeader({
           </div>
 
           {actions && (
-            <div className="flex shrink-0 items-start gap-3 mt-4 sm:mt-0">
+            <div className="flex shrink-0 items-center gap-3 mt-4 sm:mt-0">
               {actions}
             </div>
           )}
