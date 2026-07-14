@@ -263,65 +263,7 @@ exports.suggestMeals = async (req, res) => {
   }
 };
 
-exports.getRecipes = async (req, res) => {
-  try {
-    const { rows } = await db.query('SELECT id, food_name as name, calories FROM recipes LIMIT 20');
-    res.json({ success: true, data: rows });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
 
-exports.autoFillWeek = async (req, res) => {
-  const userId = await getUserId(req);
-  const { weekStart } = req.query;
-
-  try {
-    const { rows: recipes } = await db.query('SELECT id FROM recipes LIMIT 50');
-    if (recipes.length === 0) {
-      return res.status(400).json({ success: false, message: 'No recipes available to autofill' });
-    }
-
-    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
-
-    // Generate week dates
-    let start = weekStart ? new Date(weekStart) : getWeekStart(new Date());
-    start = getWeekStart(start);
-    
-    const weekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(start);
-      d.setDate(d.getDate() + i);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const date = String(d.getDate()).padStart(2, '0');
-      weekDates.push(`${year}-${month}-${date}`);
-    }
-
-    for (let i = 0; i < 7; i++) {
-      const day = daysOfWeek[i];
-      const date = weekDates[i];
-      for (let type of mealTypes) {
-        // Check if empty on that date
-        const check = await db.query('SELECT 1 FROM meal_plans WHERE user_id = $1 AND meal_date = $2 AND meal_type = $3', [userId, date, type]);
-        if (check.rows.length === 0) {
-          const randomRecipeId = recipes[Math.floor(Math.random() * recipes.length)].id;
-          await db.query(`
-            INSERT INTO meal_plans (user_id, day_name, meal_type, recipe_id, meal_date)
-            VALUES ($1, $2, $3, $4, $5)
-          `, [userId, day, type, randomRecipeId, date]);
-        }
-      }
-    }
-
-    exports.getWeeklyPlan(req, res);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
 exports.getIngredients = async (req, res) => {
   try {
     const { rows } = await db.query('SELECT * FROM ingredients ORDER BY name ASC');

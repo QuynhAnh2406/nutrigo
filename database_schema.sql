@@ -1,3 +1,17 @@
+-- =========================================================================
+-- SCRIPT KHỞI TẠO CẤU TRÚC DATABASE CHO NUTRIGO
+-- =========================================================================
+
+-- Xóa các bảng cũ nếu đã tồn tại để tránh xung đột cấu trúc
+DROP TABLE IF EXISTS password_history CASCADE;
+DROP TABLE IF EXISTS meal_plans CASCADE;
+DROP TABLE IF EXISTS recipe_instruction_steps CASCADE;
+DROP TABLE IF EXISTS recipe_ingredients CASCADE;
+DROP TABLE IF EXISTS recipes CASCADE;
+DROP TABLE IF EXISTS ingredients CASCADE;
+DROP TABLE IF EXISTS user_health_data CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
 -- ==========================================
 -- BẢNG USERS (Người dùng)
 -- ==========================================
@@ -65,6 +79,7 @@ CREATE TABLE recipes (
     is_recipe BOOLEAN DEFAULT FALSE,
     meal_types VARCHAR(50),
     category VARCHAR(50) DEFAULT 'food',
+    health_level VARCHAR(50) DEFAULT 'medium',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

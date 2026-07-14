@@ -232,15 +232,14 @@ exports.updateRecipe = async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    // 1. Update Recipe basic info
     await client.query(`
       UPDATE recipes 
-      SET food_name = $1, description = $2, image_url = $3, prep_time = $4, difficulty = $5, calories = $6, category = $7, health_level = $8
-      WHERE id = $9
+      SET food_name = $1, description = $2, image_url = $3, prep_time = $4, calories = $5, category = $6, health_level = $7
+      WHERE id = $8
     `, [
       foodName, description, 
       image || 'https://images.unsplash.com/photo-1498837167922-41cfa6f500ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      prepTime || 'Unknown', difficulty || 'Medium', 
+      prepTime || 'Unknown', 
       Math.round(totalCal) > 0 ? Math.round(totalCal) : 300, 
       category || 'food',
       healthLevel || 'medium',

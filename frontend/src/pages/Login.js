@@ -198,25 +198,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Nhớ mật khẩu & Quên mật khẩu */}
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-[#B5E361] focus:ring-[#B5E361] border-gray-300 rounded cursor-pointer accent-[#B5E361]"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600 cursor-pointer">
-                  Ghi nhớ đăng nhập
-                </label>
-              </div>
-              <div className="text-sm">
-                <a href="#forgot" className="font-semibold text-gray-700 hover:text-[#8cbd3e] transition-colors">
-                  Quên mật khẩu?
-                </a>
-              </div>
-            </div>
+
 
             {/* Nút Đăng nhập */}
             <button

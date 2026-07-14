@@ -18,7 +18,7 @@ const getWeekStart = (date) => {
 
 function MealPlan() {
   const navigate = useNavigate();
-  const { healthData } = useOutletContext();
+  const { healthData, metrics } = useOutletContext();
   const location = useLocation();
 
   useEffect(() => {
@@ -442,6 +442,35 @@ function MealPlan() {
 
                 {(() => {
                   const macros = calculateTotalMacros();
+                  const targetCalories = metrics?.targetCalories || 2000;
+                  const targetProtein = Math.round((targetCalories * 0.3) / 4);
+                  const targetCarbs = Math.round((targetCalories * 0.45) / 4);
+                  const targetFat = Math.round((targetCalories * 0.25) / 9);
+
+                  const getStatusMessage = (actual, target, unit) => {
+                    if (!target) return null;
+                    const diff = target - actual;
+                    if (diff > 0) {
+                      return (
+                        <div className="mt-2 text-[11px] font-bold text-gray-500 bg-gray-100/80 px-2.5 py-1 rounded-full border border-gray-200/50">
+                          Thiếu <span className="text-orange-600">{diff}</span> {unit}
+                        </div>
+                      );
+                    } else if (diff < 0) {
+                      return (
+                        <div className="mt-2 text-[11px] font-bold text-red-600 bg-red-50/80 px-2.5 py-1 rounded-full border border-red-100 animate-pulse">
+                          Thừa <span className="font-extrabold">{Math.abs(diff)}</span> {unit}
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="mt-2 text-[11px] font-bold text-green-700 bg-green-50/80 px-2.5 py-1 rounded-full border border-green-100">
+                          Đủ mục tiêu 🎉
+                        </div>
+                      );
+                    }
+                  };
+
                   return (
                     <div className="mt-8 bg-gradient-to-br from-[#fcfefa] to-[#f4fce8] border border-[#e8f3d6] rounded-[28px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-in fade-in slide-in-from-bottom-4 duration-500 relative overflow-hidden">
                       <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-[#B5E361]/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
@@ -455,33 +484,48 @@ function MealPlan() {
                       </h4>
 
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 relative z-10">
+                        {/* Calories */}
                         <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
                           <span className="text-[#8CB33D] text-[10px] font-black uppercase tracking-widest mb-1.5">Calories</span>
                           <div className="flex items-baseline gap-1">
                             <span className="text-3xl font-black text-[#2a4500]">{macros.calories}</span>
                             <span className="text-sm font-bold text-gray-400">kcal</span>
                           </div>
+                          <span className="text-[10px] text-gray-400 mt-1.5 font-semibold">Mục tiêu: {targetCalories} kcal</span>
+                          {getStatusMessage(macros.calories, targetCalories, 'kcal')}
                         </div>
+
+                        {/* Protein */}
                         <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
                           <span className="text-blue-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Protein</span>
                           <div className="flex items-baseline gap-1">
                             <span className="text-3xl font-black text-blue-700">{macros.protein}</span>
                             <span className="text-sm font-bold text-gray-400">g</span>
                           </div>
+                          <span className="text-[10px] text-gray-400 mt-1.5 font-semibold">Mục tiêu: {targetProtein} g</span>
+                          {getStatusMessage(macros.protein, targetProtein, 'g')}
                         </div>
+
+                        {/* Carbs */}
                         <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
                           <span className="text-orange-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Carbs</span>
                           <div className="flex items-baseline gap-1">
                             <span className="text-3xl font-black text-orange-600">{macros.carbs}</span>
                             <span className="text-sm font-bold text-gray-400">g</span>
                           </div>
+                          <span className="text-[10px] text-gray-400 mt-1.5 font-semibold">Mục tiêu: {targetCarbs} g</span>
+                          {getStatusMessage(macros.carbs, targetCarbs, 'g')}
                         </div>
+
+                        {/* Fat */}
                         <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
                           <span className="text-red-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Fat</span>
                           <div className="flex items-baseline gap-1">
                             <span className="text-3xl font-black text-red-600">{macros.fat}</span>
                             <span className="text-sm font-bold text-gray-400">g</span>
                           </div>
+                          <span className="text-[10px] text-gray-400 mt-1.5 font-semibold">Mục tiêu: {targetFat} g</span>
+                          {getStatusMessage(macros.fat, targetFat, 'g')}
                         </div>
                       </div>
                     </div>
