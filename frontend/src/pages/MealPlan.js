@@ -341,9 +341,9 @@ function MealPlan() {
         actions={
           <button
             onClick={() => navigate('/ai-chef')}
-            className="flex items-center gap-2.5 px-6 py-3.5 sm:py-4 rounded-[20px] bg-white/80 hover:bg-white text-[#1f3b00] border border-white/60 shadow-md hover:shadow-lg font-black text-sm sm:text-[15px] transition-all hover:scale-105"
+            className="flex items-center gap-2 px-4 py-2 sm:py-2.5 rounded-[14px] bg-white/80 hover:bg-white text-[#1f3b00] border border-white/60 shadow-sm hover:shadow-md font-black text-xs sm:text-sm transition-all hover:scale-105"
           >
-            <Sparkles size={16} className="text-[#8CB33D] animate-pulse" />
+            <Sparkles size={14} className="text-[#8CB33D] animate-pulse" />
             Bạn không biết ăn gì?
           </button>
         }
@@ -372,43 +372,43 @@ function MealPlan() {
         </div>
 
         {/* Right Side: Detail */}
-        <div style={{ width: `calc(${100 - leftWidth}%)` }} className="flex-1 h-full p-4 sm:p-6 flex flex-col min-h-0">
-          <div className="border-b border-gray-100 pb-4 mb-4 shrink-0 flex justify-between items-start">
+        <div style={{ width: `calc(${100 - leftWidth}%)` }} className="flex-1 h-full p-3 sm:p-4 flex flex-col min-h-0">
+          <div className="border-b border-gray-100 pb-2 mb-2 shrink-0 flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-extrabold text-[#1f3b00] flex items-center gap-3">
+              <h3 className="text-lg font-extrabold text-[#1f3b00] flex items-center gap-3">
                 {selectedDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                 {selectedDate.toDateString() === new Date().toDateString() && (
-                  <span className="text-xs font-black bg-[#B5E361] text-[#1f3b00] px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                  <span className="text-[10px] font-black bg-[#B5E361] text-[#1f3b00] px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm">
                     Hôm nay
                   </span>
                 )}
               </h3>
-              <p className="text-sm font-semibold text-green-700 mt-1">Chi tiết lịch ăn uống</p>
+              <p className="text-xs font-semibold text-green-700 mt-0.5">Chi tiết lịch ăn uống</p>
             </div>
             <button
               onClick={handleClearClick}
-              className="p-2 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors"
+              className="p-1.5 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors"
               title={activeSession ? "Xóa tất cả món ăn trong bữa này" : "Xóa tất cả món ăn trong ngày"}
             >
-              <Trash2 size={18} />
+              <Trash2 size={16} />
             </button>
           </div>
 
-          <div className="overflow-auto flex-1 custom-scrollbar pr-2 space-y-3">
+          <div className="flex flex-col flex-1 gap-3 overflow-y-auto custom-scrollbar pr-1 min-h-0">
             {activeSession === null ? (
               <>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 flex-[1.2] min-h-0">
                   {['breakfast', 'lunch', 'snack', 'dinner'].map(mealType => {
                     const recipes = selectedPlanData?.meals ? selectedPlanData.meals[mealType] : [];
                     const sessionCalories = recipes.reduce((sum, r) => sum + (r.calories || 0), 0);
 
                     const getMealIcon = (type) => {
                       switch (type) {
-                        case 'breakfast': return <Coffee size={24} style={{ color: '#111827' }} />;
-                        case 'lunch': return <Utensils size={24} style={{ color: '#111827' }} />;
-                        case 'snack': return <Cookie size={24} style={{ color: '#111827' }} />;
-                        case 'dinner': return <UtensilsCrossed size={24} style={{ color: '#111827' }} />;
-                        default: return <ChefHat size={24} style={{ color: '#111827' }} />;
+                        case 'breakfast': return <Coffee size={20} style={{ color: '#111827' }} />;
+                        case 'lunch': return <Utensils size={20} style={{ color: '#111827' }} />;
+                        case 'snack': return <Cookie size={20} style={{ color: '#111827' }} />;
+                        case 'dinner': return <UtensilsCrossed size={20} style={{ color: '#111827' }} />;
+                        default: return <ChefHat size={20} style={{ color: '#111827' }} />;
                       }
                     };
 
@@ -416,21 +416,21 @@ function MealPlan() {
                       <div
                         key={mealType}
                         onClick={() => setActiveSession(mealType)}
-                        className="bg-gradient-to-b from-white to-[#fcfefa] border border-[#e8f3d6] rounded-[24px] p-5 shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-[#B5E361]/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group gap-3 relative overflow-hidden"
+                        className="bg-gradient-to-b from-white to-[#fcfefa] border border-[#e8f3d6] rounded-[18px] p-3 shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-[#B5E361]/50 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center group gap-2 relative overflow-hidden h-full"
                       >
                         <div className="absolute inset-0 bg-gradient-to-tr from-[#B5E361]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div className="w-12 h-12 bg-[#B5E361] shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300 z-10" style={{ borderRadius: '9999px', borderTopLeftRadius: '2px' }}>
+                        <div className="w-10 h-10 bg-[#B5E361] shadow-sm flex items-center justify-center group-hover:scale-105 group-hover:shadow-md transition-all duration-300 z-10" style={{ borderRadius: '9999px', borderTopLeftRadius: '2px' }}>
                           {getMealIcon(mealType)}
                         </div>
-                        <div className="z-10 mt-1">
-                          <h4 className="font-extrabold text-[#2a4500] uppercase text-[13px] tracking-widest mb-3 group-hover:text-[#4a7a00] transition-colors">
+                        <div className="z-10 mt-0.5">
+                          <h4 className="font-extrabold text-[#2a4500] uppercase text-[11px] tracking-widest mb-1.5 group-hover:text-[#4a7a00] transition-colors">
                             {mealTypeLabels[mealType]}
                           </h4>
-                          <div className="flex flex-col gap-2 items-center">
-                            <span className="text-[11px] font-bold text-gray-500 bg-white border border-gray-100 shadow-[0_2px_10px_rgb(0,0,0,0.02)] px-3 py-1 rounded-full">
+                          <div className="flex flex-col gap-1.5 items-center">
+                            <span className="text-[10px] font-bold text-gray-500 bg-white border border-gray-100 shadow-[0_2px_10px_rgb(0,0,0,0.02)] px-2.5 py-0.5 rounded-full">
                               {recipes.length} món
                             </span>
-                            <span className="text-xs font-black text-[#1f3b00] bg-gradient-to-r from-[#EAF7D5] to-[#d8efaa] border border-[#B5E361]/30 shadow-sm px-3 py-1 rounded-full">
+                            <span className="text-[10px] font-black text-[#1f3b00] bg-gradient-to-r from-[#EAF7D5] to-[#d8efaa] border border-[#B5E361]/30 shadow-sm px-2.5 py-0.5 rounded-full">
                               {sessionCalories} kcal
                             </span>
                           </div>
@@ -452,19 +452,19 @@ function MealPlan() {
                     const diff = target - actual;
                     if (diff > 0) {
                       return (
-                        <div className="mt-2 text-[11px] font-bold text-gray-500 bg-gray-100/80 px-2.5 py-1 rounded-full border border-gray-200/50">
+                        <div className="mt-1 text-[10px] font-bold text-gray-500 bg-gray-100/80 px-2 py-0.5 rounded-full border border-gray-200/50">
                           Thiếu <span className="text-orange-600">{diff}</span> {unit}
                         </div>
                       );
                     } else if (diff < 0) {
                       return (
-                        <div className="mt-2 text-[11px] font-bold text-red-600 bg-red-50/80 px-2.5 py-1 rounded-full border border-red-100 animate-pulse">
+                        <div className="mt-1 text-[10px] font-bold text-red-600 bg-red-50/80 px-2 py-0.5 rounded-full border border-red-100 animate-pulse">
                           Thừa <span className="font-extrabold">{Math.abs(diff)}</span> {unit}
                         </div>
                       );
                     } else {
                       return (
-                        <div className="mt-2 text-[11px] font-bold text-green-700 bg-green-50/80 px-2.5 py-1 rounded-full border border-green-100">
+                        <div className="mt-1 text-[10px] font-bold text-green-700 bg-green-50/80 px-2 py-0.5 rounded-full border border-green-100">
                           Đủ mục tiêu 🎉
                         </div>
                       );
@@ -472,59 +472,59 @@ function MealPlan() {
                   };
 
                   return (
-                    <div className="mt-8 bg-gradient-to-br from-[#fcfefa] to-[#f4fce8] border border-[#e8f3d6] rounded-[28px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-in fade-in slide-in-from-bottom-4 duration-500 relative overflow-hidden">
+                    <div className="mt-0 bg-gradient-to-br from-[#fcfefa] to-[#f4fce8] border border-[#e8f3d6] rounded-[20px] p-3 sm:p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-in fade-in slide-in-from-bottom-4 duration-500 relative overflow-hidden flex-1 flex flex-col min-h-0">
                       <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-[#B5E361]/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
                       <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-gradient-to-tr from-[#8CB33D]/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 
-                      <h4 className="font-black text-[#2a4500] uppercase text-[15px] tracking-widest mb-6 flex items-center gap-2.5 relative z-10">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#B5E361] to-[#8CB33D] flex items-center justify-center shadow-md">
-                          <Sparkles size={16} className="text-white" />
+                      <h4 className="font-black text-[#2a4500] uppercase text-xs sm:text-[13px] tracking-widest mb-2 flex items-center gap-2 relative z-10 shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#B5E361] to-[#8CB33D] flex items-center justify-center shadow-md">
+                          <Sparkles size={14} className="text-white" />
                         </div>
                         Tổng Dinh Dưỡng Trong Ngày
                       </h4>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 relative z-10">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10 flex-1 min-h-0">
                         {/* Calories */}
-                        <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
-                          <span className="text-[#8CB33D] text-[10px] font-black uppercase tracking-widest mb-1.5">Calories</span>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-3xl font-black text-[#2a4500]">{macros.calories}</span>
-                            <span className="text-sm font-bold text-gray-400">kcal</span>
+                        <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[18px] p-3 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 h-full">
+                          <span className="text-[#8CB33D] text-[9px] font-black uppercase tracking-widest mb-1">Calories</span>
+                          <div className="flex items-baseline gap-0.5">
+                            <span className="text-xl sm:text-2xl font-black text-[#2a4500]">{macros.calories}</span>
+                            <span className="text-[11px] font-bold text-gray-400">kcal</span>
                           </div>
-                          <span className="text-[10px] text-gray-400 mt-1.5 font-semibold">Mục tiêu: {targetCalories} kcal</span>
+                          <span className="text-[9px] text-gray-400 mt-1 font-semibold">Mục tiêu: {targetCalories}</span>
                           {getStatusMessage(macros.calories, targetCalories, 'kcal')}
                         </div>
 
                         {/* Protein */}
-                        <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
-                          <span className="text-blue-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Protein</span>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-3xl font-black text-blue-700">{macros.protein}</span>
-                            <span className="text-sm font-bold text-gray-400">g</span>
+                        <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[18px] p-3 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 h-full">
+                          <span className="text-blue-500 text-[9px] font-black uppercase tracking-widest mb-1">Protein</span>
+                          <div className="flex items-baseline gap-0.5">
+                            <span className="text-xl sm:text-2xl font-black text-blue-700">{macros.protein}</span>
+                            <span className="text-[11px] font-bold text-gray-400">g</span>
                           </div>
-                          <span className="text-[10px] text-gray-400 mt-1.5 font-semibold">Mục tiêu: {targetProtein} g</span>
+                          <span className="text-[9px] text-gray-400 mt-1 font-semibold">Mục tiêu: {targetProtein}</span>
                           {getStatusMessage(macros.protein, targetProtein, 'g')}
                         </div>
 
                         {/* Carbs */}
-                        <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
-                          <span className="text-orange-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Carbs</span>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-3xl font-black text-orange-600">{macros.carbs}</span>
-                            <span className="text-sm font-bold text-gray-400">g</span>
+                        <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[18px] p-3 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 h-full">
+                          <span className="text-orange-500 text-[9px] font-black uppercase tracking-widest mb-1">Carbs</span>
+                          <div className="flex items-baseline gap-0.5">
+                            <span className="text-xl sm:text-2xl font-black text-orange-600">{macros.carbs}</span>
+                            <span className="text-[11px] font-bold text-gray-400">g</span>
                           </div>
-                          <span className="text-[10px] text-gray-400 mt-1.5 font-semibold">Mục tiêu: {targetCarbs} g</span>
+                          <span className="text-[9px] text-gray-400 mt-1 font-semibold">Mục tiêu: {targetCarbs}</span>
                           {getStatusMessage(macros.carbs, targetCarbs, 'g')}
                         </div>
 
                         {/* Fat */}
-                        <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[24px] p-5 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
-                          <span className="text-red-500 text-[10px] font-black uppercase tracking-widest mb-1.5">Fat</span>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-3xl font-black text-red-600">{macros.fat}</span>
-                            <span className="text-sm font-bold text-gray-400">g</span>
+                        <div className="bg-white/80 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[18px] p-3 flex flex-col items-center justify-center text-center hover:scale-105 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 h-full">
+                          <span className="text-red-500 text-[9px] font-black uppercase tracking-widest mb-1">Fat</span>
+                          <div className="flex items-baseline gap-0.5">
+                            <span className="text-xl sm:text-2xl font-black text-red-600">{macros.fat}</span>
+                            <span className="text-[11px] font-bold text-gray-400">g</span>
                           </div>
-                          <span className="text-[10px] text-gray-400 mt-1.5 font-semibold">Mục tiêu: {targetFat} g</span>
+                          <span className="text-[9px] text-gray-400 mt-1 font-semibold">Mục tiêu: {targetFat}</span>
                           {getStatusMessage(macros.fat, targetFat, 'g')}
                         </div>
                       </div>

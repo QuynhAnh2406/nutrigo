@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useOutletContext, useLocation } from 'react-router-dom';
-import { UserCircle2, Settings, Activity, HeartPulse, Zap, Target, Leaf, ArrowLeft, Camera } from 'lucide-react';
+import { UserCircle2, Settings, Activity, HeartPulse, Zap, Target, Leaf, ArrowLeft, Camera, ChevronDown, Check } from 'lucide-react';
 
 
 const getGoalLabel = (goal) => {
@@ -33,6 +33,58 @@ const calculateAge = (dateOfBirth) => {
     age--;
   }
   return Math.max(0, age);
+};
+
+const CustomSelect = ({ name, value, onChange, options, placeholder }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="relative w-full" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between border border-gray-200 rounded-xl p-3 bg-white/80 hover:bg-white text-gray-700 font-medium text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#B5E361]/30 focus:border-[#8CB33D] text-left cursor-pointer"
+      >
+        <span className={selectedOption ? "text-gray-700" : "text-gray-400"}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <ChevronDown size={16} className={`text-[#8CB33D] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="py-1">
+            {options.map((opt) => (
+              <div
+                key={opt.value}
+                onClick={() => {
+                  onChange({ target: { name, value: opt.value } });
+                  setIsOpen(false);
+                }}
+                className={`flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-[#B5E361]/10 hover:text-[#1f3b00] cursor-pointer transition-all duration-150 ${opt.value === value ? 'font-bold bg-gray-50/50 text-[#1f3b00]' : 'font-medium'}`}
+              >
+                <span>{opt.label}</span>
+                {opt.value === value && <Check size={14} className="text-[#8CB33D] shrink-0" />}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 function Profile() {
@@ -420,16 +472,16 @@ function Profile() {
 
                   <div className="form-group">
                     <label>Giới tính</label>
-                    <select
+                    <CustomSelect
                       name="gender"
                       value={formData.gender || ''}
                       onChange={handleFormChange}
-                      className="custom-select bg-white/80"
-                    >
-                      <option value="">Chọn giới tính</option>
-                      <option value="Male">Nam</option>
-                      <option value="Female">Nữ</option>
-                    </select>
+                      options={[
+                        { value: 'Male', label: 'Nam' },
+                        { value: 'Female', label: 'Nữ' }
+                      ]}
+                      placeholder="Chọn giới tính"
+                    />
                   </div>
                   <div className="form-group">
                     <label>Chiều cao (cm)</label>
@@ -474,24 +526,34 @@ function Profile() {
                 <div className="form-grid flex-1 content-between">
                   <div className="form-group col-span-2">
                     <label>Mục tiêu</label>
-                    <select name="goal" value={formData.goal || ''} onChange={handleFormChange} className="custom-select bg-white/80">
-                      <option value="">Chọn mục tiêu</option>
-                      <option value="Lose weight">Giảm cân</option>
-                      <option value="Maintain weight">Duy trì cân nặng</option>
-                      <option value="Gain weight">Tăng cân</option>
-                      <option value="Build muscle">Tăng cơ</option>
-                    </select>
+                    <CustomSelect
+                      name="goal"
+                      value={formData.goal || ''}
+                      onChange={handleFormChange}
+                      options={[
+                        { value: 'Lose weight', label: 'Giảm cân' },
+                        { value: 'Maintain weight', label: 'Duy trì cân nặng' },
+                        { value: 'Gain weight', label: 'Tăng cân' },
+                        { value: 'Build muscle', label: 'Tăng cơ' }
+                      ]}
+                      placeholder="Chọn mục tiêu"
+                    />
                   </div>
                   <div className="form-group col-span-2">
                     <label>Mức độ vận động</label>
-                    <select name="activityLevel" value={formData.activityLevel || ''} onChange={handleFormChange} className="custom-select bg-white/80">
-                      <option value="">Chọn mức độ vận động</option>
-                      <option value="Sedentary">Ít vận động (Ít hoặc không tập thể dục)</option>
-                      <option value="Light">Nhẹ nhàng (Tập thể dục 1-3 lần/tuần)</option>
-                      <option value="Moderate">Vừa phải (Tập thể dục 4-5 lần/tuần)</option>
-                      <option value="Active">Năng động (Tập thể dục hàng ngày hoặc cường độ cao 3-4 lần/tuần)</option>
-                      <option value="Very Active">Rất năng động (Tập thể dục cường độ cao 6-7 lần/tuần)</option>
-                    </select>
+                    <CustomSelect
+                      name="activityLevel"
+                      value={formData.activityLevel || ''}
+                      onChange={handleFormChange}
+                      options={[
+                        { value: 'Sedentary', label: 'Ít vận động (Ít hoặc không tập thể dục)' },
+                        { value: 'Light', label: 'Nhẹ nhàng (Tập thể dục 1-3 lần/tuần)' },
+                        { value: 'Moderate', label: 'Vừa phải (Tập thể dục 4-5 lần/tuần)' },
+                        { value: 'Active', label: 'Năng động (Tập thể dục hàng ngày hoặc cường độ cao 3-4 lần/tuần)' },
+                        { value: 'Very Active', label: 'Rất năng động (Tập thể dục cường độ cao 6-7 lần/tuần)' }
+                      ]}
+                      placeholder="Chọn mức độ vận động"
+                    />
                   </div>
                   <div className="form-group col-span-2">
                     <label>Chế độ ăn ưa thích</label>
@@ -503,13 +565,18 @@ function Profile() {
                   </div>
                   <div className="form-group col-span-2">
                     <label>Khả năng nấu nướng</label>
-                    <select name="cookingSkill" value={formData.cookingSkill || ''} onChange={handleFormChange} className="custom-select bg-white/80">
-                      <option value="">Chọn khả năng nấu nướng</option>
-                      <option value="Beginner">Người mới bắt đầu (Ít hoặc không có kinh nghiệm)</option>
-                      <option value="Intermediate">Trung bình (Có thể nấu theo công thức dễ dàng)</option>
-                      <option value="Advanced">Nâng cao (Người nấu ăn gia đình có kinh nghiệm)</option>
-                      <option value="Expert">Chuyên gia (Đầu bếp chuyên nghiệp hoặc tay nghề cao)</option>
-                    </select>
+                    <CustomSelect
+                      name="cookingSkill"
+                      value={formData.cookingSkill || ''}
+                      onChange={handleFormChange}
+                      options={[
+                        { value: 'Beginner', label: 'Người mới bắt đầu (Ít hoặc không có kinh nghiệm)' },
+                        { value: 'Intermediate', label: 'Trung bình (Có thể nấu theo công thức dễ dàng)' },
+                        { value: 'Advanced', label: 'Nâng cao (Người nấu ăn gia đình có kinh nghiệm)' },
+                        { value: 'Expert', label: 'Chuyên gia (Đầu bếp chuyên nghiệp hoặc tay nghề cao)' }
+                      ]}
+                      placeholder="Chọn khả năng nấu nướng"
+                    />
                   </div>
                 </div>
               </div>

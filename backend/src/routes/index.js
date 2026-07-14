@@ -8,7 +8,7 @@ const ingredientRoutes = require('./ingredientRoutes');
 const recipeRoutes = require('./recipeRoutes');
 const mealPlanRoutes = require('./mealPlanRoutes');
 const profileRoutes = require('./profileRoutes');
-const aiRoutes = require('./aiRoutes');
+const aiRoutes = require('./aiRoutes_new');
 
 // Attach req.user if a Bearer token is provided.
 router.use(authOptional);
