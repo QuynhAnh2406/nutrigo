@@ -201,7 +201,7 @@ function AddToMealPlanModal({ post, onClose, onAddSuccess }) {
           <div className="w-full flex flex-col gap-1.5 z-10">
             {existingRecipes.map((r, idx) => (
               <div key={idx} className="bg-white rounded-lg px-2 py-1.5 text-[11px] font-bold text-[#2d3748] shadow-sm border border-[#f0ebe1] truncate w-full flex items-center justify-center">
-                {r.name}
+                {r.title || r.name}
               </div>
             ))}
             <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-1 text-[10px] text-[#659A1D] font-black flex items-center justify-center gap-1 uppercase tracking-wider">
