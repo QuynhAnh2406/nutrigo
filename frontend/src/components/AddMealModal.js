@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChefHat, X, Flame, Search, Plus, Check, Trash2, Wheat, Fish, Droplet, ArrowLeft } from 'lucide-react';
 
 function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialRecipe }) {
@@ -123,7 +123,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
     return map[dayName] || dayName;
   };
 
-  const handleSelectRecipe = async (recipe) => {
+  const handleSelectRecipe = useCallback(async (recipe) => {
     if (recipe.isBrand) {
       setIsLoading(true);
       const brandData = recipe.brandData;
@@ -186,23 +186,26 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
     if (recipe.ingredients) {
       setSelectedIngredients(recipe.ingredients.map(ing => {
         if (typeof ing === 'string') {
+          const match = allIngredients.find(db => db.name.toLowerCase() === ing.toLowerCase());
           return {
-            name: ing,
-            weight_g: 0,
-            calories_per_100g: 0,
-            protein_per_100g: 0,
-            carbs_per_100g: 0,
-            fat_per_100g: 0,
+            name: match ? match.name : ing,
+            weight_g: 100,
+            calories_per_100g: match ? parseFloat(match.calories_per_100g) : 0,
+            protein_per_100g: match ? parseFloat(match.protein_per_100g) : 0,
+            carbs_per_100g: match ? parseFloat(match.carbs_per_100g) : 0,
+            fat_per_100g: match ? parseFloat(match.fat_per_100g) : 0,
             showDropdown: false
           };
         }
+        const nameStr = ing.name || '';
+        const match = allIngredients.find(db => db.name.toLowerCase() === nameStr.toLowerCase());
         return {
-          name: ing.name,
-          weight_g: parseFloat(ing.weight_g || ing.weight || ing.amount) || 0,
-          calories_per_100g: parseFloat(ing.calories_per_100g) || 0,
-          protein_per_100g: parseFloat(ing.protein_per_100g) || 0,
-          carbs_per_100g: parseFloat(ing.carbs_per_100g) || 0,
-          fat_per_100g: parseFloat(ing.fat_per_100g) || 0,
+          name: match ? match.name : nameStr,
+          weight_g: parseFloat(ing.weight_g || ing.weight || ing.amount) || 100,
+          calories_per_100g: match ? parseFloat(match.calories_per_100g) : (parseFloat(ing.calories_per_100g) || 0),
+          protein_per_100g: match ? parseFloat(match.protein_per_100g) : (parseFloat(ing.protein_per_100g) || 0),
+          carbs_per_100g: match ? parseFloat(match.carbs_per_100g) : (parseFloat(ing.carbs_per_100g) || 0),
+          fat_per_100g: match ? parseFloat(match.fat_per_100g) : (parseFloat(ing.fat_per_100g) || 0),
           showDropdown: false
         };
       }));
@@ -220,32 +223,40 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
     setUpdateExistingRecipe(false); // Default to not updating original
     setActiveTab('create');
     setCurrentStep(1);
-  };
+  }, [day, category, mealDate, onConfirm, onClose, allIngredients]);
 
   useEffect(() => {
     if (initialRecipe && !isLoading) {
       const fetchFullRecipe = async () => {
+        const recipeId = initialRecipe.id || initialRecipe.recipeId;
+        if (!recipeId) {
+          handleSelectRecipe(initialRecipe);
+          setUpdateExistingRecipe(false);
+          setActiveTab('create');
+          return;
+        }
         try {
-          const res = await fetch(`http://localhost:5002/api/recipes/${initialRecipe.id || initialRecipe.recipeId}`, {
+          const res = await fetch(`http://localhost:5002/api/recipes/${recipeId}`, {
             headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
           });
           const data = await res.json();
           if (data.success) {
             handleSelectRecipe(data.data);
+            setUpdateExistingRecipe(true);
           } else {
             handleSelectRecipe(initialRecipe);
+            setUpdateExistingRecipe(false);
           }
         } catch (e) {
           console.error("Failed to fetch full recipe", e);
           handleSelectRecipe(initialRecipe);
+          setUpdateExistingRecipe(false);
         }
-        // Ensure this happens after handleSelectRecipe so it doesn't get overwritten
-        setUpdateExistingRecipe(true);
         setActiveTab('create');
       };
       fetchFullRecipe();
     }
-  }, [initialRecipe, isLoading]);
+  }, [initialRecipe, isLoading, handleSelectRecipe]);
 
   const removeIngredient = (index) => {
     setSelectedIngredients(selectedIngredients.filter((_, i) => i !== index));
@@ -589,7 +600,7 @@ function AddMealModal({ day, mealType, onClose, onConfirm, mealDate, initialReci
                         </div>
                         <div className="flex flex-col items-center justify-center border-l border-gray-100">
                           <div className="flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] text-gray-400 font-medium mb-0.5">
-                            <Droplet size={12} strokeWidth={2.5} className="text-red-500" /> Béo
+                            <Droplet size={12} strokeWidth={2.5} className="text-red-500" /> Fat
                           </div>
                           <span className="text-[11px] sm:text-[12px] font-black text-gray-700">{recipe.fat || 0}g</span>
                         </div>

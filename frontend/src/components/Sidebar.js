@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, BookOpen, Database, Apple, Store, Leaf, User, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, BookOpen, Database, Apple, Store, Leaf, User, Settings, LogOut, Sparkles } from 'lucide-react';
 
 function Sidebar({ user }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -60,6 +60,9 @@ function Sidebar({ user }) {
                 </NavLink>
                 <NavLink to="/my-recipes" onClick={handleNavLinkClick('/my-recipes')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <BookOpen className="nav-icon" size={20} /> Công thức của tôi
+                </NavLink>
+                <NavLink to="/ai-chef" onClick={handleNavLinkClick('/ai-chef')} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                    <Sparkles className="nav-icon text-amber-400" size={20} /> AI Đầu Bếp
                 </NavLink>
                 <div className="nav-group">
                     <div 

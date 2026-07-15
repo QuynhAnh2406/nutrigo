@@ -121,7 +121,7 @@ exports.getRecipeById = async (req, res) => {
 
 
 exports.createRecipe = async (req, res) => {
-  const { foodName, description, image, prepTime, ingredients, instructions, isRecipe, mealType, category } = req.body;
+  const { foodName, description, image, prepTime, ingredients, instructions, isRecipe, mealType, category, carbs, protein, fat, calories } = req.body;
   const userId = getUserId(req);
 
   if (!foodName || !ingredients || !instructions) {
@@ -149,8 +149,10 @@ exports.createRecipe = async (req, res) => {
       userId, foodName, description, 
       image || 'https://images.unsplash.com/photo-1498837167922-41cfa6f500ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       prepTime || 'Unknown', 
-      Math.round(totalCal) > 0 ? Math.round(totalCal) : 300, 
-      30, 20, 10, // Mock macros
+      (calories !== undefined && !isNaN(Number(calories))) ? Number(calories) : (Math.round(totalCal) > 0 ? Math.round(totalCal) : 300), 
+      (carbs !== undefined && !isNaN(Number(carbs))) ? Number(carbs) : 30, 
+      (protein !== undefined && !isNaN(Number(protein))) ? Number(protein) : 20, 
+      (fat !== undefined && !isNaN(Number(fat))) ? Number(fat) : 10,
       isRecipe !== undefined ? isRecipe : true,
       mealType || null,
       category || 'food'
@@ -164,7 +166,7 @@ exports.createRecipe = async (req, res) => {
     if (ingredients && Array.isArray(ingredients)) {
       for (let ing of ingredients) {
         await client.query('INSERT INTO recipe_ingredients (recipe_id, ingredient_name, amount, calories) VALUES ($1, $2, $3, $4)', 
-          [recipeId, ing.name, ing.amount, ing.calories || 0]);
+          [recipeId, ing.name || ing, ing.amount || '1 phần', ing.calories || 0]);
       }
     }
 
@@ -190,7 +192,7 @@ exports.createRecipe = async (req, res) => {
       prepTime: recipeRes.rows[0].prep_time,
       difficulty: recipeRes.rows[0].difficulty,
 
-      macros: { carbs: 30, protein: 20, fat: 10 },
+      macros: { carbs: recipeRes.rows[0].carbs, protein: recipeRes.rows[0].protein, fat: recipeRes.rows[0].fat },
       ingredients: ingredients || [],
       instructions: instructions || [],
       rating: 0,
@@ -202,7 +204,7 @@ exports.createRecipe = async (req, res) => {
   } catch (error) {
     await client.query('ROLLBACK');
     console.error(error);
-    res.status(500).json({ success: false, message: 'Server error during Recipe creation' });
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   } finally {
     client.release();
   }
@@ -230,15 +232,14 @@ exports.updateRecipe = async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    // 1. Update Recipe basic info
     await client.query(`
       UPDATE recipes 
-      SET food_name = $1, description = $2, image_url = $3, prep_time = $4, difficulty = $5, calories = $6, category = $7, health_level = $8
-      WHERE id = $9
+      SET food_name = $1, description = $2, image_url = $3, prep_time = $4, calories = $5, category = $6, health_level = $7
+      WHERE id = $8
     `, [
       foodName, description, 
       image || 'https://images.unsplash.com/photo-1498837167922-41cfa6f500ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      prepTime || 'Unknown', difficulty || 'Medium', 
+      prepTime || 'Unknown', 
       Math.round(totalCal) > 0 ? Math.round(totalCal) : 300, 
       category || 'food',
       healthLevel || 'medium',

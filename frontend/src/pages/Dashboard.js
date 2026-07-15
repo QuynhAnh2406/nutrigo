@@ -1,33 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ArrowRight, Sparkles, LayoutDashboard, Clock, Target, Zap, Flame, Scale, X,
+  ArrowRight, Sparkles, LayoutDashboard, Clock, Zap, Flame, Scale, X,
   Coffee, Utensils, Cookie, UtensilsCrossed,
-  CheckCircle2, AlertCircle, Activity, ChevronLeft, ChevronRight
+  CheckCircle2, AlertCircle, Activity, ChevronLeft, ChevronRight,
+  Wheat, Fish, Droplet
 } from 'lucide-react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 
-const quotes = [
-  "Sức khỏe là vốn quý nhất.",
-  "Ăn uống lành mạnh hôm nay, vun đắp sức khỏe ngày mai.",
-  "Một cơ thể khỏe mạnh bắt đầu từ những lựa chọn nhỏ mỗi ngày.",
-  "Dinh dưỡng tốt là nền móng của một cuộc sống trọn vẹn.",
-  "Hãy chăm sóc cơ thể như cách bạn trân trọng chính mình.",
-  "Mỗi bữa ăn là một cơ hội để nuôi dưỡng sức khỏe.",
-  "Cơ thể bạn phản ánh những gì bạn lựa chọn mỗi ngày.",
-  "Ăn đúng cách, sống tích cực, khỏe mạnh dài lâu.",
-  "Sự cân bằng trong dinh dưỡng tạo nên sự cân bằng trong cuộc sống.",
-  "Hãy ăn để khỏe mạnh, không chỉ để no.",
-  "Sức khỏe bắt đầu từ chiếc đĩa trên bàn ăn.",
-  "Thay đổi nhỏ trong bữa ăn tạo nên khác biệt lớn cho sức khỏe.",
-];
+
 
 /* ─── Column Chart ───────────────────────────────────── */
-function CalorieBarChart({ days, targetCalories }) {
+function CalorieBarChart({ days, targetCalories, onDayClick }) {
   const [hoveredIdx, setHoveredIdx] = React.useState(null);
   const maxCal = Math.max(targetCalories * 1.35, ...days.map(d => d.calories), 200);
   const targetPct = Math.min((targetCalories / maxCal) * 100, 100);
-  const CHART_H = 220; // px height of bar area
+  const CHART_H = 170; // px height of bar area
+  const todayDate = new Date();
+  const todayStr = `${todayDate.getFullYear()}-${todayDate.getMonth()}-${todayDate.getDate()}`;
 
   return (
     <div className="w-full select-none">
@@ -36,7 +26,7 @@ function CalorieBarChart({ days, targetCalories }) {
         {/* Y-axis labels column */}
         <div className="shrink-0 flex flex-col justify-between" style={{ width: 36, height: CHART_H, paddingTop: 2 }}>
           {[1, 0.75, 0.5, 0.25, 0].map((f) => (
-            <span key={f} className="text-[9px] text-gray-500 font-bold text-right leading-none">
+            <span key={f} className="text-xs text-gray-600 font-bold text-right leading-none">
               {(() => { const v = Math.round(maxCal * f); return v >= 1000 ? `${(v/1000).toFixed(1)}k` : v; })()}
             </span>
           ))}
@@ -45,7 +35,8 @@ function CalorieBarChart({ days, targetCalories }) {
         {/* Bars + X-labels: one column per day */}
         <div className="flex-1 flex gap-1.5">
           {days.map((day, idx) => {
-            const isToday = idx === days.length - 1;
+            const dayStr = `${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`;
+            const isToday = dayStr === todayStr;
             const pct = day.calories > 0 ? Math.min((day.calories / maxCal) * 100, 100) : 0;
             const ratio = targetCalories > 0 ? day.calories / targetCalories : 0;
             const isOver = ratio > 1.05;
@@ -70,6 +61,7 @@ function CalorieBarChart({ days, targetCalories }) {
                 className="flex-1 flex flex-col items-center cursor-pointer"
                 onMouseEnter={() => setHoveredIdx(idx)}
                 onMouseLeave={() => setHoveredIdx(null)}
+                onClick={() => onDayClick && onDayClick(day.date)}
               >
                 {/* Bar area */}
                 <div className="w-full relative flex items-end justify-center" style={{ height: CHART_H }}>
@@ -111,7 +103,7 @@ function CalorieBarChart({ days, targetCalories }) {
                     {/* Value inside bar */}
                     {pct > 22 && (
                       <div className="absolute bottom-2 w-full text-center pointer-events-none">
-                        <span className={`text-[8px] font-black leading-none ${isToday ? 'text-[#1f3b00]' : isOver ? 'text-orange-900' : isGood ? 'text-green-900' : 'text-gray-500'}`}>
+                        <span className={`text-[11px] font-black leading-none ${isToday ? 'text-[#1f3b00]' : isOver ? 'text-orange-900' : isGood ? 'text-green-900' : 'text-gray-500'}`}>
                           {day.calories >= 1000 ? `${(day.calories / 1000).toFixed(1)}k` : day.calories}
                         </span>
                       </div>
@@ -124,7 +116,7 @@ function CalorieBarChart({ days, targetCalories }) {
                     style={{ bottom: `${pct}%`, left: '50%', transform: 'translateX(-50%)', zIndex: 20, marginBottom: 6,
                       opacity: isHovered ? 1 : 0, transition: 'opacity 0.15s', whiteSpace: 'nowrap' }}
                   >
-                    <div className="bg-gray-900 text-white text-[10px] font-black px-2.5 py-1.5 rounded-xl shadow-lg relative">
+                    <div className="bg-gray-900 text-white text-xs font-black px-2.5 py-1.5 rounded-xl shadow-lg relative">
                       {day.calories > 0 ? `${day.calories.toLocaleString()} kcal` : 'Chưa có dữ liệu'}
                       <div className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
                     </div>
@@ -133,10 +125,10 @@ function CalorieBarChart({ days, targetCalories }) {
 
                 {/* X-axis label — same column, right below bar */}
                 <div className="flex flex-col items-center mt-1.5">
-                  <span className={`text-[9px] font-black leading-tight ${isToday ? 'text-[#2d5200]' : 'text-gray-700'}`}>
+                  <span className={`text-xs font-black leading-tight ${isToday ? 'text-[#2d5200]' : 'text-gray-700'}`}>
                     {day.date.toLocaleDateString('vi-VN', { weekday: 'short' })}
                   </span>
-                  <span className={`text-[8px] font-semibold leading-tight ${isToday ? 'text-[#5a8a00]' : 'text-gray-500'}`}>
+                  <span className={`text-[11px] font-bold leading-tight ${isToday ? 'text-[#5a8a00]' : 'text-gray-500'}`}>
                     {day.date.getDate()}/{day.date.getMonth() + 1}
                   </span>
                 </div>
@@ -145,11 +137,11 @@ function CalorieBarChart({ days, targetCalories }) {
           })}
         </div>
 
-        {/* MỤC TIÊU label on the right of target line */}
+        {/* Mục tiêu label on the right of target line */}
         <div className="shrink-0 relative pointer-events-none" style={{ width: 40, height: CHART_H }}>
-          <div className="absolute right-0 text-[7.5px] font-black text-[#6a9e1f] bg-[#fffdf0] px-0.5 leading-none"
+          <div className="absolute right-0 text-xs font-black text-[#6a9e1f] bg-[#fffdf0] px-0.5 leading-none"
             style={{ bottom: `calc(${targetPct}% - 5px)` }}>
-            MỤC TIÊU
+            Mục tiêu
           </div>
         </div>
       </div>
@@ -165,12 +157,12 @@ function Dashboard() {
   const [weeklyPlan, setWeeklyPlan] = useState([]);
   const [calorieHistory, setCalorieHistory] = useState({});
   const [selectedDayDetail, setSelectedDayDetail] = useState(null);
-  const [quote, setQuote] = useState('');
+
   const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = last week
 
   const getGoalLabel = g => ({ 'Lose weight': 'Giảm cân', 'Maintain weight': 'Duy trì', 'Gain weight': 'Tăng cân', 'Build muscle': 'Tăng cơ' }[g] || g || 'Chưa thiết lập');
   const getBmiLabel = s => ({ Underweight: 'Thiếu cân', Normal: 'Bình thường', Overweight: 'Thừa cân', Obese: 'Béo phì' }[s] || s);
-  const getBmiPct = bmi => bmi ? Math.min(Math.max(((parseFloat(bmi) - 15) / 20) * 100, 0), 100) : 0;
+
 
   const handleDayClick = async (date) => {
     try {
@@ -212,7 +204,7 @@ function Dashboard() {
   }, [weekOffset]);
 
   useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []);
-  useEffect(() => { setQuote(quotes[Math.floor(Math.random() * quotes.length)]); }, []);
+
 
   const getTodayCal = () => {
     const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
@@ -269,20 +261,18 @@ function Dashboard() {
     <div className="main-content" style={{ overflowY: 'auto', paddingBottom: '80px' }}>
 
       {/* PAGE HEADER */}
-      <div className="mb-5">
+      <div className="mb-2 relative z-30">
         <PageHeader
           icon={LayoutDashboard}
           title={time.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           subtitle="Bắt đầu ngày mới tràn đầy năng lượng cùng Nutrigo!"
           actions={
-            <div className="rounded-full bg-white/55 px-4 py-2 text-sm font-extrabold text-[#1f3b00] ring-1 ring-white/60 backdrop-blur flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-[#3d6600]" />
+            <div className="rounded-full bg-white/55 px-3.5 py-1.5 text-xs font-extrabold text-[#1f3b00] ring-1 ring-white/60 backdrop-blur flex items-center gap-1.5 shrink-0">
+              <Clock className="w-3.5 h-3.5 text-[#3d6600]" />
               <span>{time.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
             </div>
           }
-        >
-          <p className="text-sm text-[#1a3300] font-semibold italic mt-1">"{quote}"</p>
-        </PageHeader>
+        />
       </div>
 
       {/* COMPLETE PROFILE BANNER */}
@@ -311,47 +301,49 @@ function Dashboard() {
           LEFT  (flex-1): chart + 7-day + BMI
           RIGHT (w-72):   hero card + stat cards
          ══════════════════════════════════════════════ */}
-      <div className="grid grid-cols-3 gap-5 items-start">
+      <div className="grid grid-cols-3 gap-5">
 
-        {/* ─── LEFT COLUMN ─────────────────────── */}
-        <div className="col-span-2 flex flex-col gap-5">
+        {/* ─── CHART — spans first 2 cols ──────── */}
+        <div className="col-span-2 h-full">
 
           {/* CHART */}
-          <div className="bg-[#fffdf0] rounded-[2rem] border border-amber-100/60 shadow-sm p-6">
+          <div className="bg-[#fffdf0] rounded-[2rem] border border-amber-100/60 shadow-sm p-6 h-full flex flex-col justify-between">
             {/* Week navigation bar */}
-            <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-6 bg-gradient-to-b from-[#B5E361] to-[#8CB33D] rounded-full" />
-                <h2 className="text-base font-black text-[#112308] tracking-tight">Phân tích mức độ ăn uống</h2>
-              </div>
-              {/* navigator */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setWeekOffset(w => w - 1)}
-                  className="w-7 h-7 rounded-xl bg-amber-100/70 hover:bg-[#B5E361]/40 flex items-center justify-center transition-all hover:scale-105"
-                >
-                  <ChevronLeft className="w-4 h-4 text-[#3d6600]" />
-                </button>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-100 rounded-xl">
-                  <span className="text-[10px] font-black text-[#2d5200]">{weekLabel}</span>
-                  {isCurrentWeek && (
-                    <span className="text-[8px] font-black px-1.5 py-0.5 bg-[#B5E361]/30 text-[#2d5200] rounded-full">Tuần này</span>
-                  )}
+            <div className="mb-4">
+              <div className="flex items-center justify-between gap-3 mb-2.5 flex-wrap sm:flex-nowrap">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-gradient-to-b from-[#B5E361] to-[#8CB33D] rounded-full" />
+                  <h2 className="text-lg font-black text-[#112308] tracking-tight">Phân tích mức độ ăn uống</h2>
                 </div>
-                <button
-                  onClick={() => setWeekOffset(w => Math.min(w + 1, 0))}
-                  disabled={isCurrentWeek}
-                  className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
-                    isCurrentWeek
-                      ? 'bg-gray-100 opacity-30 cursor-not-allowed'
-                      : 'bg-amber-100/70 hover:bg-[#B5E361]/40 hover:scale-105'
-                  }`}
-                >
-                  <ChevronRight className="w-4 h-4 text-[#3d6600]" />
-                </button>
+                {/* navigator */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setWeekOffset(w => w - 1)}
+                    className="w-7 h-7 rounded-xl bg-amber-100/70 hover:bg-[#B5E361]/40 flex items-center justify-center transition-all hover:scale-105"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-[#3d6600]" />
+                  </button>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-100 rounded-xl min-w-[155px] justify-center">
+                    <span className="text-xs sm:text-sm font-black text-[#2d5200]">{weekLabel}</span>
+                    {isCurrentWeek && (
+                      <span className="text-[10px] font-black px-1.5 py-0.5 bg-[#B5E361]/30 text-[#2d5200] rounded-full">Tuần này</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setWeekOffset(w => Math.min(w + 1, 0))}
+                    disabled={isCurrentWeek}
+                    className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
+                      isCurrentWeek
+                        ? 'bg-gray-100 opacity-30 cursor-not-allowed'
+                        : 'bg-amber-100/70 hover:bg-[#B5E361]/40 hover:scale-105'
+                    }`}
+                  >
+                    <ChevronRight className="w-4 h-4 text-[#3d6600]" />
+                  </button>
+                </div>
               </div>
               {/* legend */}
-              <div className="flex items-center gap-3 text-[9px] font-black text-gray-400 flex-wrap">
+              <div className="flex items-center gap-3 text-xs font-black text-gray-400 flex-wrap">
                 {[
                   { color: 'bg-[#B5E361]',  label: 'Hôm nay' },
                   { color: 'bg-green-300',  label: 'Đạt mục tiêu' },
@@ -364,7 +356,7 @@ function Dashboard() {
                 ))}
               </div>
             </div>
-            <CalorieBarChart days={days} targetCalories={target} />
+            <CalorieBarChart days={days} targetCalories={target} onDayClick={handleDayClick} />
             {/* compact stats strip */}
             <div className="mt-4 pt-4 border-t border-gray-100">
               <div className="flex items-center bg-amber-50/60 rounded-2xl overflow-hidden divide-x divide-amber-100/80">
@@ -373,188 +365,79 @@ function Dashboard() {
                   { icon: CheckCircle2, iconColor: 'text-emerald-400', label: 'Ngày đạt',  val: `${goodDays.length}`,                            unit: `/ 7`,       bg: '' },
                   { icon: AlertCircle,  iconColor: 'text-red-400',    label: 'Vượt mức',  val: `${overDays.length}`,                            unit: `/ 7`,       bg: '' },
                   { icon: null,         iconColor: '',                label: 'Tổng tuần', val: days.reduce((s,d)=>s+d.calories,0).toLocaleString(), unit: 'kcal',   bg: '' },
-                  {
-                    icon: null, iconColor: '', label: 'So với mục tiêu',
-                    val: avgCal > 0 ? (avgCal > target ? '+' : '') + Math.round(avgCal - target).toLocaleString() : '--',
-                    unit: avgCal > 0 ? 'kcal' : '',
-                    valColor: avgCal > target * 1.05 ? 'text-orange-500' : avgCal >= target * 0.7 && avgCal > 0 ? 'text-emerald-600' : 'text-gray-700',
-                  },
                 ].map(({ icon: Icon, iconColor, label, val, unit, valColor }, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center justify-center py-3 px-2 min-w-0">
-                    <div className="flex items-center gap-1 mb-1">
-                      {Icon && <Icon className={`w-3 h-3 ${iconColor} shrink-0`} />}
-                      <span className="text-[8.5px] font-black text-gray-400 uppercase tracking-widest truncate">{label}</span>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      {Icon && <Icon className={`w-3.5 h-3.5 ${iconColor} shrink-0`} />}
+                      <span className="text-xs font-bold text-gray-400 truncate">{label}</span>
                     </div>
                     <div className="flex items-baseline gap-1">
-                      <span className={`text-sm font-black leading-none ${valColor || 'text-gray-800'}`}>{val}</span>
-                      {unit && <span className="text-[9px] text-gray-400 font-semibold">{unit}</span>}
+                      <span className={`text-lg font-black leading-none ${valColor || 'text-gray-800'}`}>{val}</span>
+                      {unit && <span className="text-xs text-gray-400 font-semibold">{unit}</span>}
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* 7-DAY HISTORY CARDS */}
-          <div className="bg-[#fffdf0] rounded-[2rem] border border-amber-100/60 shadow-sm p-6">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-1.5 h-6 bg-gradient-to-b from-[#B5E361] to-[#8CB33D] rounded-full" />
-              <h2 className="text-base font-black text-[#112308] tracking-tight">Lịch sử calo (7 ngày qua)</h2>
-              <div className="flex-1 h-px bg-gradient-to-r from-[#B5E361]/25 to-transparent" />
-            </div>
-            <div className="grid grid-cols-7 gap-2">
-              {days.map((day, idx) => {
-                const isToday = idx === 6;
-                const r = target > 0 && day.calories > 0 ? day.calories / target : 0;
-                const isOver = r > 1.05, isGood = r >= 0.7 && r <= 1.05;
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => handleDayClick(day.date)}
-                    className={`relative p-3 rounded-2xl border text-center flex flex-col items-center gap-1 cursor-pointer transition-all duration-250 hover:-translate-y-0.5 hover:shadow-md select-none
-                      ${isToday
-                        ? 'bg-gradient-to-br from-[#e8f9c0] to-[#c9ea5b] border-[#B5E361]/50 shadow-sm'
-                        : 'bg-amber-50/50 border-amber-100/60 hover:bg-amber-50 hover:border-amber-200/60'}`}
-                  >
-                    {isToday && <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#6aaa12]" />}
-                    <span className={`text-[9px] font-black tracking-wide ${isToday ? 'text-[#2d5200]' : 'text-gray-400'}`}>
-                      {day.date.toLocaleDateString('vi-VN', { weekday: 'short' })}
-                    </span>
-                    <span className={`text-base font-black leading-none ${isToday ? 'text-[#1f3b00]' : 'text-gray-800'}`}>
-                      {day.date.getDate()}
-                    </span>
-                    {day.calories > 0 ? (
-                      <span className={`text-[9px] font-black leading-none text-center ${
-                        isToday ? 'text-[#2d5200]' : isOver ? 'text-orange-500' : isGood ? 'text-emerald-600' : 'text-gray-400'
-                      }`}>
-                        {day.calories >= 1000 ? `${(day.calories / 1000).toFixed(1)}k` : day.calories}
-                        <span className="block text-[7px] opacity-60 font-semibold">kcal</span>
-                      </span>
-                    ) : (
-                      <span className="text-[9px] text-gray-300 font-bold">--</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* BMI SCALE */}
-          <div className="bg-[#fffdf0] rounded-[2rem] border border-amber-100/60 shadow-sm p-6">
-            <div className="flex items-center gap-2.5 mb-5">
-              <div className="w-1.5 h-6 bg-gradient-to-b from-[#B5E361] to-[#8CB33D] rounded-full" />
-              <h2 className="text-base font-black text-[#112308] tracking-tight">Thang đo BMI</h2>
-              {metrics.bmi && (
-                <span className={`ml-auto text-[9px] px-2.5 py-1 rounded-full font-black ${
-                  metrics.bmiStatus === 'Normal' ? 'bg-green-100 text-green-700' :
-                  metrics.bmiStatus === 'Underweight' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'
-                }`}>BMI {metrics.bmi} · {getBmiLabel(metrics.bmiStatus)}</span>
-              )}
-            </div>
-            <div className="relative mt-8 pt-8 pb-4 mb-2">
-              {metrics.bmi && (
-                <div className="absolute top-0 -translate-x-1/2 flex flex-col items-center" style={{ left: `${getBmiPct(metrics.bmi)}%` }}>
-                  <span className="bg-gray-900 text-white text-[10px] font-black px-2.5 py-1 rounded-xl shadow-md whitespace-nowrap animate-bounce">
-                    {metrics.bmi}
-                  </span>
-                  <div className="w-2 h-2 bg-gray-900 rotate-45 -mt-1" />
-                </div>
-              )}
-              <div className="w-full h-3.5 rounded-full flex overflow-hidden relative">
-                <div style={{ width: '17.5%' }} className="bg-blue-300 h-full" />
-                <div style={{ width: '32.5%' }} className="bg-green-400 h-full" />
-                <div style={{ width: '25%' }}   className="bg-orange-300 h-full" />
-                <div style={{ width: '25%' }}   className="bg-red-400 h-full" />
-                {metrics.bmi && (
-                  <div className="absolute top-[-5px] bottom-[-5px] w-[3px] bg-gray-900 rounded"
-                    style={{ left: `calc(${getBmiPct(metrics.bmi)}% - 1.5px)` }} />
-                )}
-              </div>
-              <div className="relative text-[9px] font-bold mt-3 h-8">
-                {[
-                  { pos: '0%',    val: '15',   label: 'Rất gầy' },
-                  { pos: '17.5%', val: '18.5', label: 'Bình thường' },
-                  { pos: '50%',   val: '25',   label: 'Thừa cân' },
-                  { pos: '75%',   val: '30',   label: 'Béo phì' },
-                  { pos: '100%',  val: '35+',  label: 'Nguy hiểm' },
-                ].map(({ pos, val, label }) => (
-                  <div key={pos} className="absolute -translate-x-1/2 text-center" style={{ left: pos }}>
-                    <span className="block font-black text-gray-700 text-[9px]">{val}</span>
-                    <span className="text-[7.5px] text-gray-400">{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-1.5 flex-wrap mt-5">
-              {[
-                { label: 'Thiếu cân',   range: '< 18.5',      cls: 'bg-blue-50 text-blue-600 border-blue-100' },
-                { label: 'Bình thường', range: '18.5 – 24.9', cls: 'bg-green-50 text-green-700 border-green-100' },
-                { label: 'Thừa cân',    range: '25 – 29.9',   cls: 'bg-orange-50 text-orange-700 border-orange-100' },
-                { label: 'Béo phì',     range: '≥ 30',        cls: 'bg-red-50 text-red-600 border-red-100' },
-              ].map(({ label, range, cls }) => (
-                <span key={label} className={`text-[9px] font-black px-2 py-1 rounded-full border ${cls}`}>
-                  {label} <span className="opacity-60">({range})</span>
-                </span>
-              ))}
             </div>
           </div>
         </div>
 
         {/* ─── RIGHT COLUMN ──────────────────────── */}
-        <div className="col-span-1 flex flex-col gap-4">
+        <div className="col-span-1 flex flex-col justify-between h-full">
 
           {/* HERO CARD */}
-          <div className="relative bg-gradient-to-br from-[#c5eb56] via-[#9bcf26] to-[#65a812] rounded-[1.75rem] p-5 overflow-hidden shadow-xl shadow-green-200/70 group">
-            <div className="absolute -top-10 -right-10 w-36 h-36 bg-white/20 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700 pointer-events-none" />
-            <div className="absolute -bottom-8 -left-8 w-28 h-28 bg-black/8 rounded-full blur-xl pointer-events-none" />
-
-            <div className="relative z-10 flex flex-col gap-4">
-              {/* label + status */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-white/25 backdrop-blur-sm rounded-xl flex items-center justify-center shrink-0">
-                    <Target className="text-white w-4 h-4" />
-                  </div>
-                  <span className="text-[#1a3800]/70 font-black text-[9px] uppercase tracking-widest leading-tight">Mục tiêu<br/>hôm nay</span>
+          <div className="bg-[#fffdf0] rounded-[1.75rem] border border-amber-100/60 shadow-sm p-5">
+            {/* header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-1.5 h-6 bg-gradient-to-b from-[#B5E361] to-[#8CB33D] rounded-full" />
+                <div>
+                  <p className="text-lg font-black text-[#112308] tracking-tight leading-tight">Mục tiêu hôm nay</p>
                 </div>
-                <span className={`text-[8px] font-black px-2 py-1 rounded-full border backdrop-blur-sm ${statusMap[status].cls}`}>
-                  {statusMap[status].label}
+              </div>
+              <span className={`text-[10px] font-black px-3 py-1 rounded-full border ${
+                status === 'good'  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                status === 'over'  ? 'bg-red-50 text-red-600 border-red-200' :
+                status === 'under' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                    'bg-gray-100 text-gray-500 border-gray-200'
+              }`}>
+                {statusMap[status].label}
+              </span>
+            </div>
+
+            {/* big number */}
+            <div className="mb-4">
+              <p className="text-xs text-gray-400 font-semibold mb-0.5">Đã nạp hôm nay</p>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-5xl font-black text-[#112308] leading-none tracking-tight">
+                  {todayCal.toLocaleString()}
                 </span>
+                <span className="text-base text-gray-400 font-bold">kcal</span>
               </div>
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-xs text-gray-400 font-semibold">mục tiêu:</span>
+                <span className="text-xs text-gray-700 font-black">{target.toLocaleString()} kcal</span>
+              </div>
+            </div>
 
-              {/* big number */}
-              <div>
-                <p className="text-white/55 text-[10px] font-semibold mb-0.5">Đã nạp hôm nay</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-white leading-none tracking-tight">
-                    {todayCal.toLocaleString()}
-                  </span>
-                  <span className="text-white/45 text-xs font-bold">kcal</span>
-                </div>
-                <div className="flex items-center gap-1 mt-1">
-                  <span className="text-white/40 text-[10px] font-semibold">mục tiêu:</span>
-                  <span className="text-white/80 text-[10px] font-black">{target.toLocaleString()} kcal</span>
-                </div>
+            {/* progress */}
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="text-[10px] text-gray-400 font-bold tracking-wide">Tiến trình</span>
+                <span className="text-xs text-gray-700 font-black">{Math.round(progress)}%</span>
               </div>
-
-              {/* progress */}
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-[#1a3800]/55 text-[8px] font-black uppercase tracking-wider">Tiến trình</span>
-                  <span className="text-white text-[9px] font-black">{Math.round(progress)}%</span>
-                </div>
-                <div className="w-full h-2 bg-black/15 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${progress}%`,
-                      background: progress >= 100 ? 'linear-gradient(90deg,#fb923c,#ef4444)' : 'rgba(255,255,255,0.9)',
-                      boxShadow: '0 0 8px rgba(255,255,255,0.5)'
-                    }} />
-                </div>
-                <p className="text-[#1a3800]/50 text-[9px] mt-1.5 font-semibold">
-                  Mục tiêu: <span className="text-[#1a3800]/80 font-black">{getGoalLabel(healthData.goal)}</span>
-                </p>
+              <div className="w-full h-2 bg-amber-100/60 rounded-full overflow-hidden">
+                <div className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${progress}%`,
+                    background: progress >= 100
+                      ? 'linear-gradient(90deg,#fb923c,#ef4444)'
+                      : 'linear-gradient(90deg,#B5E361,#7ab82a)',
+                  }} />
               </div>
+              <p className="text-xs text-gray-400 mt-1.5 font-semibold">
+                Mục tiêu: <span className="text-gray-700 font-black">{getGoalLabel(healthData.goal)}</span>
+              </p>
             </div>
           </div>
 
@@ -565,13 +448,13 @@ function Dashboard() {
                 <Icon className={`w-4 h-4 ${color}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[8.5px] text-gray-400 font-black uppercase tracking-widest mb-0.5">{label}</p>
+                <p className="text-xs text-gray-400 font-semibold mb-0.5">{label}</p>
                 <div className="flex items-baseline gap-1 flex-wrap">
-                  <span className={`text-2xl font-black leading-none ${valueColor || 'text-gray-900'}`}>{value}</span>
-                  {unit && <span className="text-[9px] text-gray-400 font-semibold">{unit}</span>}
+                  <span className={`text-3xl font-black leading-none ${valueColor || 'text-gray-900'}`}>{value}</span>
+                  {unit && <span className="text-xs text-gray-400 font-semibold">{unit}</span>}
                 </div>
                 {badge && (
-                  <span className={`inline-block mt-1 text-[8px] px-1.5 py-0.5 rounded-full font-black ${badge.cls}`}>
+                  <span className={`inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full font-black ${badge.cls}`}>
                     {badge.text}
                   </span>
                 )}
@@ -579,6 +462,9 @@ function Dashboard() {
             </div>
           ))}
         </div>
+
+
+
       </div>
 
       {/* ─── DAY DETAIL MODAL ──────────────────── */}
@@ -636,23 +522,39 @@ function Dashboard() {
             </div>
             {selectedDayDetail.meals.length > 0 && (
               <div className="p-5 border-t border-gray-100 bg-[#fafdf6]">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Tổng dinh dưỡng</span>
-                  <span className="text-base font-black text-[#1f3b00]">
-                    {selectedDayDetail.meals.reduce((s, m) => s + Number(m.calories || 0), 0)} kcal
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  {[
-                    { label: 'Carb',    key: 'carbs',   color: 'text-orange-500' },
-                    { label: 'Protein', key: 'protein', color: 'text-blue-500' },
-                    { label: 'Fat',     key: 'fat',     color: 'text-red-500' },
-                  ].map(({ label, key, color }) => (
-                    <div key={label} className="bg-white p-2 rounded-xl border border-gray-100">
-                      <p className="text-[8px] text-gray-400 font-bold">{label}</p>
-                      <p className={`text-xs font-black ${color}`}>{selectedDayDetail.meals.reduce((s, m) => s + Math.round(Number(m[key] || 0)), 0)}g</p>
+                <div className="grid grid-cols-4 bg-white rounded-2xl py-3 px-2 border border-gray-100 shadow-sm text-center">
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400 font-medium mb-0.5">
+                      <Flame size={12} strokeWidth={2.5} className="text-[#8CB33D]" /> kcal
                     </div>
-                  ))}
+                    <span className="text-xs sm:text-sm font-black text-gray-700">
+                      {selectedDayDetail.meals.reduce((s, m) => s + Number(m.calories || 0), 0)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center border-l border-gray-100">
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400 font-medium mb-0.5">
+                      <Wheat size={12} strokeWidth={2.5} className="text-orange-500" /> Carb
+                    </div>
+                    <span className="text-xs sm:text-sm font-black text-gray-700">
+                      {selectedDayDetail.meals.reduce((s, m) => s + Math.round(Number(m.carbs || 0)), 0)}g
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center border-l border-gray-100">
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400 font-medium mb-0.5">
+                      <Fish size={12} strokeWidth={2.5} className="text-blue-500" /> Protein
+                    </div>
+                    <span className="text-xs sm:text-sm font-black text-gray-700">
+                      {selectedDayDetail.meals.reduce((s, m) => s + Math.round(Number(m.protein || 0)), 0)}g
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center border-l border-gray-100">
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400 font-medium mb-0.5">
+                      <Droplet size={12} strokeWidth={2.5} className="text-red-500" /> Fat
+                    </div>
+                    <span className="text-xs sm:text-sm font-black text-gray-700">
+                      {selectedDayDetail.meals.reduce((s, m) => s + Math.round(Number(m.fat || 0)), 0)}g
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
